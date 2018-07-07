@@ -1,0 +1,49 @@
+﻿<Window x:Class="Main.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Main"
+        mc:Ignorable="d"
+        Title="Maestro" Height="auto" Width="auto" ResizeMode="CanMinimize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" Topmost="True">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto"></ColumnDefinition>
+            <ColumnDefinition Width="auto"></ColumnDefinition>
+            <ColumnDefinition Width="auto"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Menu Grid.Row="0" Grid.Column="0">
+            <MenuItem  Header="Поточка">
+                <MenuItem Header="Річні плани">
+                    <MenuItem x:Name="MI_Filling" Header="За фондом" Click="MI_Filling_Click"></MenuItem>
+                    <MenuItem x:Name="MI_MicroFilling" Header="За мікрофондом" Click="MI_MicroFilling_Click"></MenuItem>
+                </MenuItem>
+                <MenuItem Header="Виконання" Click="MI_CurrPlan_Click" Foreground="Black"></MenuItem>
+                <MenuItem x:Name="MI_Correct" Header="Довідки" Click="MI_Correct_Click" Foreground="Black"></MenuItem>
+                <MenuItem x:Name="MI_Financing" Header="Фінансування" Click="MI_Financing_Click" Foreground="Black"></MenuItem>
+            </MenuItem>
+        </Menu>
+        <Menu Grid.Row="0" Grid.Column="1">
+            <MenuItem  Header="Довідники">
+                <MenuItem x:Name="MI_Macrofoundations" Header="Макрофонди" Click="MI_Macrofoundations_Click" Foreground="Black"/>
+                <MenuItem x:Name="MI_Foundations" Header="Фонди" Click="MI_Foundations_Click" Foreground="Black"/>
+                <MenuItem x:Name="MI_Microfoundations" Header="Мікрофонди" Click="MI_Microfoundations_Click" Foreground="Black" />
+                <MenuItem x:Name="MI_KDB" Header="КДБ" Click="MI_KDB_Click" Foreground="Black"/>
+                <MenuItem x:Name="MI_KEKB" Header="КЕКВ" Click="MI_KEKB_Click" Foreground="Black"/>
+                <MenuItem x:Name="MI_KFK" Header="КФК" Click="MI_KFK_Click" Foreground="Black"/>
+                <MenuItem x:Name="MI_Main_managers" Header="Головні розпорядники" Click="MI_Main_managers_Click" Foreground="Black"/>
+                <MenuItem x:Name="MI_Managers" Header="Розпорядники" Click="MI_Managers_Click" Foreground="Black"/>
+                <MenuItem x:Name="MI_DocStatus" Header="Статуси документа" Click="MI_DocStatus_Click" Foreground="Black"/>
+            </MenuItem>
+        </Menu>
+        <Menu Grid.Row="0" Grid.Column="2">
+            <MenuItem Header="Системні">
+                <MenuItem x:Name="MI_Users" Header="Користувачі" Click="MI_Users_Click" Foreground="Black"></MenuItem>
+                <MenuItem x:Name="MI_Lows" Header="Права доступу" Click="MI_Lows_Click" Foreground="Black"></MenuItem>
+            </MenuItem>
+        </Menu>
+    </Grid>
+</Window>

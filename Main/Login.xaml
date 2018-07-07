@@ -1,0 +1,29 @@
+﻿<Window x:Class="Main.Login"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Main"
+        mc:Ignorable="d"
+        Title="Maestro: [Авторизація]" Height="140" Width="320" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+    <Window.Background>
+        <ImageBrush ImageSource="login.jpg" Stretch="UniformToFill"/>
+    </Window.Background>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto"></ColumnDefinition>
+            <ColumnDefinition></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Label x:Name="label" Grid.Row="0" Grid.Column="0" Margin="5" Foreground="White">Логін</Label>
+        <TextBox x:Name="txtLogin" Grid.Row="0" Grid.Column="1" Margin="5" Foreground="White" Background="{Binding Background, ElementName=label}" BorderBrush="Black" AutomationProperties.IsRequiredForForm="True"></TextBox>
+        <Label Grid.Row="1" Grid.Column="0" Margin="5" Foreground="White">Пароль</Label>
+        <PasswordBox x:Name="pswMain" Grid.Row="1" Grid.Column="1" Margin="5" Background="{Binding Background, ElementName=label}" Foreground="White" BorderBrush="Black"></PasswordBox>
+        <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="5" Click="Button_Click" Width="50" Foreground="White" Background="Black" BorderBrush="#FF3131EE" IsDefault="True">Вхід</Button>
+
+    </Grid>
+</Window>

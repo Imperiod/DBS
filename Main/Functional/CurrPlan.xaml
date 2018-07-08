@@ -34,21 +34,21 @@
                                 <Expander IsExpanded="False" Background="Black" BorderThickness="1" BorderBrush="Yellow" Margin="3">
                                     <Expander.Header>
                                         <DockPanel>
-                                            <TextBlock Foreground="White" TextAlignment="Left" FontWeight="Bold" Text="{Binding Name}" Width="664"/>
-                                            <TextBlock Foreground="Red" TextAlignment="Right" FontWeight="Bold" Text="{Binding Items, Converter={StaticResource TotalConverter}}" Width="140"/>
-                                            <TextBlock Foreground="BlueViolet" TextAlignment="Right" FontWeight="Bold" Text="{Binding Items, Converter={StaticResource CurrentConverter}}" Width="140"/>
-                                            <TextBlock Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource OneConverter}}" Width="120"/>
-                                            <TextBlock Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource TwoConverter}}" Width="120"/>
-                                            <TextBlock Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource ThreeConverter}}" Width="120"/>
-                                            <TextBlock Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource FourConverter}}" Width="120"/>
-                                            <TextBlock Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource FiveConverter}}" Width="120"/>
-                                            <TextBlock Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource SixConverter}}" Width="120"/>
-                                            <TextBlock Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource SevenConverter}}" Width="120"/>
-                                            <TextBlock Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource EightConverter}}" Width="120"/>
-                                            <TextBlock Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource NineConverter}}" Width="120"/>
-                                            <TextBlock Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource TenConverter}}" Width="120"/>
-                                            <TextBlock Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource ElevenConverter}}" Width="120"/>
-                                            <TextBlock Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource TwelveConverter}}" Width="120"/>
+                                            <TextBlock Foreground="White" TextAlignment="Left" FontWeight="Bold" Text="{Binding Name}" Width="700"/>
+                                            <TextBlock Foreground="Red" TextAlignment="Right" FontWeight="Bold" Text="{Binding Items, Converter={StaticResource TotalConverter}}" Width="150"/>
+                                            <TextBlock Foreground="BlueViolet" TextAlignment="Right" FontWeight="Bold" Text="{Binding Items, Converter={StaticResource CurrentConverter}}" Width="150"/>
+                                            <TextBlock Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource OneConverter}}" Width="150"/>
+                                            <TextBlock Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource TwoConverter}}" Width="150"/>
+                                            <TextBlock Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource ThreeConverter}}" Width="150"/>
+                                            <TextBlock Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource FourConverter}}" Width="150"/>
+                                            <TextBlock Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource FiveConverter}}" Width="150"/>
+                                            <TextBlock Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource SixConverter}}" Width="150"/>
+                                            <TextBlock Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource SevenConverter}}" Width="150"/>
+                                            <TextBlock Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource EightConverter}}" Width="150"/>
+                                            <TextBlock Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource NineConverter}}" Width="150"/>
+                                            <TextBlock Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource TenConverter}}" Width="150"/>
+                                            <TextBlock Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource ElevenConverter}}" Width="150"/>
+                                            <TextBlock Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource TwelveConverter}}" Width="150"/>
                                         </DockPanel>
                                     </Expander.Header>
                                     <ItemsPresenter />

@@ -8,6 +8,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -466,7 +467,7 @@ namespace Main
                     e.Column = new DataGridTextColumn()
                     {
                         Header = e.Column.Header,
-                        Width = 140,
+                        Width = 150,
                         Binding = new Binding("Рік")
                         {
                             Mode = BindingMode.TwoWay,
@@ -481,7 +482,7 @@ namespace Main
                     e.Column = new DataGridTextColumn()
                     {
                         Header = e.Column.Header,
-                        Width = 140,
+                        Width = 150,
                         Binding = new Binding("Період")
                         {
                             Mode = BindingMode.TwoWay,
@@ -496,7 +497,7 @@ namespace Main
                     e.Column = new DataGridTextColumn()
                     {
                         Header = e.Column.Header,
-                        Width = 120,
+                        Width = 150,
                         Binding = new Binding("Січень")
                         {
                             Mode = BindingMode.TwoWay,
@@ -511,7 +512,7 @@ namespace Main
                     e.Column = new DataGridTextColumn()
                     {
                         Header = e.Column.Header,
-                        Width = 120,
+                        Width = 150,
                         Binding = new Binding("Лютий")
                         {
                             Mode = BindingMode.TwoWay,
@@ -526,7 +527,7 @@ namespace Main
                     e.Column = new DataGridTextColumn()
                     {
                         Header = e.Column.Header,
-                        Width = 120,
+                        Width = 150,
                         Binding = new Binding("Березень")
                         {
                             Mode = BindingMode.TwoWay,
@@ -541,7 +542,7 @@ namespace Main
                     e.Column = new DataGridTextColumn()
                     {
                         Header = e.Column.Header,
-                        Width = 120,
+                        Width = 150,
                         Binding = new Binding("Квітень")
                         {
                             Mode = BindingMode.TwoWay,
@@ -556,7 +557,7 @@ namespace Main
                     e.Column = new DataGridTextColumn()
                     {
                         Header = e.Column.Header,
-                        Width = 120,
+                        Width = 150,
                         Binding = new Binding("Травень")
                         {
                             Mode = BindingMode.TwoWay,
@@ -571,7 +572,7 @@ namespace Main
                     e.Column = new DataGridTextColumn()
                     {
                         Header = e.Column.Header,
-                        Width = 120,
+                        Width = 150,
                         Binding = new Binding("Червень")
                         {
                             Mode = BindingMode.TwoWay,
@@ -586,7 +587,7 @@ namespace Main
                     e.Column = new DataGridTextColumn()
                     {
                         Header = e.Column.Header,
-                        Width = 120,
+                        Width = 150,
                         Binding = new Binding("Липень")
                         {
                             Mode = BindingMode.TwoWay,
@@ -601,7 +602,7 @@ namespace Main
                     e.Column = new DataGridTextColumn()
                     {
                         Header = e.Column.Header,
-                        Width = 120,
+                        Width = 150,
                         Binding = new Binding("Серпень")
                         {
                             Mode = BindingMode.TwoWay,
@@ -616,7 +617,7 @@ namespace Main
                     e.Column = new DataGridTextColumn()
                     {
                         Header = e.Column.Header,
-                        Width = 120,
+                        Width = 150,
                         Binding = new Binding("Вересень")
                         {
                             Mode = BindingMode.TwoWay,
@@ -631,7 +632,7 @@ namespace Main
                     e.Column = new DataGridTextColumn()
                     {
                         Header = e.Column.Header,
-                        Width = 120,
+                        Width = 150,
                         Binding = new Binding("Жовтень")
                         {
                             Mode = BindingMode.TwoWay,
@@ -646,7 +647,7 @@ namespace Main
                     e.Column = new DataGridTextColumn()
                     {
                         Header = e.Column.Header,
-                        Width = 120,
+                        Width = 150,
                         Binding = new Binding("Листопад")
                         {
                             Mode = BindingMode.TwoWay,
@@ -661,7 +662,7 @@ namespace Main
                     e.Column = new DataGridTextColumn()
                     {
                         Header = e.Column.Header,
-                        Width = 120,
+                        Width = 150,
                         Binding = new Binding("Грудень")
                         {
                             Mode = BindingMode.TwoWay,
@@ -676,7 +677,7 @@ namespace Main
                     e.Column = new DataGridTextColumn()
                     {
                         Header = e.Column.Header,
-                        Width = 100,
+                        Width = 150,
                         Binding = new Binding("Сума")
                         {
                             Mode = BindingMode.TwoWay,
@@ -1120,13 +1121,25 @@ namespace Main
 
         public static void CollectionView_Filter(object sender, FilterEventArgs e)
         {
-            var q1 = ((TypeInfo)sender.GetType()).DeclaredProperties.FirstOrDefault(f => f.Name == "InheritanceContext").GetValue(sender);
-            List<Filters> filters = (List<Filters>)((TypeInfo)q1.GetType()).DeclaredFields.First(f => f.Name == "GetFilters").GetValue(q1);
+            Window active_window = (Window)((TypeInfo)sender.GetType()).DeclaredProperties.FirstOrDefault(f => f.Name == "InheritanceContext").GetValue(sender);
+            List<Filters> filters = (List<Filters>)((TypeInfo)active_window.GetType()).DeclaredFields.First(f => f.Name == "GetFilters").GetValue(active_window);
+            //int j = 0;
+            bool result;
+
+            //ProgressBar PB = null;
+            //try
+            //{
+            //    PB = (ProgressBar)((TypeInfo)active_window.GetType()).DeclaredFields.First(f => f.Name == "PB").GetValue(active_window);
+            //    j = (int)((TypeInfo)active_window.GetType()).DeclaredFields.First(f => f.Name == "counterElementsDGM").GetValue(active_window);
+            //}
+            //catch
+            //{
+            //}
+            
 
             if (filters.Count == 0)
             {
-                e.Accepted = true;
-                return;
+                result = true;
             }
             else if ((e.Item.GetType().GetProperties().FirstOrDefault(f => f.Name == "Id") is null) || ((e.Item.GetType().GetProperties().FirstOrDefault(f => f.Name == "Id") != null) && (long)e.Item.GetType().GetProperty("Id").GetValue(e.Item) != 0))
             {
@@ -1140,22 +1153,21 @@ namespace Main
                 }
                 catch
                 {
-                    e.Accepted = false;
-                    return;
+                    result = false;
                 }
-                if (fdv.Where(w => w == true).Count() > 0)
-                {
-                    e.Accepted = true;
-                }
-                else
-                {
-                    e.Accepted = false;
-                }
+                result = fdv.Where(w => w == true).Count() > 0 ? true : false;
             }
             else
             {
-                e.Accepted = true;
+                result = true;
             }
+
+            e.Accepted = result;
+            //if (PB != null)
+            //{
+            //    active_window.Dispatcher.BeginInvoke(new ThreadStart((delegate { PB.Maximum = PB.Maximum == j ? PB.Maximum : j;  PB.Value++; PB.Value = PB.Value == PB.Maximum ? 0 : PB.Value; })));
+            //}
+
 
             bool GetFill(Filters filter)
             {

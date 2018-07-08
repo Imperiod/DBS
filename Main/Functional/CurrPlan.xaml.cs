@@ -11,6 +11,7 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -34,6 +35,7 @@ namespace Main.Functional
         public string prop = "";
         public object value = null;
         public int counterForDGMColumns = 0;
+        public int counterElementsDGM = 0;
 
         public List<Label> GetLabels = new List<Label>();
         public Dictionary<string, ComboBox> dict_cmb = new Dictionary<string, ComboBox>();
@@ -185,6 +187,20 @@ namespace Main.Functional
         {
             if (SDate.SelectedDate != null && EDate.SelectedDate != null)
             {
+                #region "Clear filters, groups and visibility"
+                dict_cmb.Values.ToList().ForEach(cmb => cmb.SelectedValue = null);
+                dict_txt.Values.ToList().ForEach(txt => txt.Text = null);
+                CheckBoxes.ForEach(a => a.IsChecked = false);
+                EXPHDN.Children.Cast<ToggleButton>().ToList().ForEach(tgb => tgb.IsChecked = true);
+
+                type = "";
+                prop = "";
+                value = null;
+
+                LBFilters.Items.Clear();
+                GetFilters.Clear();
+                #endregion
+
                 GetCurrPlanEntities = new CurrPlanEntities((DateTime)SDate.SelectedDate, (DateTime)EDate.SelectedDate);
                 ((CollectionViewSource)FindResource("cvs")).Source = GetCurrPlanEntities.GetEntities;
                 DGM.ItemsSource = ((CollectionViewSource)FindResource("cvs")).View;
@@ -194,18 +210,24 @@ namespace Main.Functional
                 ((CollectionViewSource)FindResource("cvs")).SortDescriptions.Add(new SortDescription("Мікрофонд.Повністю", ListSortDirection.Ascending));
                 ((CollectionViewSource)FindResource("cvs")).SortDescriptions.Add(new SortDescription("КДБ.Код", ListSortDirection.Ascending));
                 ((CollectionViewSource)FindResource("cvs")).SortDescriptions.Add(new SortDescription("КЕКВ.Код", ListSortDirection.Ascending));
+                ((CollectionViewSource)FindResource("cvs")).SortDescriptions.Add(new SortDescription("Дані", ListSortDirection.Ascending));
 
-                var t = 0;
-                foreach (var item in ((IItemProperties)DGM.Items).ItemProperties)
+                if (CheckBoxes.Count == 0)
                 {
-                    Func.GetFilters(EXPGRO, t, item, ref dict_cmb, ref dict_txt, ref GetLabels);
+                    var t = 0;
+                    foreach (var item in ((IItemProperties)DGM.Items).ItemProperties)
+                    {
+                        Func.GetFilters(EXPGRO, t, item, ref dict_cmb, ref dict_txt, ref GetLabels);
 
-                    Func.GetGroups(t, item, ref CheckBoxes, ref EXPGRT);
+                        Func.GetGroups(t, item, ref CheckBoxes, ref EXPGRT);
 
-                    Func.GetVisibilityOfColumns(t, item, ref EXPHDN);
+                        Func.GetVisibilityOfColumns(t, item, ref EXPHDN);
 
-                    t++;
+                        t++;
+                    }
                 }
+
+                counterElementsDGM = GetCurrPlanEntities.GetEntities.Count;
                 CollectionViewSource.GetDefaultView(DGM.ItemsSource).Refresh();
             }
         }
@@ -248,11 +270,9 @@ namespace Main.Functional
         }
         public void BTN_Reset_Click(object sender, RoutedEventArgs e)
         {
-            for (int i = 0; i < dict_cmb.Count; i++)
-            {
-                dict_cmb.Select(s => s.Value).ToList()[i].SelectedValue = null;
-                dict_txt.Select(s => s.Value).ToList()[i].Text = null;
-            }
+            dict_cmb.Values.ToList().ForEach(cmb => cmb.SelectedValue = null);
+            dict_txt.Values.ToList().ForEach(txt => txt.Text = null);
+
             type = "";
             prop = "";
             value = null;

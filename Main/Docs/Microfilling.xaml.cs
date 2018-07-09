@@ -450,8 +450,8 @@ namespace Main.Docs
                                 sum += d;
                             }
                         }
-                        GRPBAll.Content = "Не более 1 ячейки.";
-                        GRPBCurr.Content = "Не более 1 ячейки.";
+                        GRPBAll.Content = "Лише 1 комірка";
+                        GRPBCurr.Content = "Лише 1 комірка";
                         GRPBElm.Content = counter.ToString("N0", CultureInfo.CreateSpecificCulture("ru-RU"));
                         GRPBSum.Content = sum.ToString("N2", CultureInfo.CreateSpecificCulture("ru-RU"));
                         GRPBSred.Content = (sum == 0 ? 0 : sum / counter).ToString("N2", CultureInfo.CreateSpecificCulture("ru-RU"));

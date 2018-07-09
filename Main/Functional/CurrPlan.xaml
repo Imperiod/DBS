@@ -239,26 +239,41 @@
             </Grid>
         </Expander>
 
-        <DataGrid x:Name="DGM" Grid.Row="1" Margin="0, 5, 0, 0" SelectionUnit="Cell" AutoGeneratingColumn="DGM_AutoGeneratingColumn" IsReadOnly="True"/>
+        <DataGrid x:Name="DGM" Grid.Row="1" Margin="0, 5, 0, 0" SelectionUnit="Cell" AutoGeneratingColumn="DGM_AutoGeneratingColumn" IsReadOnly="True" SelectedCellsChanged="DGM_SelectedCellsChanged"/>
 
         <Expander x:Name="EVAL" Grid.Row="2" Margin="5" IsExpanded="False" Header="Розрахунки:" BorderBrush="LightBlue" BorderThickness="2">
             <Grid Height="auto">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="auto" MinHeight="80"/>
-                    <RowDefinition Height="auto" MinHeight="80"/>
-                    <RowDefinition Height="auto" MinHeight="25"/>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="20" />
                 </Grid.RowDefinitions>
-                <Grid x:Name="SANDBOX" Grid.Row="0" >
+                <Grid Grid.Row="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                        <ColumnDefinition />
+                    </Grid.ColumnDefinitions>
+                    <GroupBox x:Name="GRPBElm" Grid.Column="0" FontWeight="Bold" FontSize="12" Header="Елементів:" Margin="2" />
+                    <GroupBox x:Name="GRPBSum" Grid.Column="1" FontWeight="Bold" FontSize="12" Header="Сума:" Margin="2"/>
+                    <GroupBox x:Name="GRPBSred" Grid.Column="2" FontWeight="Bold" FontSize="12" Header="Середнє:" Margin="2"/>
+                    <GroupBox x:Name="GRPBMin" Grid.Column="3" FontWeight="Bold" FontSize="12" Header="Мінімум:" Margin="2"/>
+                    <GroupBox x:Name="GRPBMax" Grid.Column="4" FontWeight="Bold" FontSize="12" Header="Максимум:" Margin="2"/>
+                </Grid>
+                <Grid x:Name="SANDBOX" Grid.Row="1" >
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="auto" />
-                        <RowDefinition MinHeight="20" Height="auto" />
+                        <RowDefinition Height="auto" MinHeight="80" />
+                        <RowDefinition Height="20" />
                     </Grid.RowDefinitions>
                     <DataGrid x:Name="DGMSandBox" Grid.Row="0" CanUserReorderColumns="False" CanUserSortColumns="False"></DataGrid>
                     <Button x:Name="btnAddEval" Grid.Row="1" Content="Додати"/>
                 </Grid>
-                <ListBox x:Name="EVALUATE" Grid.Row="1">
+                <ListBox x:Name="EVALUATE" Grid.Row="2">
                 </ListBox>
-                <Button x:Name="BTN_Clear_SANDBOX" Grid.Row="2" Click="BTN_Clear_SANDBOX_Click">Очистити поле</Button>
+                <Button x:Name="BTN_Clear_SANDBOX" Grid.Row="3" Click="BTN_Clear_SANDBOX_Click">Очистити поле</Button>
             </Grid>
         </Expander>
 

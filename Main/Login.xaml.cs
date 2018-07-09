@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data.Entity;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -25,9 +26,17 @@ namespace Main
 
         private void Button_Click(object sender, RoutedEventArgs e)
         {
-            if (txtLogin.Text != "")
+            string t = txtLogin.Text;
+            string p = pswMain.Password;
+            Task.Factory.StartNew( () => GetAction(t, p) );
+        }
+
+        private async void GetAction (string l, string p = "")
+        {
+            await Dispatcher.BeginInvoke(new ThreadStart(() => { BTN.Visibility = Visibility.Collapsed; PB.Visibility = Visibility.Visible; }));
+            if (l != "")
             {
-                var q = Func.GetDB.Users.FirstOrDefault(w => w.Видалено == false && w.Логін == txtLogin.Text);
+                var q = Func.GetDB.Users.FirstOrDefault(w => w.Видалено == false && w.Логін == l);
                 if (q is null)
                 {
                     MessageBox.Show("Такого логіна не існує.", "Maestro", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -43,17 +52,16 @@ namespace Main
 
                     if (pass == "")
                     {
+                        await Dispatcher.BeginInvoke(new ThreadStart(() => { PB.Visibility = Visibility.Collapsed; BTN.Visibility = Visibility.Visible; }));
                         return;
                     }
 
                     q.Пароль = pass;
                     q.New = false;
-                    Func.GetDB.SaveChanges();
+                    await Task.Factory.StartNew(() => Func.GetDB.SaveChanges());
                     MessageBox.Show("Пароль встановлено.\n\nПри повторному вході використовуйте ваш новий пароль.", "Maestro", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                     Func.Login = q.Логін;
-                    MainWindow mainWindow = new MainWindow();
-                    mainWindow.Show();
-                    Close();
+                    await Dispatcher.BeginInvoke( new ThreadStart( () => { MainWindow mainWindow = new MainWindow(); mainWindow.Show(); Close(); } ) );
                 }
                 else
                 {
@@ -62,9 +70,7 @@ namespace Main
                         if (q.Пароль == pswMain.Password)
                         {
                             Func.Login = q.Логін;
-                            MainWindow mainWindow = new MainWindow();
-                            mainWindow.Show();
-                            Close();
+                            await Dispatcher.BeginInvoke(new ThreadStart(() => { MainWindow mainWindow = new MainWindow(); mainWindow.Show(); Close(); }));
                         }
                         else
                         {
@@ -81,6 +87,7 @@ namespace Main
             {
                 MessageBox.Show("Заповніть Логін.", "Maestro", MessageBoxButton.OK, MessageBoxImage.Exclamation);
             }
+            await Dispatcher.BeginInvoke(new ThreadStart(() => { PB.Visibility = Visibility.Collapsed; BTN.Visibility = Visibility.Visible; }));
         }
     }
 }

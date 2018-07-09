@@ -436,8 +436,8 @@ namespace Main.Docs
                         double d;
                         if (double.TryParse(DGM.SelectedCells.First().Item.GetType().GetProperty(DGM.SelectedCells.FirstOrDefault().Column.Header.ToString()).GetValue(DGM.SelectedCells.First().Item).ToString(), out d))
                         {
-                            GRPBElm.Content = "Количество элементов: 1";
-                            GRPBSum.Content = "Сума: " + d.ToString("N2", CultureInfo.CreateSpecificCulture("ru-RU"));
+                            GRPBElm.Content = "1";
+                            GRPBSum.Content = d.ToString("N2", CultureInfo.CreateSpecificCulture("ru-RU"));
                             GRPBSred.Content = "";
                             GRPBMin.Content = "";
                             GRPBMax.Content = "";
@@ -445,9 +445,9 @@ namespace Main.Docs
                     }
                     else
                     {
-                        GRPBPlan.Content = "Не более 1 ячейки.";
-                        GRPBCorr.Content = "Не более 1 ячейки.";
-                        GRPBNow.Content = "Не более 1 ячейки.";
+                        GRPBPlan.Content = "Лише 1 комірка";
+                        GRPBCorr.Content = "Лише 1 комірка";
+                        GRPBNow.Content = "Лише 1 комірка";
 
                         double sum = 0;
                         int counter = 0;

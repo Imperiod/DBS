@@ -1123,18 +1123,7 @@ namespace Main
         {
             Window active_window = (Window)((TypeInfo)sender.GetType()).DeclaredProperties.FirstOrDefault(f => f.Name == "InheritanceContext").GetValue(sender);
             List<Filters> filters = (List<Filters>)((TypeInfo)active_window.GetType()).DeclaredFields.First(f => f.Name == "GetFilters").GetValue(active_window);
-            //int j = 0;
             bool result;
-
-            //ProgressBar PB = null;
-            //try
-            //{
-            //    PB = (ProgressBar)((TypeInfo)active_window.GetType()).DeclaredFields.First(f => f.Name == "PB").GetValue(active_window);
-            //    j = (int)((TypeInfo)active_window.GetType()).DeclaredFields.First(f => f.Name == "counterElementsDGM").GetValue(active_window);
-            //}
-            //catch
-            //{
-            //}
             
 
             if (filters.Count == 0)
@@ -1163,11 +1152,6 @@ namespace Main
             }
 
             e.Accepted = result;
-            //if (PB != null)
-            //{
-            //    active_window.Dispatcher.BeginInvoke(new ThreadStart((delegate { PB.Maximum = PB.Maximum == j ? PB.Maximum : j;  PB.Value++; PB.Value = PB.Value == PB.Maximum ? 0 : PB.Value; })));
-            //}
-
 
             bool GetFill(Filters filter)
             {

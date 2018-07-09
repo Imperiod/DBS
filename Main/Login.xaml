@@ -5,15 +5,15 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Main"
         mc:Ignorable="d"
-        Title="Maestro: [Авторизація]" Height="140" Width="320" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
+        Title="Maestro: [Авторизація]" Height="150" Width="320" WindowStartupLocation="CenterScreen" ResizeMode="NoResize">
     <Window.Background>
         <ImageBrush ImageSource="login.jpg" Stretch="UniformToFill"/>
     </Window.Background>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition Height="auto"></RowDefinition>
-            <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="40"></RowDefinition>
+            <RowDefinition Height="40"></RowDefinition>
+            <RowDefinition Height="50"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="auto"></ColumnDefinition>
@@ -23,7 +23,7 @@
         <TextBox x:Name="txtLogin" Grid.Row="0" Grid.Column="1" Margin="5" Foreground="White" Background="{Binding Background, ElementName=label}" BorderBrush="Black" AutomationProperties.IsRequiredForForm="True"></TextBox>
         <Label Grid.Row="1" Grid.Column="0" Margin="5" Foreground="White">Пароль</Label>
         <PasswordBox x:Name="pswMain" Grid.Row="1" Grid.Column="1" Margin="5" Background="{Binding Background, ElementName=label}" Foreground="White" BorderBrush="Black"></PasswordBox>
-        <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="5" Click="Button_Click" Width="50" Foreground="White" Background="Black" BorderBrush="#FF3131EE" IsDefault="True">Вхід</Button>
-
+        <Button x:Name="BTN" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Margin="5" Height="20" VerticalAlignment="Top" Click="Button_Click" Width="50" Foreground="White" Background="Black" FontSize="12" BorderBrush="#FF3131EE" IsDefault="True">Вхід</Button>
+        <ProgressBar x:Name="PB" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" VerticalAlignment="Top"  Margin="5" Visibility="Collapsed" Height="15" Width="310" IsIndeterminate="True" />
     </Grid>
 </Window>

@@ -89,6 +89,7 @@ namespace Main.Docs
             BTN_Reset.Click += BTN_Reset_Click;
             BTN_ResetGroup.Click += BTN_ResetGroup_Click;
             BTN_Save.Click += BTN_Save_Click;
+            BTN_ExportToExcel.Click += BTN_ExportToExcel_Click;
 
             var t = 0;
             foreach (var item in ((IItemProperties)DGM.Items).ItemProperties)

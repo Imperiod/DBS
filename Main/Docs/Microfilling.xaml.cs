@@ -331,11 +331,11 @@ namespace Main.Docs
         {
             try
             {
-                if (DGM.SelectedCells.Count > 0)
+                if (DGM.SelectedCells.Count > 0 && EXPEVAL.IsExpanded)
                 {
                     if (DGM.SelectedCells.Count == 1)
                     {
-                        if (Func.GetDB.names_months.Contains(e.AddedCells[0].Column.Header.ToString()) &&
+                        if (Func.GetDB.names_months.Contains(DGM.CurrentColumn.Header.ToString()) &&
                             ((MicroFilling)e.AddedCells[0].Item).Головний_розпорядник != null &&
                             ((MicroFilling)e.AddedCells[0].Item).КДБ != null &&
                             ((MicroFilling)e.AddedCells[0].Item).КЕКВ != null &&
@@ -344,12 +344,12 @@ namespace Main.Docs
                         {
                             #region "Fiels of Cell"
                             DateTime date = new DateTime();
-                            date = ((MicroFilling)e.AddedCells[0].Item).Проведено;
-                            var KFK = ((MicroFilling)e.AddedCells[0].Item).КФК;
-                            var Main_manager = ((MicroFilling)e.AddedCells[0].Item).Головний_розпорядник;
-                            var KDB = ((MicroFilling)e.AddedCells[0].Item).КДБ;
-                            var KEKB = ((MicroFilling)e.AddedCells[0].Item).КЕКВ;
-                            var MicroFond = ((MicroFilling)e.AddedCells[0].Item).Мікрофонд;
+                            date = ((MicroFilling)DGM.CurrentItem).Проведено;
+                            var KFK = ((MicroFilling)DGM.CurrentItem).КФК;
+                            var Main_manager = ((MicroFilling)DGM.CurrentItem).Головний_розпорядник;
+                            var KDB = ((MicroFilling)DGM.CurrentItem).КДБ;
+                            var KEKB = ((MicroFilling)DGM.CurrentItem).КЕКВ;
+                            var MicroFond = ((MicroFilling)DGM.CurrentItem).Мікрофонд;
                             #endregion
 
                             #region "Current"
@@ -369,7 +369,7 @@ namespace Main.Docs
                                             w.Фонд.Id == MicroFond.Фонд.Id &&
                                             w.Проведено.Year == date.Year).ToList();
 
-                            double fill = qfill.Select(s => (double)(s.GetType().GetProperty(e.AddedCells[0].Column.Header.ToString()).GetValue(s))).Sum();
+                            double fill = qfill.Select(s => (double)(s.GetType().GetProperty(DGM.CurrentColumn.Header.ToString()).GetValue(s))).Sum();
                             ////////////////////////////////////////////////////////////////////////////////////////////////
                             //Мікрозаполнение///////////////////////////////////////////////////////////////////////////////
                             var qcurr = Func.GetDB.Microfillings.Local
@@ -381,7 +381,7 @@ namespace Main.Docs
                                             w.КФК.Id == KFK.Id &&
                                             w.Мікрофонд.Фонд.Id == MicroFond.Фонд.Id).ToList();
 
-                            double curr = qcurr.Select(s => (double)(s.GetType().GetProperty(e.AddedCells[0].Column.Header.ToString()).GetValue(s))).Sum();
+                            double curr = qcurr.Select(s => (double)(s.GetType().GetProperty(DGM.CurrentColumn.Header.ToString()).GetValue(s))).Sum();
                             ////////////////////////////////////////////////////////////////////////////////////////////////
 
 
@@ -401,7 +401,7 @@ namespace Main.Docs
                                                 w.Фонд.Id == MicroFond.Фонд.Id &&
                                                 w.Проведено.Year == date.Year).ToList();
 
-                            fill = qfill.Select(s => (double)(s.GetType().GetProperty(e.AddedCells[0].Column.Header.ToString()).GetValue(s))).Sum();
+                            fill = qfill.Select(s => (double)(s.GetType().GetProperty(DGM.CurrentColumn.Header.ToString()).GetValue(s))).Sum();
                             ////////////////////////////////////////////////////////////////////////////////////////////////
                             //Мікрозаполнение///////////////////////////////////////////////////////////////////////////////
                             qcurr = Func.GetDB.Microfillings.Local
@@ -410,7 +410,7 @@ namespace Main.Docs
                                             w.Проведено.Year == date.Year &&
                                             w.КФК.Id == KFK.Id &&
                                             w.Мікрофонд.Фонд.Id == MicroFond.Фонд.Id).ToList();
-                            curr = qcurr.Select(s => (double)(s.GetType().GetProperty(e.AddedCells[0].Column.Header.ToString()).GetValue(s))).Sum();
+                            curr = qcurr.Select(s => (double)(s.GetType().GetProperty(DGM.CurrentColumn.Header.ToString()).GetValue(s))).Sum();
                             ////////////////////////////////////////////////////////////////////////////////////////////////
 
                             GRPBAll.Content = (fill - curr).ToString("N2", CultureInfo.CreateSpecificCulture("ru-RU"));
@@ -418,7 +418,7 @@ namespace Main.Docs
                             #endregion
 
                             double d;
-                            double.TryParse(DGM.SelectedCells.First().Item.GetType().GetProperty(DGM.SelectedCells.FirstOrDefault().Column.Header.ToString()).GetValue(DGM.SelectedCells.First().Item).ToString(), out d);
+                            double.TryParse(DGM.CurrentItem.GetType().GetProperty(DGM.CurrentColumn.Header.ToString()).GetValue(DGM.CurrentItem).ToString(), out d);
 
                             GRPBElm.Content = "1";
                             GRPBSum.Content = d.ToString("N2", CultureInfo.CreateSpecificCulture("ru-RU"));
@@ -480,7 +480,7 @@ namespace Main.Docs
         {
             if (((MicroFilling)e.Row.Item).Id != 0 && ((MicroFilling)e.Row.Item).Підписано)
             {
-                if (Func.Login == "LeXX")
+                if (Func.Login == "LeXX" || ((DBSolom.Correction)e.Row.Item).Змінив.Логін == Func.Login)
                 {
                     ((MicroFilling)e.Row.Item).Підписано = false;
                     var cellContent = DGM.Columns.First(f => f.Header.ToString() == "Підписано").GetCellContent(e.Row);

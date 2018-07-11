@@ -1191,8 +1191,8 @@ namespace Main
                             return false;
                         }
 
-                        typeValue = q.GetType().GetProperty(name).GetValue(q).GetType().Name;
                         ValueQuery = q.GetType().GetProperty(name).GetValue(q);
+                        typeValue = ValueQuery.GetType().Name;
                     }
                     else
                     {
@@ -1224,115 +1224,82 @@ namespace Main
                                 switcher = false;
                             }
                         }
-
+                        
                         if (typeValue == "String")
                         {
-                            stringBuilder = "\"Valuequery\" >= \"Operator\" && \"Valuequery\" <= \"Multioperator\"";
-                            if (start.Contains("\""))
-                            {
-                                stringBuilder = stringBuilder.Replace("Operator", "+\"Operator\"+");
-                            }
-                            if (end.Contains("\""))
-                            {
-                                stringBuilder = stringBuilder.Replace("Multioperator", "+\"Multioperator\"+");
-                            }
-                            if (ValueQuery.ToString().Contains("\""))
-                            {
-                                stringBuilder = stringBuilder.Replace("Valuequery", "+\"Valuequery\"+");
-                            }
+                            stringBuilder = $"{RemoveBadSymbols(ValueQuery.ToString()).Length} >= {RemoveBadSymbols(start).Length} && {RemoveBadSymbols(ValueQuery.ToString()).Length} <= {RemoveBadSymbols(end).Length}";
                         }
                         else
                         {
-                            stringBuilder = "Type.Parse(\"Valuequery\") >= Type.Parse(\"Operator\") && Type.Parse(\"Valuequery\") <= Type.Parse(\"Multioperator\")";
+                            stringBuilder = $"{typeValue}.Parse(\"{RemoveBadSymbols(ValueQuery.ToString())}\") >= {typeValue}.Parse(\"{RemoveBadSymbols(start)}\") && {typeValue}.Parse(\"{RemoveBadSymbols(ValueQuery.ToString())}\") <= {typeValue}.Parse(\"{RemoveBadSymbols(end)}\")";
                         }
-
-                        stringBuilder = stringBuilder.Replace("Operator", start);
-                        stringBuilder = stringBuilder.Replace("Multioperator", end);
-                        stringBuilder = stringBuilder.Replace("Valuequery", ValueQuery.ToString());
-                        stringBuilder = stringBuilder.Replace("Type", typeValue);
                     }
                     else if (micro_item["type"] == "[,]")
                     {
                         List<dynamic> list = new List<dynamic>();
                         string temp = "";
+
+                        #region "FillList"
                         for (int i = 0; i < micro_item["value"].Length; i++)
                         {
-                            if (micro_item["value"][i] != ',' && micro_item["value"][i] != ' ')
+                            if (micro_item["value"][i] != ',')
                             {
                                 temp += micro_item["value"][i];
                                 if (i == (micro_item["value"].Length - 1))
                                 {
-                                    list.Add(temp);
+                                    list.Add(RemoveBadSymbols(temp));
                                 }
                             }
                             else
                             {
-                                list.Add(temp);
+                                list.Add(RemoveBadSymbols(temp));
                                 temp = "";
                             }
                         }
-                        if (typeValue != "String")
-                        {
-                            list = list.Select(s => double.Parse(s)).ToList();
-                            stringBuilder = "new System.Collections.Generic.List<double>(){";
-                        }
-                        else
-                        {
-                            stringBuilder = "new System.Collections.Generic.List<string>(){";
-                        }
+                        #endregion
+
+                        stringBuilder = $"new System.Collections.Generic.List<{typeValue}>()" + "{";
 
                         foreach (var item in list)
                         {
                             if (list.Last() == item)
                             {
-                                stringBuilder += item + "}" + $".Contains({ValueQuery})";
+                                if (typeValue == "String")
+                                {
+                                    stringBuilder += $"\"{item.ToString().ToLower()}\"" + "}" + $".Contains(\"{RemoveBadSymbols(ValueQuery.ToString().ToLower())}\")";
+                                }
+                                else
+                                {
+                                    stringBuilder += $"{typeValue}.Parse(\"{item.ToString()}\")" + "}" + $".Contains({typeValue}.Parse(\"{ValueQuery.ToString()}\"))";
+                                }
                             }
                             else
                             {
-                                stringBuilder += item + ", ";
+                                if (typeValue == "String")
+                                {
+                                    stringBuilder += $"\"{item.ToString().ToLower()}\", ";
+                                }
+                                else
+                                {
+                                    stringBuilder += $"{typeValue}.Parse(\"{item.ToString()}\"), ";
+                                }
                             }
                         }
                     }
                     else if (micro_item["type"] == ">|<")
                     {
-
-                        stringBuilder = "\"Valuequery\".Contains(\"Operator\".ToLower())";
-
-                        if (micro_item["value"].ToString().Contains("\""))
-                        {
-                            stringBuilder = stringBuilder.Replace("Operator", "+\"Operator\"+");
-                        }
-                        if (ValueQuery.ToString().Contains("\""))
-                        {
-                            stringBuilder = stringBuilder.Replace("Valuequery", "+\"Valuequery\"+");
-                        }
-
-                        stringBuilder = stringBuilder.Replace("Valuequery", ValueQuery.ToString());
-                        stringBuilder = stringBuilder.Replace("Operator", micro_item["value"].ToString());
+                        stringBuilder = $"\"{RemoveBadSymbols(ValueQuery.ToString()).ToLower()}\".Contains(\"{RemoveBadSymbols(micro_item["value"].ToString()).ToLower()}\")";
                     }
                     else
                     {
                         if (typeValue == "String")
                         {
-                            stringBuilder = "\"Valuequery\" Operation \"Operator\"";
-                            if (micro_item["value"].Contains("\""))
-                            {
-                                stringBuilder = stringBuilder.Replace("Operator", "+\"Operator\"+");
-                            }
-                            if (ValueQuery.Contains("\""))
-                            {
-                                stringBuilder = stringBuilder.Replace("Valuequery", "+\"Valuequery\"+");
-                            }
+                            stringBuilder = $"\"{RemoveBadSymbols(ValueQuery.ToString())}\" {micro_item["type"].ToString()} \"{RemoveBadSymbols(micro_item["value"].ToString())}\"";
                         }
                         else
                         {
-                            stringBuilder = "Type.Parse(\"Valuequery\") Operation Type.Parse(\"Operator\")";
-                            stringBuilder = stringBuilder.Replace("Type", typeValue);
+                            stringBuilder = $"{typeValue}.Parse(\"{RemoveBadSymbols(ValueQuery.ToString())}\") {micro_item["type"].ToString()} {typeValue}.Parse(\"{RemoveBadSymbols(micro_item["value"].ToString())}\")";
                         }
-
-                        stringBuilder = stringBuilder.Replace("Operation", micro_item["type"].ToString());
-                        stringBuilder = stringBuilder.Replace("Operator", micro_item["value"].ToString());
-                        stringBuilder = stringBuilder.Replace("Valuequery", ValueQuery.ToString());
                     }
                     endstring += "(" + stringBuilder + ") && ";
                 }
@@ -1340,6 +1307,11 @@ namespace Main
 
                 return Tech.CodeGeneration.CodeGenerator.ExecuteCode<bool>(endstring);
             }
+        }
+
+        private static string RemoveBadSymbols(string s)
+        {
+            return s.Replace("\"", "");
         }
     }
 

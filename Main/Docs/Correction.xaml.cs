@@ -369,7 +369,7 @@ namespace Main.Docs
         {
             try
             {
-                if (DGM.SelectedCells.Count > 0)
+                if (DGM.SelectedCells.Count > 0 && EXPEVAL.IsExpanded)
                 {
                     if (DGM.SelectedCells.Count == 1)
                     {
@@ -493,65 +493,77 @@ namespace Main.Docs
             ((DBSolom.Correction)e.Row.Item).Змінено = DateTime.Now;
 
 
-            if (Func.GetDB.names_months.Contains(e.Column.Header.ToString()) &&
-                ((DBSolom.Correction)e.EditingElement.DataContext).Головний_розпорядник != null &&
+            if (((DBSolom.Correction)e.EditingElement.DataContext).Головний_розпорядник != null &&
                 ((DBSolom.Correction)e.EditingElement.DataContext).КДБ != null &&
                 ((DBSolom.Correction)e.EditingElement.DataContext).КЕКВ != null &&
                 ((DBSolom.Correction)e.EditingElement.DataContext).КФК != null &&
                 ((DBSolom.Correction)e.EditingElement.DataContext).Мікрофонд != null &&
                 ((DBSolom.Correction)e.EditingElement.DataContext).Статус != null)
             {
-                    #region "Fiels of Cell"
-                    DateTime date = new DateTime();
-                    date = ((DBSolom.Correction)e.EditingElement.DataContext).Проведено;
-                    var KFK = ((DBSolom.Correction)e.EditingElement.DataContext).КФК;
-                    var Main_manager = ((DBSolom.Correction)e.EditingElement.DataContext).Головний_розпорядник;
-                    var KDB = ((DBSolom.Correction)e.EditingElement.DataContext).КДБ;
-                    var KEKB = ((DBSolom.Correction)e.EditingElement.DataContext).КЕКВ;
-                    var FOND = ((DBSolom.Correction)e.EditingElement.DataContext).Мікрофонд.Фонд;
-                    #endregion
+                #region "Fiels of Cell"
+                DateTime date = new DateTime();
+                date = ((DBSolom.Correction)e.EditingElement.DataContext).Проведено;
+                var KFK = ((DBSolom.Correction)e.EditingElement.DataContext).КФК;
+                var Main_manager = ((DBSolom.Correction)e.EditingElement.DataContext).Головний_розпорядник;
+                var KDB = ((DBSolom.Correction)e.EditingElement.DataContext).КДБ;
+                var KEKB = ((DBSolom.Correction)e.EditingElement.DataContext).КЕКВ;
+                var FOND = ((DBSolom.Correction)e.EditingElement.DataContext).Мікрофонд.Фонд;
+                #endregion
 
-                    #region "Year_plan"
+                #region "Year_plan"
 
-                    var qplan = Func.GetDB.Fillings.FirstOrDefault(w => w.Видалено == false &&
-                                                                 w.Головний_розпорядник.Id == Main_manager.Id &&
-                                                                 w.Проведено.Year == date.Year &&
-                                                                 w.КДБ.Id == KDB.Id &&
-                                                                 w.КЕКВ.Id == KEKB.Id &&
-                                                                 w.КФК.Id == KFK.Id &&
-                                                                 w.Фонд.Id == FOND.Id);
-                    double plan = 0;
-                    if (qplan != null)
+                var qplan = Func.GetDB.Fillings.FirstOrDefault(w => w.Видалено == false &&
+                                                             w.Головний_розпорядник.Id == Main_manager.Id &&
+                                                             w.Проведено.Year == date.Year &&
+                                                             w.КДБ.Id == KDB.Id &&
+                                                             w.КЕКВ.Id == KEKB.Id &&
+                                                             w.КФК.Id == KFK.Id &&
+                                                             w.Фонд.Id == FOND.Id);
+                double plan = 0;
+                if (qplan != null)
+                {
+                    foreach (var item in Func.GetDB.names_months)
                     {
-                        plan = (double)qplan.GetType().GetProperty(e.Column.Header.ToString()).GetValue(qplan);
+                        plan += (double)qplan.GetType().GetProperty(item).GetValue(qplan);
                     }
+                }
 
-                    #endregion
+                #endregion
 
-                    #region "Corrections"
-                    double corrections = 0;
-                    var qcorr = Func.GetDB.Corrections.Local.Where(w => w.Видалено == false &&
-                                                                       w.Головний_розпорядник.Id == Main_manager.Id &&
-                                                                       w.Проведено.Year == date.Year &&
-                                                                       w.КДБ.Id == KDB.Id &&
-                                                                       w.КЕКВ.Id == KEKB.Id &&
-                                                                       w.КФК.Id == KFK.Id &&
-                                                                       w.Мікрофонд.Фонд.Id == FOND.Id).ToList();
-                    if (qcorr.Count != 0)
+                #region "Corrections"
+                double corrections = 0;
+                var qcorr = Func.GetDB.Corrections.Local.Where(w => w.Видалено == false &&
+                                                                   w.Головний_розпорядник.Id == Main_manager.Id &&
+                                                                   w.Проведено.Year == date.Year &&
+                                                                   w.КДБ.Id == KDB.Id &&
+                                                                   w.КЕКВ.Id == KEKB.Id &&
+                                                                   w.КФК.Id == KFK.Id &&
+                                                                   w.Мікрофонд.Фонд.Id == FOND.Id).ToList();
+                if (qcorr.Count != 0)
+                {
+                    foreach (var item in Func.GetDB.names_months)
                     {
-                        corrections = qcorr.Select(s => (double)s.GetType().GetProperty(e.Column.Header.ToString()).GetValue(s)).Sum();
+                        corrections = qcorr.Select(s => (double)s.GetType().GetProperty(item).GetValue(s)).Sum();
                     }
-                    #endregion
+                    
+                }
+                #endregion
 
-                    var k = ((DBSolom.Correction)e.Row.Item).GetType().GetProperty(e.Column.Header.ToString());
-                    if (plan + corrections < 0)
+                PropertyInfo k = null;
+
+                if (plan + corrections < 0)
+                {
+                    e.Cancel = true;
+                    if (Func.GetDB.names_months.Contains(e.Column.Header.ToString()))
                     {
-                        e.Cancel = true;
+                        k = ((DBSolom.Correction)e.Row.Item).GetType().GetProperty(e.Column.Header.ToString());
                         k.SetValue(e.Row.Item, 0);
                         ((TextBox)e.EditingElement).Text = "0";
-                        MessageBox.Show("Недостаточно средств! Годовой план: " + plan + "; Корректировки: " + (corrections) + "; Итог: " + (plan - corrections));
-                        return;
                     }
+                    
+                    MessageBox.Show("Недостатньо коштів! Річний план: " + plan + "; Корегування: " + (corrections) + "; Уточнення: " + (plan - corrections));
+                    return;
+                }
             }
 
         }
@@ -570,7 +582,7 @@ namespace Main.Docs
         {
             if (((DBSolom.Correction)e.Row.Item).Id != 0 && ((DBSolom.Correction)e.Row.Item).Статус?.Повністю != "Зареєстровано")
             {
-                if (Func.Login == "LeXX")
+                if (Func.Login == "LeXX" || ((DBSolom.Correction)e.Row.Item).Змінив.Логін == Func.Login)
                 {
                     ((DBSolom.Correction)e.Row.Item).Статус = Func.GetDB.DocStatuses.Include(i => i.Змінив).Include(i => i.Створив).FirstOrDefault(f => f.Видалено == false && f.Повністю == "Зареєстровано");
                     var cellContent = DGM.Columns.First(f => f.Header.ToString() == "Статус").GetCellContent(e.Row);

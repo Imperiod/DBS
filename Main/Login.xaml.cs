@@ -22,6 +22,7 @@ namespace Main
         public Login()
         {
             InitializeComponent();
+            txtLogin.Focus();
         }
 
         private void Button_Click(object sender, RoutedEventArgs e)

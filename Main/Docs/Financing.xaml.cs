@@ -312,12 +312,11 @@ namespace Main.Docs
         {
             try
             {
-                if (DGM.SelectedCells.Count > 0)
+                if (DGM.SelectedCells.Count > 0 && EXPCALC.IsExpanded)
                 {
                     if (DGM.SelectedCells.Count == 1)
                     {
-                        if (EXPCALC.IsExpanded &&
-                            e.AddedCells[0].Column.Header.ToString() == "Сума" &&
+                        if (DGM.CurrentColumn.Header.ToString() == "Сума" &&
                             ((DBSolom.Financing)e.AddedCells[0].Item).Проведено != null &&
                             ((DBSolom.Financing)e.AddedCells[0].Item).Головний_розпорядник != null &&
                             ((DBSolom.Financing)e.AddedCells[0].Item).КДБ != null &&
@@ -325,9 +324,9 @@ namespace Main.Docs
                             ((DBSolom.Financing)e.AddedCells[0].Item).КФК != null &&
                             ((DBSolom.Financing)e.AddedCells[0].Item).Мікрофонд != null)
                         {
-                            List<string> vs = new List<string>() { "Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень", "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень" };
-
-                            #region "Fiels of Cell"
+                            List<string> vs = Func.GetDB.names_months;
+                                
+                                #region "Fiels of Cell"
 
                             DateTime date = new DateTime();
                             date = ((DBSolom.Financing)e.AddedCells[0].Item).Проведено;
@@ -659,7 +658,7 @@ namespace Main.Docs
         {
             if (((DBSolom.Financing)e.Row.Item).Id != 0 && ((DBSolom.Financing)e.Row.Item).Підписано)
             {
-                if (Func.Login == "LeXX")
+                if (Func.Login == "LeXX" || ((DBSolom.Correction)e.Row.Item).Змінив.Логін == Func.Login)
                 {
                     ((DBSolom.Financing)e.Row.Item).Підписано = false;
                     var cellContent = DGM.Columns.First(f => f.Header.ToString() == "Підписано").GetCellContent(e.Row);

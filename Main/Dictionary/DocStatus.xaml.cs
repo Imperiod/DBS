@@ -82,6 +82,9 @@ namespace Main.Dictionary
             BTN_ResetGroup.Click += BTN_ResetGroup_Click;
             BTN_Save.Click += BTN_Save_Click;
 
+            EXPMAESTRO.MouseEnter += Func.Expander_MouseEnter;
+            EXPMAESTRO.MouseLeave += Func.Expander_MouseLeave;
+
             var t = 0;
             foreach (var item in ((IItemProperties)DGM.Items).ItemProperties)
             {

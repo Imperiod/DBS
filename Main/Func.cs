@@ -14,6 +14,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Media;
 
 namespace Main
@@ -21,6 +22,23 @@ namespace Main
     public static class Func
     {
         public static string Login { get; set; }
+
+        private static Dictionary<Window, Expander> expanders = new Dictionary<Window, Expander>();
+        public static void AddExp(Window window, Expander exp)
+        {
+            expanders.Add(window, exp);
+            System.Windows.Threading.DispatcherTimer dispatcherTimer = new System.Windows.Threading.DispatcherTimer() { Interval = TimeSpan.FromMilliseconds(100) };
+            dispatcherTimer.Tick += new EventHandler((object c, EventArgs eventArgs) =>
+            {
+                var b = expanders.FirstOrDefault(f => f.Key == window && f.Value == exp);
+                if (b.Value != null)
+                {
+                    window.Dispatcher.Invoke(() => b.Value.IsExpanded = true);
+                }
+                ((System.Windows.Threading.DispatcherTimer)c).Stop();
+            });
+            dispatcherTimer.Start();
+        }
 
         static DBSolom.Db db;
         public static DBSolom.Db GetDB
@@ -1312,6 +1330,21 @@ namespace Main
         private static string RemoveBadSymbols(string s)
         {
             return s.Replace("\"", "");
+        }
+
+        public static void Expander_MouseEnter(object sender, MouseEventArgs e)
+        {
+            AddExp((Window)((Grid)((Expander)sender).Parent).Parent, (Expander)sender);
+        }
+
+        public static void Expander_MouseLeave(object sender, MouseEventArgs e)
+        {
+            var x = expanders.FirstOrDefault(f => f.Key == (Window)((Grid)((Expander)sender).Parent).Parent && f.Value == (Expander)sender);
+            if (x.Value != null)
+            {
+                expanders.Remove(x.Key);
+            }
+            ((Expander)sender).IsExpanded = false;
         }
     }
 

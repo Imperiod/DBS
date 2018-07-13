@@ -90,6 +90,11 @@ namespace Main.Docs
             BTN_Save.Click += BTN_Save_Click;
             BTN_ExportToExcel.Click += BTN_ExportToExcel_Click;
 
+            EVAL.MouseEnter += Func.Expander_MouseEnter;
+            EVAL.MouseLeave += Func.Expander_MouseLeave;
+            EXPMAESTRO.MouseEnter += Func.Expander_MouseEnter;
+            EXPMAESTRO.MouseLeave += Func.Expander_MouseLeave;
+
             var t = 0;
             foreach (var item in ((IItemProperties)DGM.Items).ItemProperties)
             {

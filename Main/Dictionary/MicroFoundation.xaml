@@ -67,7 +67,7 @@
             <RowDefinition></RowDefinition>
         </Grid.RowDefinitions>
 
-        <Expander Grid.Row="0" IsExpanded="False" Margin="5" Header="Maestro: панель інструментів" BorderBrush="LightBlue" BorderThickness="2">
+        <Expander x:Name="EXPMAESTRO" Grid.Row="0" IsExpanded="False" Margin="5" Header="Maestro: панель інструментів" BorderBrush="LightBlue" BorderThickness="2">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition></RowDefinition>

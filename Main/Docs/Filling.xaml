@@ -95,7 +95,7 @@
             <RowDefinition Height="auto"></RowDefinition>
         </Grid.RowDefinitions>
 
-        <Expander Grid.Row="0" IsExpanded="False" Margin="5" Header="Maestro: панель інструментів" BorderBrush="LightBlue" BorderThickness="2">
+        <Expander x:Name="EXPMAESTRO" Grid.Row="0" IsExpanded="False" Margin="5" Header="Maestro: панель інструментів" BorderBrush="LightBlue" BorderThickness="2">
             <Grid>
                 <Grid.RowDefinitions>
                     <RowDefinition></RowDefinition>
@@ -110,7 +110,7 @@
                     <ColumnDefinition />
                     <ColumnDefinition />
                 </Grid.ColumnDefinitions>
-                <Expander Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" IsExpanded="False" Margin="5" Header="Фільтри:" BorderBrush="LightBlue" BorderThickness="2">
+                <Expander x:Name="EXPFILTERS" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" IsExpanded="False" Margin="5" Header="Фільтри:" BorderBrush="LightBlue" BorderThickness="2">
                     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                         <Grid x:Name="EXPGRO">
                             <Grid.RowDefinitions>
@@ -150,7 +150,7 @@
                         </Grid>
                     </ScrollViewer>
                 </Expander>
-                <Expander Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" IsExpanded="False" Margin="5" Header="Групи:" BorderBrush="LightBlue" BorderThickness="2">
+                <Expander x:Name="EXPGROUPS" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" IsExpanded="False" Margin="5" Header="Групи:" BorderBrush="LightBlue" BorderThickness="2">
                     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                         <Grid x:Name="EXPGRT">
                             <Grid.RowDefinitions>
@@ -186,7 +186,7 @@
                         </Grid>
                     </ScrollViewer>
                 </Expander>
-                <Expander Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="5" IsExpanded="False" Margin="5" Header="Видимість:" BorderBrush="LightBlue" BorderThickness="2">
+                <Expander x:Name="EXPVISIBILITY" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="5" IsExpanded="False" Margin="5" Header="Видимість:" BorderBrush="LightBlue" BorderThickness="2">
                     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                         <Grid x:Name="EXPHDN">
                             <Grid.ColumnDefinitions>
@@ -229,7 +229,7 @@
         </Expander>
 
         <DataGrid x:Name="DGM" Grid.Row="1" Margin="0, 5, 0, 0" ItemsSource="{Binding Mode=OneWay, Source={StaticResource cvs}}" Loaded="DGM_Loaded" SelectionUnit="Cell" SelectedCellsChanged="DGM_SelectedCellsChanged" Foreground="Black" Background="White" BorderBrush="#FF18106A" BeginningEdit="DGM_BeginningEdit" AutoGeneratingColumn="DGM_AutoGeneratingColumn" CellEditEnding="DGM_CellEditEnding" CanUserDeleteRows="False"></DataGrid>
-        <Expander Grid.Row="2" Margin="5" IsExpanded="False" Header="Расчёты:" BorderBrush="LightBlue" BorderThickness="2">
+        <Expander x:Name="EVAL" Grid.Row="2" Margin="5" IsExpanded="False" Header="Расчёты:" BorderBrush="LightBlue" BorderThickness="2">
             <Grid Height="50" Width="auto">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto"></ColumnDefinition>

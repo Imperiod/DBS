@@ -486,7 +486,7 @@ namespace Main.Docs
         {
             if (((MicroFilling)e.Row.Item).Id != 0 && ((MicroFilling)e.Row.Item).Підписано)
             {
-                if (Func.Login == "LeXX" || ((DBSolom.Correction)e.Row.Item).Змінив.Логін == Func.Login)
+                if (Func.Login == "LeXX" || ((DBSolom.MicroFilling)e.Row.Item).Змінив.Логін == Func.Login)
                 {
                     ((MicroFilling)e.Row.Item).Підписано = false;
                     var cellContent = DGM.Columns.First(f => f.Header.ToString() == "Підписано").GetCellContent(e.Row);

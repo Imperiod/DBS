@@ -663,7 +663,7 @@ namespace Main.Docs
         {
             if (((DBSolom.Financing)e.Row.Item).Id != 0 && ((DBSolom.Financing)e.Row.Item).Підписано)
             {
-                if (Func.Login == "LeXX" || ((DBSolom.Correction)e.Row.Item).Змінив.Логін == Func.Login)
+                if (Func.Login == "LeXX" || ((DBSolom.Financing)e.Row.Item).Змінив.Логін == Func.Login)
                 {
                     ((DBSolom.Financing)e.Row.Item).Підписано = false;
                     var cellContent = DGM.Columns.First(f => f.Header.ToString() == "Підписано").GetCellContent(e.Row);

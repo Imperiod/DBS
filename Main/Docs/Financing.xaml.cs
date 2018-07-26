@@ -92,10 +92,8 @@ namespace Main.Docs
             BTN_Reset.Click += BTN_Reset_Click;
             BTN_ResetGroup.Click += BTN_ResetGroup_Click;
             BTN_Save.Click += BTN_Save_Click;
-            BTN_ExportToExcel.Click += BTN_ExportToExcel_Click;
+            BTN_ExportToExcel.Click += Func.BTN_ExportToExcel_Click;
 
-            EXPCALC.MouseEnter += Func.Expander_MouseEnter;
-            EXPCALC.MouseLeave += Func.Expander_MouseLeave;
             EXPMAESTRO.MouseEnter += Func.Expander_MouseEnter;
             EXPMAESTRO.MouseLeave += Func.Expander_MouseLeave;
 
@@ -181,127 +179,6 @@ namespace Main.Docs
                 MessageBox.Show(ex.Message);
             }
             DGM.Items.Refresh();
-        }
-        private void BTN_ExportToExcel_Click(object sender, RoutedEventArgs e)
-        {
-            bool IsExist = false;
-            if (DGM.SelectedCells.Count > 0)
-            {
-                List<DBSolom.Financing> financings = new List<DBSolom.Financing>();
-
-                foreach (var item in DGM.SelectedCells)
-                {
-                    if (item.Item.ToString() != "{NewItemPlaceholder}" && financings.FirstOrDefault(f => f.Id == ((DBSolom.Financing)item.Item).Id) is null)
-                    {
-                        financings.Add(((DBSolom.Financing)item.Item));
-                    }
-                }
-
-                OpenFileDialog openFileDialog = new OpenFileDialog();
-                openFileDialog.Filter = "Excel files (*.xlsx;*.xlsm;*.xls)|*.xlsx;*.xlsm;*.xls";
-                if (openFileDialog.ShowDialog() == true)
-                {
-                    PB.Minimum = 0;
-                    PB.Maximum = financings.Count;
-                    PB.Value = 1;
-
-                    Action action = () => { PB.Value++; };
-                    var Task = new Task(() =>
-                    {
-                        Microsoft.Office.Interop.Excel.Application application = new Microsoft.Office.Interop.Excel.Application();
-                        application.AskToUpdateLinks = false;
-                        application.DisplayAlerts = false;
-                        Microsoft.Office.Interop.Excel.Workbook workbook = application.Workbooks.Open(openFileDialog.FileName);
-                        Microsoft.Office.Interop.Excel.Worksheet worksheet = null;
-
-                        foreach (Microsoft.Office.Interop.Excel.Worksheet item in workbook.Worksheets)
-                        {
-                            if (item.Name == "Maestro_Data")
-                            {
-                                IsExist = true;
-                                worksheet = item;
-                                break;
-                            }
-                        }
-
-                        if (IsExist)
-                        {
-                            worksheet.Cells.Clear();
-                            if (worksheet.ListObjects.Count != 0)
-                            {
-                                for (int i = 0; i < worksheet.ListObjects.Count; i++)
-                                {
-                                    if (worksheet.ListObjects[i].Name == "Maestro_DataTable")
-                                    {
-                                        worksheet.ListObjects.Item[i].Delete();
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
-                            worksheet = workbook.Worksheets.Add();
-                            worksheet.Name = "Maestro_Data";
-                        }
-
-                        int r = 1;
-                        worksheet.Cells[r, 1] = "Id";
-                        worksheet.Cells[r, 2] = "Видалено";
-                        worksheet.Cells[r, 3] = "Створив";
-                        worksheet.Cells[r, 4] = "Створино";
-                        worksheet.Cells[r, 5] = "Змінив";
-                        worksheet.Cells[r, 6] = "Змінено";
-                        worksheet.Cells[r, 7] = "Проведено";
-                        worksheet.Cells[r, 8] = "Головний_розпорядник";
-                        worksheet.Cells[r, 9] = "КФК";
-                        worksheet.Cells[r, 10] = "Фонд";
-                        worksheet.Cells[r, 11] = "Мікрофонд";
-                        worksheet.Cells[r, 12] = "КДБ";
-                        worksheet.Cells[r, 13] = "КЕКВ";
-                        worksheet.Cells[r, 14] = "Сума";
-                        worksheet.Cells[r, 15] = "Підписано";
-                        r++;
-
-                        worksheet.ListObjects.Add(Microsoft.Office.Interop.Excel.XlListObjectSourceType.xlSrcRange, worksheet.Range[worksheet.Cells[1, 1], worksheet.Cells[financings.Count, 15]], Type.Missing, Microsoft.Office.Interop.Excel.XlYesNoGuess.xlYes, Type.Missing).Name = "Maestro_DataTable";
-
-                        foreach (var item in financings)
-                        {
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 1] = item.Id;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 2] = item.Видалено;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 3] = item.Створив.Логін;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 4] = item.Створино.ToShortDateString();
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 5] = item.Змінив.Логін;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 6] = item.Змінено.ToShortDateString();
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 7] = item.Проведено.ToShortDateString();
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 8] = item.Головний_розпорядник.Найменування;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 9] = item.КФК.Код;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 10] = item.Мікрофонд.Фонд.Код;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 11] = item.Мікрофонд.Повністю;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 12] = item.КДБ.Код;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 13] = item.КЕКВ.Код;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 14] = item.Сума;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 15] = item.Підписано;
-                            PB.Dispatcher.Invoke(action);
-                            r++;
-                        }
-
-                        MessageBox.Show("Виконано!", "Maestro", MessageBoxButton.OK, MessageBoxImage.Information);
-                        application.Visible = true;
-                        openFileDialog = null;
-                        application = null;
-                        workbook = null;
-                        worksheet = null;
-                        PB.Dispatcher.Invoke(() => PB.Value = 0);
-                    });
-
-                    Task.Start();
-                }
-            }
-            else
-            {
-                MessageBox.Show("Виділіть всі строки, які будуть експортовані!", "Maestro", MessageBoxButton.OK, MessageBoxImage.Hand);
-            }
         }
         #endregion
 

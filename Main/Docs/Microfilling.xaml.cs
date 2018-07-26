@@ -89,10 +89,8 @@ namespace Main.Docs
             BTN_Reset.Click += BTN_Reset_Click;
             BTN_ResetGroup.Click += BTN_ResetGroup_Click;
             BTN_Save.Click += BTN_Save_Click;
-            BTN_ExportToExcel.Click += BTN_ExportToExcel_Click;
+            BTN_ExportToExcel.Click += Func.BTN_ExportToExcel_Click;
 
-            EXPEVAL.MouseEnter += Func.Expander_MouseEnter;
-            EXPEVAL.MouseLeave += Func.Expander_MouseLeave;
             EXPMAESTRO.MouseEnter += Func.Expander_MouseEnter;
             EXPMAESTRO.MouseLeave += Func.Expander_MouseLeave;
 

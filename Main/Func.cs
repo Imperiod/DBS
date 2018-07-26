@@ -1,4 +1,5 @@
 ﻿using Microsoft.CSharp;
+using Microsoft.Win32;
 using System;
 using System.CodeDom.Compiler;
 using System.Collections.Generic;
@@ -27,7 +28,7 @@ namespace Main
         public static void AddExp(Window window, Expander exp)
         {
             expanders.Add(window, exp);
-            System.Windows.Threading.DispatcherTimer dispatcherTimer = new System.Windows.Threading.DispatcherTimer() { Interval = TimeSpan.FromMilliseconds(100) };
+            System.Windows.Threading.DispatcherTimer dispatcherTimer = new System.Windows.Threading.DispatcherTimer() { Interval = TimeSpan.FromMilliseconds(150) };
             dispatcherTimer.Tick += new EventHandler((object c, EventArgs eventArgs) =>
             {
                 var b = expanders.FirstOrDefault(f => f.Key == window && f.Value == exp);
@@ -1142,7 +1143,7 @@ namespace Main
             Window active_window = (Window)((TypeInfo)sender.GetType()).DeclaredProperties.FirstOrDefault(f => f.Name == "InheritanceContext").GetValue(sender);
             List<Filters> filters = (List<Filters>)((TypeInfo)active_window.GetType()).DeclaredFields.First(f => f.Name == "GetFilters").GetValue(active_window);
             bool result;
-            
+
 
             if (filters.Count == 0)
             {
@@ -1242,7 +1243,7 @@ namespace Main
                                 switcher = false;
                             }
                         }
-                        
+
                         if (typeValue == "String")
                         {
                             stringBuilder = $"{RemoveBadSymbols(ValueQuery.ToString()).Length} >= {RemoveBadSymbols(start).Length} && {RemoveBadSymbols(ValueQuery.ToString()).Length} <= {RemoveBadSymbols(end).Length}";
@@ -1346,6 +1347,183 @@ namespace Main
             }
             ((Expander)sender).IsExpanded = false;
         }
+
+        public static void BTN_ExportToExcel_Click(object sender, RoutedEventArgs e)
+        {
+            Window active_window = (Window)((Grid)((Expander)((Grid)((Button)sender).Parent).Parent).Parent).Parent;
+            DataGrid DGM = (DataGrid)active_window.GetType().GetRuntimeFields().First(f => f.Name == "DGM").GetValue(active_window);
+            ProgressBar PB = (ProgressBar)active_window.GetType().GetRuntimeFields().First(f => f.Name == "PB").GetValue(active_window);
+
+            bool WorksheetExist = false;
+            bool TableExist = false;
+            if (DGM.SelectedCells.Count > 0)
+            {
+                List<Dictionary<string, dynamic>> Entities = new List<Dictionary<string, dynamic>>();
+                int countColumns = 0;
+                int countRows = 0;
+
+                //Перенос сущностей
+                foreach (var item in DGM.SelectedCells)
+                {
+                    if (item.Item.ToString() != "{NewItemPlaceholder}" && Entities.FirstOrDefault(dict => dict.FirstOrDefault(d => d.Key == "Id").Value.ToString() == item.Item.GetType().GetProperty("Id").GetValue(item.Item).ToString()) is null)
+                    {
+                        foreach (var itemm in item.Item.GetType().GetProperties().Select(s => s.Name).ToList())
+                        {
+                            var q = Entities.FirstOrDefault(dict => dict.FirstOrDefault(d => d.Key == "Id").Value.ToString() == item.Item.GetType().GetProperty("Id").GetValue(item.Item).ToString());
+                            if (q is null)
+                            {
+                                Entities.Add(new Dictionary<string, dynamic>() { { itemm, item.Item.GetType().GetProperty(itemm).GetValue(item.Item) } });
+                            }
+                            else
+                            {
+                                dynamic q1, q2, q3;
+                                switch (itemm)
+                                {
+                                    case "Створив":
+                                    case "Змінив":
+                                    case "Правовласник":
+                                        q1 = item.Item.GetType().GetProperty(itemm).GetValue(item.Item);
+                                        q.Add(itemm, q1.GetType().GetProperty("Логін").GetValue(q1));
+                                        break;
+                                    case "Статус":
+                                        q1 = item.Item.GetType().GetProperty(itemm).GetValue(item.Item);
+                                        q.Add(itemm, q1.GetType().GetProperty("Повністю").GetValue(q1));
+                                        break;
+                                    case "Головний_розпорядник":
+                                        q1 = item.Item.GetType().GetProperty(itemm).GetValue(item.Item);
+                                        q.Add(itemm, q1.GetType().GetProperty("Найменування").GetValue(q1));
+                                        break;
+                                    case "КФК":
+                                        q1 = item.Item.GetType().GetProperty(itemm).GetValue(item.Item);
+                                        q.Add(itemm, q1.GetType().GetProperty("Код").GetValue(q1));
+                                        break;
+                                    case "Фонд":
+                                        q1 = item.Item.GetType().GetProperty(itemm).GetValue(item.Item);
+                                        q.Add(itemm, q1.GetType().GetProperty("Код").GetValue(q1));
+                                        break;
+                                    case "Мікрофонд":
+                                        q1 = item.Item.GetType().GetProperty(itemm).GetValue(item.Item);
+                                        q.Add(itemm, q1.GetType().GetProperty("Повністю").GetValue(q1));
+                                        q2 = q1.GetType().GetProperty("Фонд").GetValue(q1);
+                                        q3 = q2.GetType().GetProperty("Код").GetValue(q2);
+                                        q.Add("Фонд", q3);
+                                        break;
+                                    case "КДБ":
+                                        q1 = item.Item.GetType().GetProperty(itemm).GetValue(item.Item);
+                                        q.Add(itemm, q1.GetType().GetProperty("Код").GetValue(q1));
+                                        break;
+                                    case "КЕКВ":
+                                        q1 = item.Item.GetType().GetProperty(itemm).GetValue(item.Item);
+                                        q.Add(itemm, q1.GetType().GetProperty("Код").GetValue(q1));
+                                        break;
+                                    default:
+                                        q.Add(itemm, item.Item.GetType().GetProperty(itemm).GetValue(item.Item));
+                                        break;
+                                }
+                            }
+                        }
+                        countRows++;
+                    }
+                }
+
+                OpenFileDialog openFileDialog = new OpenFileDialog();
+                openFileDialog.Filter = "Excel files (*.xlsx;*.xlsm;*.xls)|*.xlsx;*.xlsm;*.xls";
+                if (openFileDialog.ShowDialog() == true)
+                {
+                    PB.IsIndeterminate = true;
+
+                    var Task = new Task(() =>
+                    {
+                        #region "Variables"
+                        Microsoft.Office.Interop.Excel.Application application = new Microsoft.Office.Interop.Excel.Application
+                        {
+                            AskToUpdateLinks = false,
+                            DisplayAlerts = false,
+                            Visible = false
+                        };
+                        Microsoft.Office.Interop.Excel.Workbook workbook = application.Workbooks.Open(openFileDialog.FileName);
+                        application.Calculation = Microsoft.Office.Interop.Excel.XlCalculation.xlCalculationManual;
+                        int currentRow = 2;
+                        Microsoft.Office.Interop.Excel.Worksheet worksheet = null;
+                        #endregion
+
+                        //Check exist worksheet
+                        foreach (Microsoft.Office.Interop.Excel.Worksheet item in workbook.Worksheets)
+                        {
+                            if (item.Name == "Maestro_Data")
+                            {
+                                WorksheetExist = true;
+                                worksheet = item;
+                                break;
+                            }
+                        }
+
+                        if (WorksheetExist)
+                        {
+                            if (worksheet.ListObjects.Count != 0)
+                            {
+                                for (int i = 1; i <= worksheet.ListObjects.Count; i++)
+                                {
+                                    if (worksheet.ListObjects[i].Name == "Maestro_DataTable")
+                                    {
+                                        TableExist = true;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        else
+                        {
+                            worksheet = workbook.Worksheets.Add();
+                            worksheet.Name = "Maestro_Data";
+                        }
+
+                        //Headers
+                        foreach (var column in Entities.First().Keys)
+                        {
+                            countColumns++;
+                            worksheet.Cells[1, countColumns] = column;
+                        }
+
+                        if (TableExist == false)
+                        {
+                            worksheet.ListObjects.Add(Microsoft.Office.Interop.Excel.XlListObjectSourceType.xlSrcRange, worksheet.Range[worksheet.Cells[1, 1], worksheet.Cells[countRows, countColumns]], Type.Missing, Microsoft.Office.Interop.Excel.XlYesNoGuess.xlYes, Type.Missing).Name = "Maestro_DataTable";
+                        }
+                        else
+                        {
+                            worksheet.Range[worksheet.Cells[2, 1], worksheet.Cells[1000, 50]].Clear();
+                        }
+
+                        //Filling
+                        foreach (var item in Entities)
+                        {
+                            int currentColumn = 1;
+                            foreach (string ent in item.Keys)
+                            {
+                                worksheet.Cells[currentRow, currentColumn] = item.FirstOrDefault(dict => dict.Key == ent).Value;
+                                currentColumn++;
+                            }
+                            currentRow++;
+                        }
+
+                        application.Calculation = Microsoft.Office.Interop.Excel.XlCalculation.xlCalculationAutomatic;
+                        MessageBox.Show("Виконано!", "Maestro", MessageBoxButton.OK, MessageBoxImage.Information);
+                        application.Visible = true;
+                        openFileDialog = null;
+                        application = null;
+                        workbook = null;
+                        worksheet = null;
+                    PB.Dispatcher.Invoke(() => PB.IsIndeterminate = false);
+                    });
+
+                    Task.Start();
+                }
+            }
+            else
+            {
+                MessageBox.Show("Виділіть всі строки, які будуть експортовані!", "Maestro", MessageBoxButton.OK, MessageBoxImage.Hand);
+            }
+        }
     }
 
     public class Filters
@@ -1403,5 +1581,10 @@ namespace Main
                 return value;
             }
         }
+    }
+    public class AdditionalEntities
+    {
+        public string Property { get; set; }
+        public Dictionary<string, dynamic> Value = new Dictionary<string, dynamic>();
     }
 }

@@ -252,12 +252,14 @@ namespace Main.Docs
 
                             #region "Годовой план"
                             double plan = 0;
-                            var qplan = Func.GetDB.Fillings.FirstOrDefault(w => w.Головний_розпорядник.Id == Main_manager.Id &&
-                                                                             w.Проведено.Year == date.Year &&
-                                                                             w.КДБ.Id == KDB.Id &&
-                                                                             w.КЕКВ.Id == KEKB.Id &&
-                                                                             w.КФК.Id == KFK.Id &&
-                                                                             w.Фонд.Id == FOND.Id);
+                            var qplan = Func.GetDB.Fillings.FirstOrDefault(w =>
+                                            w.Видалено == false &&
+                                            w.Головний_розпорядник.Id == Main_manager.Id &&
+                                            w.Проведено.Year == date.Year &&
+                                            w.КДБ.Id == KDB.Id &&
+                                            w.КЕКВ.Id == KEKB.Id &&
+                                            w.КФК.Id == KFK.Id &&
+                                            w.Фонд.Id == FOND.Id);
                             if (qplan != null)
                             {
                                 plan = (double)qplan.GetType().GetProperty(e.AddedCells[0].Column.Header.ToString()).GetValue(qplan);
@@ -266,13 +268,13 @@ namespace Main.Docs
 
                             #region "Довідки"
                             double corrections = 0;
-                            var qcorr = Func.GetDB.Corrections.Local.Where(w => w.Видалено == false &&
-                                                                               w.Головний_розпорядник.Id == Main_manager.Id &&
+                            var qcorr = Func.GetDB.Corrections.Local.Where(w => ((w?.Видалено ?? true) == false) &&
+                                                                               ((w.Головний_розпорядник?.Id ?? 0) == Main_manager.Id) &&
                                                                                w.Проведено.Year == date.Year &&
-                                                                               w.КДБ.Id == KDB.Id &&
-                                                                               w.КЕКВ.Id == KEKB.Id &&
-                                                                               w.КФК.Id == KFK.Id &&
-                                                                               w.Мікрофонд.Фонд.Id == FOND.Id).ToList();
+                                                                               ((w.КДБ?.Id ?? 0) == KDB.Id) &&
+                                                                               ((w.КЕКВ?.Id ?? 0) == KEKB.Id) &&
+                                                                               ((w.КФК?.Id ?? 0) == KFK.Id) &&
+                                                                               ((w.Мікрофонд?.Фонд?.Id ?? 0) == FOND.Id)).ToList();
                             if (qcorr.Count != 0)
                             {
                                 corrections = qcorr.Select(s => (double)s.GetType().GetProperty(e.AddedCells[0].Column.Header.ToString()).GetValue(s)).Sum();
@@ -389,20 +391,19 @@ namespace Main.Docs
 
                 #region "Corrections"
                 double corrections = 0;
-                var qcorr = Func.GetDB.Corrections.Local.Where(w => w.Видалено == false &&
-                                                                   w.Головний_розпорядник.Id == Main_manager.Id &&
+                var qcorr = Func.GetDB.Corrections.Local.Where(w => ((w?.Видалено ?? true) == false) &&
+                                                                   ((w.Головний_розпорядник?.Id ?? 0) == Main_manager.Id) &&
                                                                    w.Проведено.Year == date.Year &&
-                                                                   w.КДБ.Id == KDB.Id &&
-                                                                   w.КЕКВ.Id == KEKB.Id &&
-                                                                   w.КФК.Id == KFK.Id &&
-                                                                   w.Мікрофонд.Фонд.Id == FOND.Id).ToList();
+                                                                   ((w.КДБ?.Id ?? 0) == KDB.Id) &&
+                                                                   ((w.КЕКВ?.Id ?? 0) == KEKB.Id) &&
+                                                                   ((w.КФК?.Id ?? 0) == KFK.Id) &&
+                                                                   ((w.Мікрофонд?.Фонд?.Id ?? 0) == FOND.Id)).ToList();
                 if (qcorr.Count != 0)
                 {
                     foreach (var item in Func.GetDB.names_months)
                     {
                         corrections = qcorr.Select(s => (double)s.GetType().GetProperty(item).GetValue(s)).Sum();
                     }
-                    
                 }
                 #endregion
 

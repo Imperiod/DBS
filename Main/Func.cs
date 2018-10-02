@@ -442,7 +442,7 @@ namespace Main
                     {
                         Header = e.Column.Header,
                         Width = 50,
-                        ItemsSource = new List<string> { "План", "Факт" },
+                        ItemsSource = new List<string> { "План", "Факт", "Н_Залишок", "М_Залишок" },
                         SelectedValueBinding = new Binding("Дані")
                         {
                             Mode = BindingMode.TwoWay,

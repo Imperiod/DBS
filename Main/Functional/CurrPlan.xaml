@@ -8,6 +8,21 @@
         mc:Ignorable="d"
         Title="Maestro: [Виконання]" Height="450" Width="1000">
     <Window.Resources>
+        <local:MonthCurrBalanceGroupTotalConverter  x:Key="MonthBalanceTotalConverter" />
+        <local:MonthCurrBalanceGroupCurrentConverter  x:Key="MonthBalanceCurrentConverter" />
+        <local:MonthCurrBalanceGroupOneConverter  x:Key="MonthBalanceOneConverter" />
+        <local:MonthCurrBalanceGroupTwoConverter  x:Key="MonthBalanceTwoConverter" />
+        <local:MonthCurrBalanceGroupThreeConverter  x:Key="MonthBalanceThreeConverter" />
+        <local:MonthCurrBalanceGroupFourConverter  x:Key="MonthBalanceFourConverter" />
+        <local:MonthCurrBalanceGroupFiveConverter  x:Key="MonthBalanceFiveConverter" />
+        <local:MonthCurrBalanceGroupSixConverter  x:Key="MonthBalanceSixConverter" />
+        <local:MonthCurrBalanceGroupSevenConverter  x:Key="MonthBalanceSevenConverter" />
+        <local:MonthCurrBalanceGroupEightConverter  x:Key="MonthBalanceEightConverter" />
+        <local:MonthCurrBalanceGroupNineConverter  x:Key="MonthBalanceNineConverter" />
+        <local:MonthCurrBalanceGroupTenConverter  x:Key="MonthBalanceTenConverter" />
+        <local:MonthCurrBalanceGroupElevenConverter  x:Key="MonthBalanceElevenConverter" />
+        <local:MonthCurrBalanceGroupTwelveConverter  x:Key="MonthBalanceTwelveConverter" />
+
         <local:AccumulativelyCurrBalanceGroupTotalConverter  x:Key="AccumulativelyBalanceTotalConverter" />
         <local:AccumulativelyCurrBalanceGroupCurrentConverter  x:Key="AccumulativelyBalanceCurrentConverter" />
         <local:AccumulativelyCurrBalanceGroupOneConverter  x:Key="AccumulativelyBalanceOneConverter" />
@@ -62,87 +77,105 @@
                         <Setter.Value>
                             <ControlTemplate TargetType="{x:Type GroupItem}">
                                 <Expander IsExpanded="False" Background="Black" BorderThickness="1" BorderBrush="Yellow" Margin="3">
-                                        <Expander.Header>
-                                            <Grid Width="auto">
-                                                <Grid.RowDefinitions>
-                                                    <RowDefinition Height="50"/>
-                                                    <RowDefinition Height="1" />
-                                                    <RowDefinition Height="20"/>
-                                                    <RowDefinition Height="1" />
-                                                    <RowDefinition Height="20"/>
-                                                    <RowDefinition Height="1" />
-                                                    <RowDefinition Height="20"/>
-                                                </Grid.RowDefinitions>
-                                                <Grid.ColumnDefinitions>
-                                                    <ColumnDefinition Width="700" />
-                                                    <ColumnDefinition Width="150" />
-                                                    <ColumnDefinition Width="150" />
-                                                    <ColumnDefinition Width="150" />
-                                                    <ColumnDefinition Width="150" />
-                                                    <ColumnDefinition Width="150" />
-                                                    <ColumnDefinition Width="150" />
-                                                    <ColumnDefinition Width="150" />
-                                                    <ColumnDefinition Width="150" />
-                                                    <ColumnDefinition Width="150" />
-                                                    <ColumnDefinition Width="150" />
-                                                    <ColumnDefinition Width="150" />
-                                                    <ColumnDefinition Width="150" />
-                                                    <ColumnDefinition Width="150" />
-                                                    <ColumnDefinition Width="150" />
-                                                </Grid.ColumnDefinitions>
-                                                <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="15" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Background="Black" Foreground="Red" Content="{Binding Name}" FontSize="24" FontWeight="Bold" />
-                                                <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="15" Background="White" />
-                                                <TextBlock Grid.Row="2" Grid.Column="0" Foreground="Green" TextAlignment="Right" VerticalAlignment="Center">План:</TextBlock>
-                                                <TextBlock Grid.Row="2" Grid.Column="1" Foreground="Red" TextAlignment="Right" FontWeight="Bold" Text="{Binding Items, Converter={StaticResource CurrPlanTotalConverter}}"/>
-                                                <TextBlock Grid.Row="2" Grid.Column="2" Foreground="BlueViolet" TextAlignment="Right" FontWeight="Bold" Text="{Binding Items, Converter={StaticResource CurrPlanCurrentConverter}}"/>
-                                                <TextBlock Grid.Row="2" Grid.Column="3" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPlanOneConverter}}"/>
-                                                <TextBlock Grid.Row="2" Grid.Column="4" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPlanTwoConverter}}"/>
-                                                <TextBlock Grid.Row="2" Grid.Column="5" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPlanThreeConverter}}"/>
-                                                <TextBlock Grid.Row="2" Grid.Column="6" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPlanFourConverter}}"/>
-                                                <TextBlock Grid.Row="2" Grid.Column="7" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPlanFiveConverter}}"/>
-                                                <TextBlock Grid.Row="2" Grid.Column="8" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPlanSixConverter}}"/>
-                                                <TextBlock Grid.Row="2" Grid.Column="9" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPlanSevenConverter}}"/>
-                                                <TextBlock Grid.Row="2" Grid.Column="10" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPlanEightConverter}}"/>
-                                                <TextBlock Grid.Row="2" Grid.Column="11" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPlanNineConverter}}"/>
-                                                <TextBlock Grid.Row="2" Grid.Column="12" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPlanTenConverter}}"/>
-                                                <TextBlock Grid.Row="2" Grid.Column="13" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPlanElevenConverter}}"/>
-                                                <TextBlock Grid.Row="2" Grid.Column="14" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPlanTwelveConverter}}"/>
-                                                <Label Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="15" Background="White" />
-                                                <TextBlock Grid.Row="4" Grid.Column="0" Foreground="Red" TextAlignment="Right" VerticalAlignment="Center">Факт:</TextBlock>
-                                                <TextBlock Grid.Row="4" Grid.Column="1" Foreground="Red" TextAlignment="Right" FontWeight="Bold" Text="{Binding Items, Converter={StaticResource CurrPayTotalConverter}}"/>
-                                                <TextBlock Grid.Row="4" Grid.Column="2" Foreground="BlueViolet" TextAlignment="Right" FontWeight="Bold" Text="{Binding Items, Converter={StaticResource CurrPayCurrentConverter}}"/>
-                                                <TextBlock Grid.Row="4" Grid.Column="3" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPayOneConverter}}"/>
-                                                <TextBlock Grid.Row="4" Grid.Column="4" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPayTwoConverter}}"/>
-                                                <TextBlock Grid.Row="4" Grid.Column="5" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPayThreeConverter}}"/>
-                                                <TextBlock Grid.Row="4" Grid.Column="6" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPayFourConverter}}"/>
-                                                <TextBlock Grid.Row="4" Grid.Column="7" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPayFiveConverter}}"/>
-                                                <TextBlock Grid.Row="4" Grid.Column="8" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPaySixConverter}}"/>
-                                                <TextBlock Grid.Row="4" Grid.Column="9" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPaySevenConverter}}"/>
-                                                <TextBlock Grid.Row="4" Grid.Column="10" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPayEightConverter}}"/>
-                                                <TextBlock Grid.Row="4" Grid.Column="11" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPayNineConverter}}"/>
-                                                <TextBlock Grid.Row="4" Grid.Column="12" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPayTenConverter}}"/>
-                                                <TextBlock Grid.Row="4" Grid.Column="13" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPayElevenConverter}}"/>
-                                                <TextBlock Grid.Row="4" Grid.Column="14" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPayTwelveConverter}}"/>
-                                                <Label Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="15" Background="White" />
-                                                <TextBlock Grid.Row="6" Grid.Column="0" Foreground="Orange"  TextAlignment="Right" VerticalAlignment="Center">Залишок:</TextBlock>
-                                                <TextBlock Grid.Row="6" Grid.Column="1" Foreground="Red" TextAlignment="Right" FontWeight="Bold" Text="{Binding Items, Converter={StaticResource AccumulativelyBalanceTotalConverter}}" />
-                                                <TextBlock Grid.Row="6" Grid.Column="2" Foreground="BlueViolet" TextAlignment="Right" FontWeight="Bold" Text="{Binding Items, Converter={StaticResource AccumulativelyBalanceCurrentConverter}}" />
-                                                <TextBlock Grid.Row="6" Grid.Column="3" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource AccumulativelyBalanceOneConverter}}" />
-                                                <TextBlock Grid.Row="6" Grid.Column="4" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource AccumulativelyBalanceTwoConverter}}" />
-                                                <TextBlock Grid.Row="6" Grid.Column="5" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource AccumulativelyBalanceThreeConverter}}" />
-                                                <TextBlock Grid.Row="6" Grid.Column="6" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource AccumulativelyBalanceFourConverter}}" />
-                                                <TextBlock Grid.Row="6" Grid.Column="7" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource AccumulativelyBalanceFiveConverter}}" />
-                                                <TextBlock Grid.Row="6" Grid.Column="8" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource AccumulativelyBalanceSixConverter}}" />
-                                                <TextBlock Grid.Row="6" Grid.Column="9" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource AccumulativelyBalanceSevenConverter}}" />
-                                                <TextBlock Grid.Row="6" Grid.Column="10" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource AccumulativelyBalanceEightConverter}}" />
-                                                <TextBlock Grid.Row="6" Grid.Column="11" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource AccumulativelyBalanceNineConverter}}" />
-                                                <TextBlock Grid.Row="6" Grid.Column="12" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource AccumulativelyBalanceTenConverter}}" />
-                                                <TextBlock Grid.Row="6" Grid.Column="13" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource AccumulativelyBalanceElevenConverter}}" />
-                                                <TextBlock Grid.Row="6" Grid.Column="14" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource AccumulativelyBalanceTwelveConverter}}" />
-                                            </Grid>
-                                        </Expander.Header>
-                                        <ItemsPresenter />
-                                    </Expander>
+                                    <Expander.Header>
+                                        <Grid Width="auto">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="50"/>
+                                                <RowDefinition Height="1" />
+                                                <RowDefinition Height="20"/>
+                                                <RowDefinition Height="1" />
+                                                <RowDefinition Height="20"/>
+                                                <RowDefinition Height="1" />
+                                                <RowDefinition Height="20"/>
+                                                <RowDefinition Height="1" />
+                                                <RowDefinition Height="20"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="700" />
+                                                <ColumnDefinition Width="150" />
+                                                <ColumnDefinition Width="150" />
+                                                <ColumnDefinition Width="150" />
+                                                <ColumnDefinition Width="150" />
+                                                <ColumnDefinition Width="150" />
+                                                <ColumnDefinition Width="150" />
+                                                <ColumnDefinition Width="150" />
+                                                <ColumnDefinition Width="150" />
+                                                <ColumnDefinition Width="150" />
+                                                <ColumnDefinition Width="150" />
+                                                <ColumnDefinition Width="150" />
+                                                <ColumnDefinition Width="150" />
+                                                <ColumnDefinition Width="150" />
+                                                <ColumnDefinition Width="150" />
+                                            </Grid.ColumnDefinitions>
+                                            <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="15" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Background="Black" Foreground="Red" Content="{Binding Name}" FontSize="24" FontWeight="Bold" />
+                                            <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="15" Background="White" />
+                                            <TextBlock Grid.Row="2" Grid.Column="0" Foreground="Green" TextAlignment="Right" VerticalAlignment="Center">План:</TextBlock>
+                                            <TextBlock Grid.Row="2" Grid.Column="1" Foreground="Red" TextAlignment="Right" FontWeight="Bold" Text="{Binding Items, Converter={StaticResource CurrPlanTotalConverter}}"/>
+                                            <TextBlock Grid.Row="2" Grid.Column="2" Foreground="BlueViolet" TextAlignment="Right" FontWeight="Bold" Text="{Binding Items, Converter={StaticResource CurrPlanCurrentConverter}}"/>
+                                            <TextBlock Grid.Row="2" Grid.Column="3" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPlanOneConverter}}"/>
+                                            <TextBlock Grid.Row="2" Grid.Column="4" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPlanTwoConverter}}"/>
+                                            <TextBlock Grid.Row="2" Grid.Column="5" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPlanThreeConverter}}"/>
+                                            <TextBlock Grid.Row="2" Grid.Column="6" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPlanFourConverter}}"/>
+                                            <TextBlock Grid.Row="2" Grid.Column="7" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPlanFiveConverter}}"/>
+                                            <TextBlock Grid.Row="2" Grid.Column="8" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPlanSixConverter}}"/>
+                                            <TextBlock Grid.Row="2" Grid.Column="9" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPlanSevenConverter}}"/>
+                                            <TextBlock Grid.Row="2" Grid.Column="10" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPlanEightConverter}}"/>
+                                            <TextBlock Grid.Row="2" Grid.Column="11" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPlanNineConverter}}"/>
+                                            <TextBlock Grid.Row="2" Grid.Column="12" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPlanTenConverter}}"/>
+                                            <TextBlock Grid.Row="2" Grid.Column="13" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPlanElevenConverter}}"/>
+                                            <TextBlock Grid.Row="2" Grid.Column="14" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPlanTwelveConverter}}"/>
+                                            <Label Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="15" Background="White" />
+                                            <TextBlock Grid.Row="4" Grid.Column="0" Foreground="Red" TextAlignment="Right" VerticalAlignment="Center">Факт:</TextBlock>
+                                            <TextBlock Grid.Row="4" Grid.Column="1" Foreground="Red" TextAlignment="Right" FontWeight="Bold" Text="{Binding Items, Converter={StaticResource CurrPayTotalConverter}}"/>
+                                            <TextBlock Grid.Row="4" Grid.Column="2" Foreground="BlueViolet" TextAlignment="Right" FontWeight="Bold" Text="{Binding Items, Converter={StaticResource CurrPayCurrentConverter}}"/>
+                                            <TextBlock Grid.Row="4" Grid.Column="3" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPayOneConverter}}"/>
+                                            <TextBlock Grid.Row="4" Grid.Column="4" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPayTwoConverter}}"/>
+                                            <TextBlock Grid.Row="4" Grid.Column="5" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPayThreeConverter}}"/>
+                                            <TextBlock Grid.Row="4" Grid.Column="6" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPayFourConverter}}"/>
+                                            <TextBlock Grid.Row="4" Grid.Column="7" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPayFiveConverter}}"/>
+                                            <TextBlock Grid.Row="4" Grid.Column="8" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPaySixConverter}}"/>
+                                            <TextBlock Grid.Row="4" Grid.Column="9" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPaySevenConverter}}"/>
+                                            <TextBlock Grid.Row="4" Grid.Column="10" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPayEightConverter}}"/>
+                                            <TextBlock Grid.Row="4" Grid.Column="11" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPayNineConverter}}"/>
+                                            <TextBlock Grid.Row="4" Grid.Column="12" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPayTenConverter}}"/>
+                                            <TextBlock Grid.Row="4" Grid.Column="13" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPayElevenConverter}}"/>
+                                            <TextBlock Grid.Row="4" Grid.Column="14" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource CurrPayTwelveConverter}}"/>
+                                            <Label Grid.Row="5" Grid.Column="0" Grid.ColumnSpan="15" Background="White" />
+                                            <TextBlock Grid.Row="6" Grid.Column="0" Foreground="Orange"  TextAlignment="Right" VerticalAlignment="Center">Н_Залишок:</TextBlock>
+                                            <TextBlock Grid.Row="6" Grid.Column="1" Foreground="Red" TextAlignment="Right" FontWeight="Bold" Text="{Binding Items, Converter={StaticResource AccumulativelyBalanceTotalConverter}}" />
+                                            <TextBlock Grid.Row="6" Grid.Column="2" Foreground="BlueViolet" TextAlignment="Right" FontWeight="Bold" Text="{Binding Items, Converter={StaticResource AccumulativelyBalanceCurrentConverter}}" />
+                                            <TextBlock Grid.Row="6" Grid.Column="3" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource AccumulativelyBalanceOneConverter}}" />
+                                            <TextBlock Grid.Row="6" Grid.Column="4" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource AccumulativelyBalanceTwoConverter}}" />
+                                            <TextBlock Grid.Row="6" Grid.Column="5" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource AccumulativelyBalanceThreeConverter}}" />
+                                            <TextBlock Grid.Row="6" Grid.Column="6" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource AccumulativelyBalanceFourConverter}}" />
+                                            <TextBlock Grid.Row="6" Grid.Column="7" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource AccumulativelyBalanceFiveConverter}}" />
+                                            <TextBlock Grid.Row="6" Grid.Column="8" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource AccumulativelyBalanceSixConverter}}" />
+                                            <TextBlock Grid.Row="6" Grid.Column="9" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource AccumulativelyBalanceSevenConverter}}" />
+                                            <TextBlock Grid.Row="6" Grid.Column="10" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource AccumulativelyBalanceEightConverter}}" />
+                                            <TextBlock Grid.Row="6" Grid.Column="11" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource AccumulativelyBalanceNineConverter}}" />
+                                            <TextBlock Grid.Row="6" Grid.Column="12" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource AccumulativelyBalanceTenConverter}}" />
+                                            <TextBlock Grid.Row="6" Grid.Column="13" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource AccumulativelyBalanceElevenConverter}}" />
+                                            <TextBlock Grid.Row="6" Grid.Column="14" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource AccumulativelyBalanceTwelveConverter}}" />
+                                            <Label Grid.Row="7" Grid.Column="0" Grid.ColumnSpan="15" Background="White" />
+                                            <TextBlock Grid.Row="8" Grid.Column="0" Foreground="Orange"  TextAlignment="Right" VerticalAlignment="Center">М_Залишок:</TextBlock>
+                                            <TextBlock Grid.Row="8" Grid.Column="1" Foreground="Red" TextAlignment="Right" FontWeight="Bold" Text="{Binding Items, Converter={StaticResource MonthBalanceTotalConverter}}" />
+                                            <TextBlock Grid.Row="8" Grid.Column="2" Foreground="BlueViolet" TextAlignment="Right" FontWeight="Bold" Text="{Binding Items, Converter={StaticResource MonthBalanceCurrentConverter}}" />
+                                            <TextBlock Grid.Row="8" Grid.Column="3" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource MonthBalanceOneConverter}}" />
+                                            <TextBlock Grid.Row="8" Grid.Column="4" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource MonthBalanceTwoConverter}}" />
+                                            <TextBlock Grid.Row="8" Grid.Column="5" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource MonthBalanceThreeConverter}}" />
+                                            <TextBlock Grid.Row="8" Grid.Column="6" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource MonthBalanceFourConverter}}" />
+                                            <TextBlock Grid.Row="8" Grid.Column="7" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource MonthBalanceFiveConverter}}" />
+                                            <TextBlock Grid.Row="8" Grid.Column="8" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource MonthBalanceSixConverter}}" />
+                                            <TextBlock Grid.Row="8" Grid.Column="9" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource MonthBalanceSevenConverter}}" />
+                                            <TextBlock Grid.Row="8" Grid.Column="10" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource MonthBalanceEightConverter}}" />
+                                            <TextBlock Grid.Row="8" Grid.Column="11" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource MonthBalanceNineConverter}}" />
+                                            <TextBlock Grid.Row="8" Grid.Column="12" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource MonthBalanceTenConverter}}" />
+                                            <TextBlock Grid.Row="8" Grid.Column="13" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource MonthBalanceElevenConverter}}" />
+                                            <TextBlock Grid.Row="8" Grid.Column="14" Foreground="White" TextAlignment="Right" Text="{Binding Items, Converter={StaticResource MonthBalanceTwelveConverter}}" />
+                                        </Grid>
+                                    </Expander.Header>
+                                    <ItemsPresenter />
+                                </Expander>
                             </ControlTemplate>
                         </Setter.Value>
                     </Setter>

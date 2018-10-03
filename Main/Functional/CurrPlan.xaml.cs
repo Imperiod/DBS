@@ -510,7 +510,7 @@ namespace Main.Functional
         private void FillEntities(DateTime s, DateTime e)
         {
             int Id = 1;
-            DateTime endDateTime = e.AddDays(1);
+            DateTime endDateTime = e.AddDays(1) - TimeSpan.FromSeconds(1);
 
             var qp = Func.GetDB.Microfillings
                             .Include(i => i.Головний_розпорядник)
@@ -1685,6 +1685,793 @@ namespace Main.Functional
                                 .Select(s => (double)s.GetType().GetProperty(Func.GetDB.names_months[m]).GetValue(s))
                                 .Sum());
                 }
+                return sum;
+            }
+        }
+    }
+
+    public class MonthCurrBalanceGroupTotalConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (null == value)
+            {
+                return "null";
+            }
+
+            ReadOnlyObservableCollection<object> items = (ReadOnlyObservableCollection<object>)value;
+
+            return CheckedFillingItems(items).ToString("N2", CultureInfo.CreateSpecificCulture("ru-RU"));
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+        private static double CheckedFillingItems(ReadOnlyObservableCollection<object> items)
+        {
+            var delta = items.FirstOrDefault(s => s.GetType().GetProperties().Select(p => p.Name).ToList().Contains("Items"));
+            double sum = 0;
+            if (delta != null)
+            {
+                for (int i = 0; i < items.Count; i++)
+                {
+                    if (((CollectionViewGroup)items[i]).Items.FirstOrDefault(f => f.GetType().GetProperties().Select(s => s.Name).ToList().Contains("Items")) != null)
+                    {
+                        sum += CheckedFillingItems(((CollectionViewGroup)items[i]).Items);
+                    }
+                    else
+                    {
+                        sum += ((CollectionViewGroup)items[i]).Items.Where(w => ((CurrPlanEntity)w).Дані == "План").Select(s => ((CurrPlanEntity)s).Рік).Sum() -
+                               ((CollectionViewGroup)items[i]).Items.Where(w => ((CurrPlanEntity)w).Дані == "Факт").Select(s => ((CurrPlanEntity)s).Рік).Sum();
+                    }
+                }
+                return sum;
+            }
+            else
+            {
+                sum += items.Where(w => ((CurrPlanEntity)w).Дані == "План").Select(s => ((CurrPlanEntity)s).Рік).Sum() -
+                       items.Where(w => ((CurrPlanEntity)w).Дані == "Факт").Select(s => ((CurrPlanEntity)s).Рік).Sum();
+                return sum;
+            }
+        }
+    }
+    public class MonthCurrBalanceGroupCurrentConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (null == value)
+            {
+                return "null";
+            }
+
+            ReadOnlyObservableCollection<object> items = (ReadOnlyObservableCollection<object>)value;
+
+            return CheckedFillingItems(items).ToString("N2", CultureInfo.CreateSpecificCulture("ru-RU"));
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+        private static double CheckedFillingItems(ReadOnlyObservableCollection<object> items)
+        {
+            var delta = items.FirstOrDefault(s => s.GetType().GetProperties().Select(p => p.Name).ToList().Contains("Items"));
+            double sum = 0;
+            if (delta != null)
+            {
+                for (int i = 0; i < items.Count; i++)
+                {
+                    if (((CollectionViewGroup)items[i]).Items.FirstOrDefault(f => f.GetType().GetProperties().Select(s => s.Name).ToList().Contains("Items")) != null)
+                    {
+                        sum += CheckedFillingItems(((CollectionViewGroup)items[i]).Items);
+                    }
+                    else
+                    {
+                        sum += ((CollectionViewGroup)items[i]).Items.Where(w => ((CurrPlanEntity)w).Дані == "План").Select(s => ((CurrPlanEntity)s).Період).Sum() -
+                               ((CollectionViewGroup)items[i]).Items.Where(w => ((CurrPlanEntity)w).Дані == "Факт").Select(s => ((CurrPlanEntity)s).Період).Sum();
+                    }
+                }
+                return sum;
+            }
+            else
+            {
+                sum += items.Where(w => ((CurrPlanEntity)w).Дані == "План").Select(s => ((CurrPlanEntity)s).Період).Sum() -
+                       items.Where(w => ((CurrPlanEntity)w).Дані == "Факт").Select(s => ((CurrPlanEntity)s).Період).Sum();
+                return sum;
+            }
+        }
+    }
+    public class MonthCurrBalanceGroupOneConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (null == value)
+            {
+                return "null";
+            }
+
+            ReadOnlyObservableCollection<object> items = (ReadOnlyObservableCollection<object>)value;
+
+            return CheckedFillingItems(items).ToString("N2", CultureInfo.CreateSpecificCulture("ru-RU"));
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+        private static double CheckedFillingItems(ReadOnlyObservableCollection<object> items)
+        {
+            string month = "Січень";
+            var delta = items.FirstOrDefault(s => s.GetType().GetProperties().Select(p => p.Name).ToList().Contains("Items"));
+            double sum = 0;
+            if (delta != null)
+            {
+                for (int i = 0; i < items.Count; i++)
+                {
+                    if (((CollectionViewGroup)items[i]).Items.FirstOrDefault(f => f.GetType().GetProperties().Select(s => s.Name).ToList().Contains("Items")) != null)
+                    {
+                        sum += CheckedFillingItems(((CollectionViewGroup)items[i]).Items);
+                    }
+                    else
+                    {
+                        sum += (((CollectionViewGroup)items[i]).Items
+                                    .Where(w => ((CurrPlanEntity)w).Дані == "План")
+                                    .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                        .Sum() -
+
+                               ((CollectionViewGroup)items[i]).Items
+                                    .Where(w => ((CurrPlanEntity)w).Дані == "Факт")
+                                    .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                    .Sum());
+                    }
+                }
+                return sum;
+            }
+            else
+            {
+                sum += (items.Where(w => ((CurrPlanEntity)w).Дані == "План")
+                            .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                .Sum() -
+
+                       items.Where(w => ((CurrPlanEntity)w).Дані == "Факт")
+                            .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                            .Sum());
+                return sum;
+            }
+        }
+    }
+    public class MonthCurrBalanceGroupTwoConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (null == value)
+            {
+                return "null";
+            }
+
+            ReadOnlyObservableCollection<object> items = (ReadOnlyObservableCollection<object>)value;
+
+            return CheckedFillingItems(items).ToString("N2", CultureInfo.CreateSpecificCulture("ru-RU"));
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+        private static double CheckedFillingItems(ReadOnlyObservableCollection<object> items)
+        {
+            string month = "Лютий";
+            var delta = items.FirstOrDefault(s => s.GetType().GetProperties().Select(p => p.Name).ToList().Contains("Items"));
+            double sum = 0;
+            if (delta != null)
+            {
+                for (int i = 0; i < items.Count; i++)
+                {
+                    if (((CollectionViewGroup)items[i]).Items.FirstOrDefault(f => f.GetType().GetProperties().Select(s => s.Name).ToList().Contains("Items")) != null)
+                    {
+                        sum += CheckedFillingItems(((CollectionViewGroup)items[i]).Items);
+                    }
+                    else
+                    {
+                        sum += (((CollectionViewGroup)items[i]).Items
+                                    .Where(w => ((CurrPlanEntity)w).Дані == "План")
+                                    .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                        .Sum() -
+
+                               ((CollectionViewGroup)items[i]).Items
+                                    .Where(w => ((CurrPlanEntity)w).Дані == "Факт")
+                                    .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                    .Sum());
+                    }
+                }
+                return sum;
+            }
+            else
+            {
+                sum += (items.Where(w => ((CurrPlanEntity)w).Дані == "План")
+                            .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                .Sum() -
+
+                       items.Where(w => ((CurrPlanEntity)w).Дані == "Факт")
+                            .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                            .Sum());
+                return sum;
+            }
+        }
+    }
+    public class MonthCurrBalanceGroupThreeConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (null == value)
+            {
+                return "null";
+            }
+
+            ReadOnlyObservableCollection<object> items = (ReadOnlyObservableCollection<object>)value;
+
+            return CheckedFillingItems(items).ToString("N2", CultureInfo.CreateSpecificCulture("ru-RU"));
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+        private static double CheckedFillingItems(ReadOnlyObservableCollection<object> items)
+        {
+            string month = "Березень";
+            var delta = items.FirstOrDefault(s => s.GetType().GetProperties().Select(p => p.Name).ToList().Contains("Items"));
+            double sum = 0;
+            if (delta != null)
+            {
+                for (int i = 0; i < items.Count; i++)
+                {
+                    if (((CollectionViewGroup)items[i]).Items.FirstOrDefault(f => f.GetType().GetProperties().Select(s => s.Name).ToList().Contains("Items")) != null)
+                    {
+                        sum += CheckedFillingItems(((CollectionViewGroup)items[i]).Items);
+                    }
+                    else
+                    {
+                        sum += (((CollectionViewGroup)items[i]).Items
+                                    .Where(w => ((CurrPlanEntity)w).Дані == "План")
+                                    .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                        .Sum() -
+
+                               ((CollectionViewGroup)items[i]).Items
+                                    .Where(w => ((CurrPlanEntity)w).Дані == "Факт")
+                                    .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                    .Sum());
+                    }
+                }
+                return sum;
+            }
+            else
+            {
+                sum += (items.Where(w => ((CurrPlanEntity)w).Дані == "План")
+                            .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                .Sum() -
+
+                       items.Where(w => ((CurrPlanEntity)w).Дані == "Факт")
+                            .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                            .Sum());
+                return sum;
+            }
+        }
+    }
+    public class MonthCurrBalanceGroupFourConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (null == value)
+            {
+                return "null";
+            }
+
+            ReadOnlyObservableCollection<object> items = (ReadOnlyObservableCollection<object>)value;
+
+            return CheckedFillingItems(items).ToString("N2", CultureInfo.CreateSpecificCulture("ru-RU"));
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+        private static double CheckedFillingItems(ReadOnlyObservableCollection<object> items)
+        {
+            string month = "Квітень";
+            var delta = items.FirstOrDefault(s => s.GetType().GetProperties().Select(p => p.Name).ToList().Contains("Items"));
+            double sum = 0;
+            if (delta != null)
+            {
+                for (int i = 0; i < items.Count; i++)
+                {
+                    if (((CollectionViewGroup)items[i]).Items.FirstOrDefault(f => f.GetType().GetProperties().Select(s => s.Name).ToList().Contains("Items")) != null)
+                    {
+                        sum += CheckedFillingItems(((CollectionViewGroup)items[i]).Items);
+                    }
+                    else
+                    {
+                        sum += (((CollectionViewGroup)items[i]).Items
+                                    .Where(w => ((CurrPlanEntity)w).Дані == "План")
+                                    .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                        .Sum() -
+
+                               ((CollectionViewGroup)items[i]).Items
+                                    .Where(w => ((CurrPlanEntity)w).Дані == "Факт")
+                                    .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                    .Sum());
+                    }
+                }
+                return sum;
+            }
+            else
+            {
+                sum += (items.Where(w => ((CurrPlanEntity)w).Дані == "План")
+                            .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                .Sum() -
+
+                       items.Where(w => ((CurrPlanEntity)w).Дані == "Факт")
+                            .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                            .Sum());
+                return sum;
+            }
+        }
+    }
+    public class MonthCurrBalanceGroupFiveConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (null == value)
+            {
+                return "null";
+            }
+
+            ReadOnlyObservableCollection<object> items = (ReadOnlyObservableCollection<object>)value;
+
+            return CheckedFillingItems(items).ToString("N2", CultureInfo.CreateSpecificCulture("ru-RU"));
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+        private static double CheckedFillingItems(ReadOnlyObservableCollection<object> items)
+        {
+            string month = "Травень";
+            var delta = items.FirstOrDefault(s => s.GetType().GetProperties().Select(p => p.Name).ToList().Contains("Items"));
+            double sum = 0;
+            if (delta != null)
+            {
+                for (int i = 0; i < items.Count; i++)
+                {
+                    if (((CollectionViewGroup)items[i]).Items.FirstOrDefault(f => f.GetType().GetProperties().Select(s => s.Name).ToList().Contains("Items")) != null)
+                    {
+                        sum += CheckedFillingItems(((CollectionViewGroup)items[i]).Items);
+                    }
+                    else
+                    {
+                        sum += (((CollectionViewGroup)items[i]).Items
+                                    .Where(w => ((CurrPlanEntity)w).Дані == "План")
+                                    .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                        .Sum() -
+
+                               ((CollectionViewGroup)items[i]).Items
+                                    .Where(w => ((CurrPlanEntity)w).Дані == "Факт")
+                                    .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                    .Sum());
+                    }
+                }
+                return sum;
+            }
+            else
+            {
+                sum += (items.Where(w => ((CurrPlanEntity)w).Дані == "План")
+                            .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                .Sum() -
+
+                       items.Where(w => ((CurrPlanEntity)w).Дані == "Факт")
+                            .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                            .Sum());
+                return sum;
+            }
+        }
+    }
+    public class MonthCurrBalanceGroupSixConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (null == value)
+            {
+                return "null";
+            }
+
+            ReadOnlyObservableCollection<object> items = (ReadOnlyObservableCollection<object>)value;
+
+            return CheckedFillingItems(items).ToString("N2", CultureInfo.CreateSpecificCulture("ru-RU"));
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+        private static double CheckedFillingItems(ReadOnlyObservableCollection<object> items)
+        {
+            string month = "Червень";
+            var delta = items.FirstOrDefault(s => s.GetType().GetProperties().Select(p => p.Name).ToList().Contains("Items"));
+            double sum = 0;
+            if (delta != null)
+            {
+                for (int i = 0; i < items.Count; i++)
+                {
+                    if (((CollectionViewGroup)items[i]).Items.FirstOrDefault(f => f.GetType().GetProperties().Select(s => s.Name).ToList().Contains("Items")) != null)
+                    {
+                        sum += CheckedFillingItems(((CollectionViewGroup)items[i]).Items);
+                    }
+                    else
+                    {
+                        sum += (((CollectionViewGroup)items[i]).Items
+                                    .Where(w => ((CurrPlanEntity)w).Дані == "План")
+                                    .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                        .Sum() -
+
+                               ((CollectionViewGroup)items[i]).Items
+                                    .Where(w => ((CurrPlanEntity)w).Дані == "Факт")
+                                    .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                    .Sum());
+                    }
+                }
+                return sum;
+            }
+            else
+            {
+                sum += (items.Where(w => ((CurrPlanEntity)w).Дані == "План")
+                            .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                .Sum() -
+
+                       items.Where(w => ((CurrPlanEntity)w).Дані == "Факт")
+                            .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                            .Sum());
+                return sum;
+            }
+        }
+    }
+    public class MonthCurrBalanceGroupSevenConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (null == value)
+            {
+                return "null";
+            }
+
+            ReadOnlyObservableCollection<object> items = (ReadOnlyObservableCollection<object>)value;
+
+            return CheckedFillingItems(items).ToString("N2", CultureInfo.CreateSpecificCulture("ru-RU"));
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+        private static double CheckedFillingItems(ReadOnlyObservableCollection<object> items)
+        {
+            string month = "Липень";
+            var delta = items.FirstOrDefault(s => s.GetType().GetProperties().Select(p => p.Name).ToList().Contains("Items"));
+            double sum = 0;
+            if (delta != null)
+            {
+                for (int i = 0; i < items.Count; i++)
+                {
+                    if (((CollectionViewGroup)items[i]).Items.FirstOrDefault(f => f.GetType().GetProperties().Select(s => s.Name).ToList().Contains("Items")) != null)
+                    {
+                        sum += CheckedFillingItems(((CollectionViewGroup)items[i]).Items);
+                    }
+                    else
+                    {
+                        sum += (((CollectionViewGroup)items[i]).Items
+                                    .Where(w => ((CurrPlanEntity)w).Дані == "План")
+                                    .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                        .Sum() -
+
+                               ((CollectionViewGroup)items[i]).Items
+                                    .Where(w => ((CurrPlanEntity)w).Дані == "Факт")
+                                    .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                    .Sum());
+                    }
+                }
+                return sum;
+            }
+            else
+            {
+                sum += (items.Where(w => ((CurrPlanEntity)w).Дані == "План")
+                            .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                .Sum() -
+
+                       items.Where(w => ((CurrPlanEntity)w).Дані == "Факт")
+                            .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                            .Sum());
+                return sum;
+            }
+        }
+    }
+    public class MonthCurrBalanceGroupEightConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (null == value)
+            {
+                return "null";
+            }
+
+            ReadOnlyObservableCollection<object> items = (ReadOnlyObservableCollection<object>)value;
+
+            return CheckedFillingItems(items).ToString("N2", CultureInfo.CreateSpecificCulture("ru-RU"));
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+        private static double CheckedFillingItems(ReadOnlyObservableCollection<object> items)
+        {
+            string month = "Серпень";
+            var delta = items.FirstOrDefault(s => s.GetType().GetProperties().Select(p => p.Name).ToList().Contains("Items"));
+            double sum = 0;
+            if (delta != null)
+            {
+                for (int i = 0; i < items.Count; i++)
+                {
+                    if (((CollectionViewGroup)items[i]).Items.FirstOrDefault(f => f.GetType().GetProperties().Select(s => s.Name).ToList().Contains("Items")) != null)
+                    {
+                        sum += CheckedFillingItems(((CollectionViewGroup)items[i]).Items);
+                    }
+                    else
+                    {
+                        sum += (((CollectionViewGroup)items[i]).Items
+                                    .Where(w => ((CurrPlanEntity)w).Дані == "План")
+                                    .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                        .Sum() -
+
+                               ((CollectionViewGroup)items[i]).Items
+                                    .Where(w => ((CurrPlanEntity)w).Дані == "Факт")
+                                    .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                    .Sum());
+                    }
+                }
+                return sum;
+            }
+            else
+            {
+                sum += (items.Where(w => ((CurrPlanEntity)w).Дані == "План")
+                            .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                .Sum() -
+
+                       items.Where(w => ((CurrPlanEntity)w).Дані == "Факт")
+                            .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                            .Sum());
+                return sum;
+            }
+        }
+    }
+    public class MonthCurrBalanceGroupNineConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (null == value)
+            {
+                return "null";
+            }
+
+            ReadOnlyObservableCollection<object> items = (ReadOnlyObservableCollection<object>)value;
+
+            return CheckedFillingItems(items).ToString("N2", CultureInfo.CreateSpecificCulture("ru-RU"));
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+        private static double CheckedFillingItems(ReadOnlyObservableCollection<object> items)
+        {
+            string month = "Вересень";
+            var delta = items.FirstOrDefault(s => s.GetType().GetProperties().Select(p => p.Name).ToList().Contains("Items"));
+            double sum = 0;
+            if (delta != null)
+            {
+                for (int i = 0; i < items.Count; i++)
+                {
+                    if (((CollectionViewGroup)items[i]).Items.FirstOrDefault(f => f.GetType().GetProperties().Select(s => s.Name).ToList().Contains("Items")) != null)
+                    {
+                        sum += CheckedFillingItems(((CollectionViewGroup)items[i]).Items);
+                    }
+                    else
+                    {
+                        sum += (((CollectionViewGroup)items[i]).Items
+                                    .Where(w => ((CurrPlanEntity)w).Дані == "План")
+                                    .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                        .Sum() -
+
+                               ((CollectionViewGroup)items[i]).Items
+                                    .Where(w => ((CurrPlanEntity)w).Дані == "Факт")
+                                    .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                    .Sum());
+                    }
+                }
+                return sum;
+            }
+            else
+            {
+                sum += (items.Where(w => ((CurrPlanEntity)w).Дані == "План")
+                            .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                .Sum() -
+
+                       items.Where(w => ((CurrPlanEntity)w).Дані == "Факт")
+                            .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                            .Sum());
+                return sum;
+            }
+        }
+    }
+    public class MonthCurrBalanceGroupTenConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (null == value)
+            {
+                return "null";
+            }
+
+            ReadOnlyObservableCollection<object> items = (ReadOnlyObservableCollection<object>)value;
+
+            return CheckedFillingItems(items).ToString("N2", CultureInfo.CreateSpecificCulture("ru-RU"));
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+        private static double CheckedFillingItems(ReadOnlyObservableCollection<object> items)
+        {
+            string month = "Жовтень";
+            var delta = items.FirstOrDefault(s => s.GetType().GetProperties().Select(p => p.Name).ToList().Contains("Items"));
+            double sum = 0;
+            if (delta != null)
+            {
+                for (int i = 0; i < items.Count; i++)
+                {
+                    if (((CollectionViewGroup)items[i]).Items.FirstOrDefault(f => f.GetType().GetProperties().Select(s => s.Name).ToList().Contains("Items")) != null)
+                    {
+                        sum += CheckedFillingItems(((CollectionViewGroup)items[i]).Items);
+                    }
+                    else
+                    {
+                        sum += (((CollectionViewGroup)items[i]).Items
+                                    .Where(w => ((CurrPlanEntity)w).Дані == "План")
+                                    .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                        .Sum() -
+
+                               ((CollectionViewGroup)items[i]).Items
+                                    .Where(w => ((CurrPlanEntity)w).Дані == "Факт")
+                                    .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                    .Sum());
+                    }
+                }
+                return sum;
+            }
+            else
+            {
+                sum += (items.Where(w => ((CurrPlanEntity)w).Дані == "План")
+                            .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                .Sum() -
+
+                       items.Where(w => ((CurrPlanEntity)w).Дані == "Факт")
+                            .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                            .Sum());
+                return sum;
+            }
+        }
+    }
+    public class MonthCurrBalanceGroupElevenConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (null == value)
+            {
+                return "null";
+            }
+
+            ReadOnlyObservableCollection<object> items = (ReadOnlyObservableCollection<object>)value;
+
+            return CheckedFillingItems(items).ToString("N2", CultureInfo.CreateSpecificCulture("ru-RU"));
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+        private static double CheckedFillingItems(ReadOnlyObservableCollection<object> items)
+        {
+            string month = "Листопад";
+            var delta = items.FirstOrDefault(s => s.GetType().GetProperties().Select(p => p.Name).ToList().Contains("Items"));
+            double sum = 0;
+            if (delta != null)
+            {
+                for (int i = 0; i < items.Count; i++)
+                {
+                    if (((CollectionViewGroup)items[i]).Items.FirstOrDefault(f => f.GetType().GetProperties().Select(s => s.Name).ToList().Contains("Items")) != null)
+                    {
+                        sum += CheckedFillingItems(((CollectionViewGroup)items[i]).Items);
+                    }
+                    else
+                    {
+                        sum += (((CollectionViewGroup)items[i]).Items
+                                    .Where(w => ((CurrPlanEntity)w).Дані == "План")
+                                    .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                        .Sum() -
+
+                               ((CollectionViewGroup)items[i]).Items
+                                    .Where(w => ((CurrPlanEntity)w).Дані == "Факт")
+                                    .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                    .Sum());
+                    }
+                }
+                return sum;
+            }
+            else
+            {
+                sum += (items.Where(w => ((CurrPlanEntity)w).Дані == "План")
+                            .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                .Sum() -
+
+                       items.Where(w => ((CurrPlanEntity)w).Дані == "Факт")
+                            .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                            .Sum());
+                return sum;
+            }
+        }
+    }
+    public class MonthCurrBalanceGroupTwelveConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            if (null == value)
+            {
+                return "null";
+            }
+
+            ReadOnlyObservableCollection<object> items = (ReadOnlyObservableCollection<object>)value;
+
+            return CheckedFillingItems(items).ToString("N2", CultureInfo.CreateSpecificCulture("ru-RU"));
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
+        private static double CheckedFillingItems(ReadOnlyObservableCollection<object> items)
+        {
+            string month = "Грудень";
+            var delta = items.FirstOrDefault(s => s.GetType().GetProperties().Select(p => p.Name).ToList().Contains("Items"));
+            double sum = 0;
+            if (delta != null)
+            {
+                for (int i = 0; i < items.Count; i++)
+                {
+                    if (((CollectionViewGroup)items[i]).Items.FirstOrDefault(f => f.GetType().GetProperties().Select(s => s.Name).ToList().Contains("Items")) != null)
+                    {
+                        sum += CheckedFillingItems(((CollectionViewGroup)items[i]).Items);
+                    }
+                    else
+                    {
+                        sum += (((CollectionViewGroup)items[i]).Items
+                                    .Where(w => ((CurrPlanEntity)w).Дані == "План")
+                                    .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                        .Sum() -
+
+                               ((CollectionViewGroup)items[i]).Items
+                                    .Where(w => ((CurrPlanEntity)w).Дані == "Факт")
+                                    .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                    .Sum());
+                    }
+                }
+                return sum;
+            }
+            else
+            {
+                sum += (items.Where(w => ((CurrPlanEntity)w).Дані == "План")
+                            .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                                .Sum() -
+
+                       items.Where(w => ((CurrPlanEntity)w).Дані == "Факт")
+                            .Select(s => (double)s.GetType().GetProperty(month).GetValue(s))
+                            .Sum());
                 return sum;
             }
         }

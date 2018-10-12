@@ -454,7 +454,6 @@ namespace Main.Docs
                                 .Where(w => w.Видалено == false &&
                                             w.Головний_розпорядник.Id == Main_manager.Id &&
                                             w.Проведено.Year == date.Year &&
-                                            w.КДБ.Id == KDB.Id &&
                                             w.КЕКВ.Id == KEKB.Id &&
                                             w.КФК.Id == KFK.Id &&
                                             w.Фонд.Id == FOND.Id).ToList();
@@ -479,7 +478,6 @@ namespace Main.Docs
                             .Where(w => w.Видалено == false &&
                                         w.Головний_розпорядник.Id == Main_manager.Id &&
                                         w.Проведено.Year == date.Year &&
-                                        w.КДБ.Id == KDB.Id &&
                                         w.КЕКВ.Id == KEKB.Id &&
                                         w.КФК.Id == KFK.Id &&
                                         w.Мікрофонд.Фонд.Id == FOND.Id).ToList();

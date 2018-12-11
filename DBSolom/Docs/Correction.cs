@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,7 +30,8 @@ namespace DBSolom
 
         public DateTime Проведено { get; set; }
 
-        public int Внутрішній_номер { get; set; }
+        [MaxLength(5)]
+        public string Внутрішній_номер { get; set; }
 
         public string Підстава { get; set; }
 

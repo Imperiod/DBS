@@ -359,6 +359,9 @@ namespace Main.Docs
                 ((DBSolom.Correction)e.EditingElement.DataContext).Мікрофонд != null &&
                 ((DBSolom.Correction)e.EditingElement.DataContext).Статус != null)
             {
+                Dictionary<string, double> months = new Dictionary<string, double>();
+                PropertyInfo k = null;
+
                 #region "Fiels of Cell"
                 DateTime date = new DateTime();
                 date = ((DBSolom.Correction)e.EditingElement.DataContext).Проведено;
@@ -378,19 +381,30 @@ namespace Main.Docs
                                                              w.КЕКВ.Id == KEKB.Id &&
                                                              w.КФК.Id == KFK.Id &&
                                                              w.Фонд.Id == FOND.Id);
-                double plan = 0;
                 if (qplan != null)
                 {
                     foreach (var item in Func.GetDB.names_months)
                     {
-                        plan += (double)qplan.GetType().GetProperty(item).GetValue(qplan);
+                        months.Add(item, (double)qplan.GetType().GetProperty(item).GetValue(qplan));
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Відсутній план за введеними данними, перевірте початковий план!");
+
+                    e.Cancel = true;
+                    if (Func.GetDB.names_months.Contains(e.Column.Header.ToString()))
+                    {
+                        k = ((DBSolom.Correction)e.Row.Item).GetType().GetProperty(e.Column.Header.ToString());
+                        k.SetValue(e.Row.Item, 0);
+                        ((TextBox)e.EditingElement).Text = "0";
+                        return;
                     }
                 }
 
                 #endregion
 
                 #region "Corrections"
-                double corrections = 0;
                 var qcorr = Func.GetDB.Corrections.Local.Where(w => ((w?.Видалено ?? true) == false) &&
                                                                    ((w.Головний_розпорядник?.Id ?? 0) == Main_manager.Id) &&
                                                                    w.Проведено.Year == date.Year &&
@@ -400,30 +414,29 @@ namespace Main.Docs
                                                                    ((w.Мікрофонд?.Фонд?.Id ?? 0) == FOND.Id)).ToList();
                 if (qcorr.Count != 0)
                 {
-                    foreach (var item in Func.GetDB.names_months)
+                    double temp_C = 0;
+                    double temp_P = 0;
+                    foreach (var item in months)
                     {
-                        corrections = qcorr.Select(s => (double)s.GetType().GetProperty(item).GetValue(s)).Sum();
+                        temp_P = item.Value;
+                        temp_C = qcorr.Select(s => (double)s.GetType().GetProperty(item.Key).GetValue(s)).Sum();
+                        if (temp_P + temp_C < 0)
+                        {
+                            e.Cancel = true;
+                            if (Func.GetDB.names_months.Contains(e.Column.Header.ToString()))
+                            {
+                                k = ((DBSolom.Correction)e.Row.Item).GetType().GetProperty(e.Column.Header.ToString());
+                                k.SetValue(e.Row.Item, 0);
+                                ((TextBox)DGM.Columns.FirstOrDefault(f => f.Header.ToString() == item.Key).GetCellContent(e.Row)).Text = "0";
+                            }
+
+                            MessageBox.Show("Недостатньо коштів! Річний план: " + temp_P + "; Корегування: " + temp_C + "; Уточнення: " + (temp_P + temp_C));
+                            return;
+                        }
                     }
                 }
                 #endregion
-
-                PropertyInfo k = null;
-
-                if (plan + corrections < 0)
-                {
-                    e.Cancel = true;
-                    if (Func.GetDB.names_months.Contains(e.Column.Header.ToString()))
-                    {
-                        k = ((DBSolom.Correction)e.Row.Item).GetType().GetProperty(e.Column.Header.ToString());
-                        k.SetValue(e.Row.Item, 0);
-                        ((TextBox)e.EditingElement).Text = "0";
-                    }
-                    
-                    MessageBox.Show("Недостатньо коштів! Річний план: " + plan + "; Корегування: " + (corrections) + "; Уточнення: " + (plan - corrections));
-                    return;
-                }
             }
-
         }
 
         private void DGM_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)

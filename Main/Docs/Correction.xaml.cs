@@ -425,12 +425,12 @@ namespace Main.Docs
                             e.Cancel = true;
                             if (Func.GetDB.names_months.Contains(e.Column.Header.ToString()))
                             {
-                                k = ((DBSolom.Correction)e.Row.Item).GetType().GetProperty(e.Column.Header.ToString());
+                                k = ((DBSolom.Correction)e.Row.Item).GetType().GetProperty(item.Key);
                                 k.SetValue(e.Row.Item, 0);
-                                ((TextBox)DGM.Columns.FirstOrDefault(f => f.Header.ToString() == item.Key).GetCellContent(e.Row)).Text = "0";
+                                ((TextBlock)DGM.Columns.FirstOrDefault(f => f.Header.ToString() == item.Key).GetCellContent(e.Row)).Text = "0";
                             }
 
-                            MessageBox.Show("Недостатньо коштів! Річний план: " + temp_P + "; Корегування: " + temp_C + "; Уточнення: " + (temp_P + temp_C));
+                            MessageBox.Show($"Недостатньо коштів! Місяць: {item.Key}\nРічний план: {temp_P}\nКорегування: {temp_C}\nУточнення: {(temp_P + temp_C)}");
                             return;
                         }
                     }

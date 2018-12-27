@@ -390,15 +390,9 @@ namespace Main.Docs
                 }
                 else
                 {
-                    MessageBox.Show("Відсутній план за введеними данними, перевірте початковий план!");
-
-                    e.Cancel = true;
-                    if (Func.GetDB.names_months.Contains(e.Column.Header.ToString()))
+                    foreach (var item in Func.GetDB.names_months)
                     {
-                        k = ((DBSolom.Correction)e.Row.Item).GetType().GetProperty(e.Column.Header.ToString());
-                        k.SetValue(e.Row.Item, 0);
-                        ((TextBox)e.EditingElement).Text = "0";
-                        return;
+                        months.Add(item, 0);
                     }
                 }
 

@@ -18,12 +18,45 @@
         <Menu Grid.Row="0" Grid.Column="0">
             <MenuItem  Header="Поточка">
                 <MenuItem Header="Річні плани">
-                    <MenuItem x:Name="MI_Filling" Header="За фондом" Click="MI_Filling_Click"></MenuItem>
-                    <MenuItem x:Name="MI_MicroFilling" Header="За мікрофондом" Click="MI_MicroFilling_Click"></MenuItem>
+                    <MenuItem Header="За фондом">
+                        <MenuItem x:Name="MI_Filling" Header="Редагування" Click="MI_Filling_Click"></MenuItem>
+                        <MenuItem x:Name="MI_Filling_FromExcel" Header="Excel імпорт" Click="MI_Filling_FromExcel_Click">
+                            <MenuItem.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Black" Offset="1"/>
+                                    <GradientStop Color="Red" Offset="0.564"/>
+                                </RadialGradientBrush>
+                            </MenuItem.Background>
+                        </MenuItem>
+                    </MenuItem>
+                    <MenuItem Header="За мікрофондом">
+                        <MenuItem x:Name="MI_MicroFilling" Header="Редагування" Click="MI_MicroFilling_Click"></MenuItem>
+                        <MenuItem x:Name="MI_MicroFilling_FromExcel" Header="Excel імпорт" Click="MI_MicroFilling_FromExcel_Click">
+                            <MenuItem.Background>
+                                <RadialGradientBrush>
+                                    <GradientStop Color="Black" Offset="1"/>
+                                    <GradientStop Color="Red" Offset="0.564"/>
+                                </RadialGradientBrush>
+                            </MenuItem.Background>
+                        </MenuItem>
+                    </MenuItem>
+                    <MenuItem Header="Уточнені плани" Click="MI_CurrPlan_Click" Foreground="Black">
+                    </MenuItem>
                 </MenuItem>
-                <MenuItem Header="Виконання" Click="MI_CurrPlan_Click" Foreground="Black"></MenuItem>
+                <MenuItem Header="Залишки коштів" Click="MI_Remainders_Click" Foreground="Black">                   
+                </MenuItem>
                 <MenuItem x:Name="MI_Correct" Header="Довідки" Click="MI_Correct_Click" Foreground="Black"></MenuItem>
-                <MenuItem x:Name="MI_Financing" Header="Фінансування" Click="MI_Financing_Click" Foreground="Black"></MenuItem>
+                <MenuItem Header="Фінансування" Foreground="Black">
+                    <MenuItem x:Name="MI_Financing" Header="Редагування" Click="MI_Financing_Click"></MenuItem>
+                    <MenuItem x:Name="MI_Financing_FromExcel" Header="Excel імпорт" Click="MI_Financing_FromExcel_Click">
+                        <MenuItem.Background>
+                            <RadialGradientBrush>
+                                <GradientStop Color="Black" Offset="1"/>
+                                <GradientStop Color="Red" Offset="0.564"/>
+                            </RadialGradientBrush>
+                        </MenuItem.Background>
+                    </MenuItem>
+                </MenuItem>
             </MenuItem>
         </Menu>
         <Menu Grid.Row="0" Grid.Column="1">
@@ -31,6 +64,7 @@
                 <MenuItem x:Name="MI_Macrofoundations" Header="Макрофонди" Click="MI_Macrofoundations_Click" Foreground="Black"/>
                 <MenuItem x:Name="MI_Foundations" Header="Фонди" Click="MI_Foundations_Click" Foreground="Black"/>
                 <MenuItem x:Name="MI_Microfoundations" Header="Мікрофонди" Click="MI_Microfoundations_Click" Foreground="Black" />
+                <MenuItem x:Name="MI_KFB" Header="КФБ" Click="MI_KFB_Click" Foreground="Black"/>
                 <MenuItem x:Name="MI_KDB" Header="КДБ" Click="MI_KDB_Click" Foreground="Black"/>
                 <MenuItem x:Name="MI_KEKB" Header="КЕКВ" Click="MI_KEKB_Click" Foreground="Black"/>
                 <MenuItem x:Name="MI_KFK" Header="КФК" Click="MI_KFK_Click" Foreground="Black"/>

@@ -1,4 +1,5 @@
-﻿using Microsoft.CSharp;
+﻿using DBSolom;
+using Microsoft.CSharp;
 using Microsoft.Win32;
 using System;
 using System.CodeDom.Compiler;
@@ -24,43 +25,44 @@ namespace Main
     {
         public static string Login { get; set; }
 
-        private static Dictionary<Window, Expander> expanders = new Dictionary<Window, Expander>();
-        public static void AddExp(Window window, Expander exp)
-        {
-            expanders.Add(window, exp);
-            System.Windows.Threading.DispatcherTimer dispatcherTimer = new System.Windows.Threading.DispatcherTimer() { Interval = TimeSpan.FromMilliseconds(150) };
-            dispatcherTimer.Tick += new EventHandler((object c, EventArgs eventArgs) =>
-            {
-                var b = expanders.FirstOrDefault(f => f.Key == window && f.Value == exp);
-                if (b.Value != null)
-                {
-                    window.Dispatcher.Invoke(() => b.Value.IsExpanded = true);
-                }
-                ((System.Windows.Threading.DispatcherTimer)c).Stop();
-            });
-            dispatcherTimer.Start();
-        }
+        public static readonly List<string> names_months = new List<string>() { "Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень", "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень" };
 
-        static DBSolom.Db db;
-        public static DBSolom.Db GetDB
+        static readonly DBSolom.Db db = new Db(GetConnectionString);
+
+        private static string ConnectionString { get; set; }
+
+        /// <summary>
+        /// Предоставляет строку подключения к базе данных в зависимости от того в каком состоянии проект - дебагинг/релиз
+        /// </summary>
+        public static string GetConnectionString
         {
             get
             {
-                if (db is null)
+                string s = "";
+                if (ConnectionString is null || ConnectionString == "")
                 {
 #if DEBUG
                     var f = System.IO.File.OpenText(Environment.CurrentDirectory.Substring(0, Environment.CurrentDirectory.LastIndexOf("Main")) + "Main\\Connection.imperiod");
 #else
                     var f = System.IO.File.OpenText(Environment.CurrentDirectory + "\\Connection.imperiod");
 #endif
-                    db = new DBSolom.Db(f.ReadLine());
+                    s = f.ReadLine();
                     f.Close();
                 }
-                return db;
+                else
+                {
+                    s = ConnectionString;
+                }
+                return s;
             }
         }
 
-        static public void GenerateColumnForDataGrid(ref int counterForDGMColumns, DataGridAutoGeneratingColumnEventArgs e)
+        /// <summary>
+        /// Генерирует столбцы для всех DataGrid
+        /// </summary>
+        /// <param name="counterForDGMColumns">Счётчик</param>
+        /// <param name="e">Стандартный аргумент события</param>
+        static public void GenerateColumnForDataGrid(DBSolom.Db db, ref int counterForDGMColumns, DataGridAutoGeneratingColumnEventArgs e)
         {
             CultureInfo cultureInfo = new CultureInfo("ru-RU", true);
 
@@ -70,6 +72,7 @@ namespace Main
                     e.Column = new DataGridTextColumn()
                     {
                         Header = e.Column.Header,
+                        Visibility = Visibility.Hidden,
                         Binding = new Binding("Id") { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
                         IsReadOnly = true,
                         DisplayIndex = counterForDGMColumns
@@ -79,6 +82,7 @@ namespace Main
                     e.Column = new DataGridCheckBoxColumn()
                     {
                         Header = e.Column.Header,
+                        Visibility = Visibility.Hidden,
                         Binding = new Binding("Видалено") { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
                         IsThreeState = false,
                         DisplayIndex = counterForDGMColumns
@@ -88,8 +92,8 @@ namespace Main
                     e.Column = new DataGridComboBoxColumn()
                     {
                         Header = e.Column.Header,
-
-                        ItemsSource = GetDB.Users
+                        Visibility = Visibility.Hidden,
+                        ItemsSource = db.Users
                         .Where(w => w.Видалено == false)
                         .OrderBy(o => o.Логін).ToList(),
 
@@ -104,6 +108,7 @@ namespace Main
                     e.Column = new DataGridTextColumn()
                     {
                         Header = e.Column.Header,
+                        Visibility = Visibility.Hidden,
                         Binding = new Binding("Створино") { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, StringFormat = "dd.MM.yyyy HH:mm" },
                         IsReadOnly = true,
                         DisplayIndex = counterForDGMColumns
@@ -113,8 +118,9 @@ namespace Main
                     e.Column = new DataGridComboBoxColumn()
                     {
                         Header = e.Column.Header,
+                        Visibility = Visibility.Hidden,
 
-                        ItemsSource = GetDB.Users
+                        ItemsSource = db.Users
                         .Where(w => w.Видалено == false)
                         .OrderBy(o => o.Логін).ToList(),
 
@@ -125,12 +131,22 @@ namespace Main
                         SortMemberPath = "Змінив.Логін"
                     };
                     break;
+                case "Змінено":
+                    e.Column = new DataGridTextColumn()
+                    {
+                        Header = e.Column.Header,
+                        Visibility = Visibility.Hidden,
+                        Binding = new Binding("Змінено") { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, StringFormat = "dd.MM.yyyy HH:mm" },
+                        IsReadOnly = true,
+                        DisplayIndex = counterForDGMColumns
+                    };
+                    break;
                 case "Правовласник":
                     e.Column = new DataGridComboBoxColumn()
                     {
                         Header = e.Column.Header,
 
-                        ItemsSource = GetDB.Users
+                        ItemsSource = db.Users
                         .Where(w => w.Видалено == false)
                         .OrderBy(o => o.Логін).ToList(),
 
@@ -154,15 +170,6 @@ namespace Main
                     {
                         Header = e.Column.Header,
                         Binding = new Binding("Логін") { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
-                        DisplayIndex = counterForDGMColumns
-                    };
-                    break;
-                case "Змінено":
-                    e.Column = new DataGridTextColumn()
-                    {
-                        Header = e.Column.Header,
-                        Binding = new Binding("Змінено") { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, StringFormat = "dd.MM.yyyy HH:mm" },
-                        IsReadOnly = true,
                         DisplayIndex = counterForDGMColumns
                     };
                     break;
@@ -222,7 +229,7 @@ namespace Main
                     e.Column = new DataGridComboBoxColumn()
                     {
                         Header = e.Column.Header,
-                        ItemsSource = GetDB.DocStatuses
+                        ItemsSource = db.DocStatuses
                         .Include(i => i.Змінив)
                         .Include(i => i.Створив)
                         .Where(w => w.Видалено == false)
@@ -303,7 +310,7 @@ namespace Main
                     {
                         Header = e.Column.Header,
 
-                        ItemsSource = GetDB.Managers
+                        ItemsSource = db.Managers
                         .Include(i => i.Змінив)
                         .Include(i => i.Створив)
                         .Include(i => i.Головний_розпорядник)
@@ -321,7 +328,7 @@ namespace Main
                     {
                         Header = e.Column.Header,
                         Width = 140,
-                        ItemsSource = GetDB.Main_Managers
+                        ItemsSource = db.Main_Managers
                         .Include(i => i.Змінив)
                         .Include(i => i.Створив)
                         .Where(w => w.Видалено == false)
@@ -338,7 +345,7 @@ namespace Main
                     {
                         Header = e.Column.Header,
                         Width = 80,
-                        ItemsSource = GetDB.KFKs
+                        ItemsSource = db.KFKs
                         .Include(i => i.Змінив)
                         .Include(i => i.Створив)
                         .Where(w => w.Видалено == false)
@@ -355,7 +362,7 @@ namespace Main
                     {
                         Header = e.Column.Header,
 
-                        ItemsSource = GetDB.MacroFoundations
+                        ItemsSource = db.MacroFoundations
                         .Include(i => i.Змінив)
                         .Include(i => i.Створив)
                         .Where(w => w.Видалено == false)
@@ -372,7 +379,7 @@ namespace Main
                     {
                         Header = e.Column.Header,
                         Width = 60,
-                        ItemsSource = GetDB.Foundations
+                        ItemsSource = db.Foundations
                         .Include(i => i.Змінив)
                         .Include(i => i.Створив)
                         .Include(i => i.Макрофонд)
@@ -390,7 +397,7 @@ namespace Main
                     {
                         Header = e.Column.Header,
                         Width = 220,
-                        ItemsSource = GetDB.MicroFoundations
+                        ItemsSource = db.MicroFoundations
                         .Include(i => i.Змінив)
                         .Include(i => i.Створив)
                         .Include(i => i.Фонд)
@@ -403,12 +410,29 @@ namespace Main
                         SortMemberPath = "Мікрофонд.Повністю"
                     };
                     break;
+                case "КФБ":
+                    e.Column = new DataGridComboBoxColumn()
+                    {
+                        Header = e.Column.Header,
+                        Width = 90,
+                        ItemsSource = db.KFBs
+                        .Include(i => i.Змінив)
+                        .Include(i => i.Створив)
+                        .Where(w => w.Видалено == false)
+                        .OrderBy(o => o.Код).ToList(),
+
+                        DisplayMemberPath = "Код",
+                        SelectedValueBinding = new Binding("КФБ") { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
+                        DisplayIndex = counterForDGMColumns,
+                        SortMemberPath = "КФБ.Код"
+                    };
+                    break;
                 case "КДБ":
                     e.Column = new DataGridComboBoxColumn()
                     {
                         Header = e.Column.Header,
                         Width = 90,
-                        ItemsSource = GetDB.KDBs
+                        ItemsSource = db.KDBs
                         .Include(i => i.Змінив)
                         .Include(i => i.Створив)
                         .Where(w => w.Видалено == false)
@@ -425,7 +449,7 @@ namespace Main
                     {
                         Header = e.Column.Header,
                         Width = 60,
-                        ItemsSource = GetDB.KEKBs
+                        ItemsSource = db.KEKBs
                         .Include(i => i.Змінив)
                         .Include(i => i.Створив)
                         .Where(w => w.Видалено == false)
@@ -457,7 +481,7 @@ namespace Main
                     {
                         Header = e.Column.Header,
                         Width = 80,
-                        ItemsSource = GetDB.names_months.Concat(new List<string> { "Рік", "Період" }),
+                        ItemsSource = Func.names_months.Concat(new List<string> { "Рік", "Період" }),
                         SelectedValueBinding = new Binding("Значення")
                         {
                             Mode = BindingMode.TwoWay,
@@ -910,6 +934,15 @@ namespace Main
             counterForDGMColumns++;
         }
 
+        /// <summary>
+        /// Создаёт представление подменю "Фильтр"
+        /// </summary>
+        /// <param name="EXPGRO">Грид экспендера тот что подменю "Фильтр"</param>
+        /// <param name="t">Счётчик</param>
+        /// <param name="item">Сущность с именами столбцов</param>
+        /// <param name="dict_cmb">Словарь с ComboBox - тип сравнение</param>
+        /// <param name="dict_txt">Словарь с TextBox - сравнитель</param>
+        /// <param name="GetLabels">Список labels</param>
         public static void GetFilters(Grid EXPGRO, int t, ItemPropertyInfo item,
             ref Dictionary<string, ComboBox> dict_cmb, ref Dictionary<string, TextBox> dict_txt, ref List<Label> GetLabels)
         {
@@ -928,7 +961,7 @@ namespace Main
             //Filter type
             ComboBox comboBox = new ComboBox()
             {
-                ItemsSource = GetDB.list,
+                ItemsSource = db.list,
                 Margin = new Thickness(2),
                 HorizontalContentAlignment = HorizontalAlignment.Stretch
             };
@@ -954,6 +987,11 @@ namespace Main
             EXPGRO.Children.Add(textBox);
         }
 
+        /// <summary>
+        /// Обработчик группировки
+        /// </summary>
+        /// <param name="sender">Стандартный аргумент события</param>
+        /// <param name="e">Стандартный аргумент события</param>
         public static void GroupButton_Click(object sender, RoutedEventArgs e)
         {
             var query = ((FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)e.OriginalSource).Parent).Parent).Parent).Parent).Parent).Parent).Parent.GetType().GetRuntimeFields();
@@ -1076,6 +1114,13 @@ namespace Main
             }
         }
 
+        /// <summary>
+        /// Создаёт представление подменю "Группы"
+        /// </summary>
+        /// <param name="t">Счётчик</param>
+        /// <param name="item">Сущность с именами столбцов</param>
+        /// <param name="CheckBoxes">Список togglebuttons</param>
+        /// <param name="EXPGRT">Грид экспендера тот что подменю "Группы"</param>
         public static void GetGroups(int t, ItemPropertyInfo item, ref List<ToggleButton> CheckBoxes, ref Grid EXPGRT)
         {
             var w = ((FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)EXPGRT.Parent).Parent).Parent).Parent).Parent).Parent;
@@ -1099,6 +1144,12 @@ namespace Main
             EXPGRT.Children.Add(toggleButton);
         }
 
+        /// <summary>
+        /// Создаёт представление подменю "Видимость"
+        /// </summary>
+        /// <param name="t">Счётчик</param>
+        /// <param name="item">Сущность с именами столбцов</param>
+        /// <param name="EXPHDN">Грид экспендера(Тот что меню "Видимость")</param>
         public static void GetVisibilityOfColumns(int t, ItemPropertyInfo item, ref Grid EXPHDN)
         {
             var w = ((FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)EXPHDN.Parent).Parent).Parent).Parent).Parent).Parent;
@@ -1108,7 +1159,7 @@ namespace Main
             {
                 Content = item.Name,
                 IsThreeState = false,
-                IsChecked = true,
+                IsChecked = new List<string>() { "Id", "Видалено", "Створив", "Створино", "Змінив", "Змінено" }.Contains(item.Name) ? false : true,
                 Style = st,
                 HorizontalContentAlignment = HorizontalAlignment.Stretch,
                 HorizontalAlignment = HorizontalAlignment.Stretch
@@ -1121,6 +1172,11 @@ namespace Main
             EXPHDN.Children.Add(toggleButton);
         }
 
+        /// <summary>
+        /// Скрывает или показывает столбец
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public static void HiddenUnhiddenColumn(object sender, RoutedEventArgs e)
         {
             var query = ((FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)((FrameworkElement)e.OriginalSource).Parent).Parent).Parent).Parent).Parent).Parent).Parent.GetType().GetRuntimeFields();
@@ -1138,6 +1194,11 @@ namespace Main
             }
         }
 
+        /// <summary>
+        /// Унифицированый фильтр сущностей
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public static void CollectionView_Filter(object sender, FilterEventArgs e)
         {
             Window active_window = (Window)((TypeInfo)sender.GetType()).DeclaredProperties.FirstOrDefault(f => f.Name == "InheritanceContext").GetValue(sender);
@@ -1328,103 +1389,37 @@ namespace Main
             }
         }
 
+        /// <summary>
+        /// Удаляет проблемный символы
+        /// </summary>
+        /// <param name="s">Строка с проблемными символами</param>
+        /// <returns>Чистая строка</returns>
         private static string RemoveBadSymbols(string s)
         {
             return s.Replace("\"", "");
         }
 
-        public static void Expander_MouseEnter(object sender, MouseEventArgs e)
-        {
-            AddExp((Window)((Grid)((Expander)sender).Parent).Parent, (Expander)sender);
-        }
-
-        public static void Expander_MouseLeave(object sender, MouseEventArgs e)
-        {
-            var x = expanders.FirstOrDefault(f => f.Key == (Window)((Grid)((Expander)sender).Parent).Parent && f.Value == (Expander)sender);
-            if (x.Value != null)
-            {
-                expanders.Remove(x.Key);
-            }
-            ((Expander)sender).IsExpanded = false;
-        }
-
+        /// <summary>
+        /// Метод экспорта данных в эксель в зависимости от выделенных ячеек в датагрид
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         public static void BTN_ExportToExcel_Click(object sender, RoutedEventArgs e)
         {
+            #region "Variables"
             Window active_window = (Window)((Grid)((Expander)((Grid)((Button)sender).Parent).Parent).Parent).Parent;
             DataGrid DGM = (DataGrid)active_window.GetType().GetRuntimeFields().First(f => f.Name == "DGM").GetValue(active_window);
             ProgressBar PB = (ProgressBar)active_window.GetType().GetRuntimeFields().First(f => f.Name == "PB").GetValue(active_window);
 
             bool WorksheetExist = false;
             bool TableExist = false;
+            #endregion
+
             if (DGM.SelectedCells.Count > 0)
             {
                 List<Dictionary<string, dynamic>> Entities = new List<Dictionary<string, dynamic>>();
                 int countColumns = 0;
-                int countRows = 0;
-
-                //Перенос сущностей
-                foreach (var item in DGM.SelectedCells)
-                {
-                    if (item.Item.ToString() != "{NewItemPlaceholder}" && Entities.FirstOrDefault(dict => dict.FirstOrDefault(d => d.Key == "Id").Value.ToString() == item.Item.GetType().GetProperty("Id").GetValue(item.Item).ToString()) is null)
-                    {
-                        foreach (var itemm in item.Item.GetType().GetProperties().Select(s => s.Name).ToList())
-                        {
-                            var q = Entities.FirstOrDefault(dict => dict.FirstOrDefault(d => d.Key == "Id").Value.ToString() == item.Item.GetType().GetProperty("Id").GetValue(item.Item).ToString());
-                            if (q is null)
-                            {
-                                Entities.Add(new Dictionary<string, dynamic>() { { itemm, item.Item.GetType().GetProperty(itemm).GetValue(item.Item) } });
-                            }
-                            else
-                            {
-                                dynamic q1, q2, q3;
-                                switch (itemm)
-                                {
-                                    case "Створив":
-                                    case "Змінив":
-                                    case "Правовласник":
-                                        q1 = item.Item.GetType().GetProperty(itemm).GetValue(item.Item);
-                                        q.Add(itemm, q1.GetType().GetProperty("Логін").GetValue(q1));
-                                        break;
-                                    case "Статус":
-                                        q1 = item.Item.GetType().GetProperty(itemm).GetValue(item.Item);
-                                        q.Add(itemm, q1.GetType().GetProperty("Повністю").GetValue(q1));
-                                        break;
-                                    case "Головний_розпорядник":
-                                        q1 = item.Item.GetType().GetProperty(itemm).GetValue(item.Item);
-                                        q.Add(itemm, q1.GetType().GetProperty("Найменування").GetValue(q1));
-                                        break;
-                                    case "КФК":
-                                        q1 = item.Item.GetType().GetProperty(itemm).GetValue(item.Item);
-                                        q.Add(itemm, q1.GetType().GetProperty("Код").GetValue(q1));
-                                        break;
-                                    case "Фонд":
-                                        q1 = item.Item.GetType().GetProperty(itemm).GetValue(item.Item);
-                                        q.Add(itemm, q1.GetType().GetProperty("Код").GetValue(q1));
-                                        break;
-                                    case "Мікрофонд":
-                                        q1 = item.Item.GetType().GetProperty(itemm).GetValue(item.Item);
-                                        q.Add(itemm, q1.GetType().GetProperty("Повністю").GetValue(q1));
-                                        q2 = q1.GetType().GetProperty("Фонд").GetValue(q1);
-                                        q3 = q2.GetType().GetProperty("Код").GetValue(q2);
-                                        q.Add("Фонд", q3);
-                                        break;
-                                    case "КДБ":
-                                        q1 = item.Item.GetType().GetProperty(itemm).GetValue(item.Item);
-                                        q.Add(itemm, q1.GetType().GetProperty("Код").GetValue(q1));
-                                        break;
-                                    case "КЕКВ":
-                                        q1 = item.Item.GetType().GetProperty(itemm).GetValue(item.Item);
-                                        q.Add(itemm, q1.GetType().GetProperty("Код").GetValue(q1));
-                                        break;
-                                    default:
-                                        q.Add(itemm, item.Item.GetType().GetProperty(itemm).GetValue(item.Item));
-                                        break;
-                                }
-                            }
-                        }
-                        countRows++;
-                    }
-                }
+                int countRows = CopyEntities(DGM, ref Entities, 0);
 
                 OpenFileDialog openFileDialog = new OpenFileDialog();
                 openFileDialog.Filter = "Excel files (*.xlsx;*.xlsm;*.xls)|*.xlsx;*.xlsm;*.xls";
@@ -1513,7 +1508,7 @@ namespace Main
                         application = null;
                         workbook = null;
                         worksheet = null;
-                    PB.Dispatcher.Invoke(() => PB.IsIndeterminate = false);
+                        PB.Dispatcher.Invoke(() => PB.IsIndeterminate = false);
                     });
 
                     Task.Start();
@@ -1523,6 +1518,240 @@ namespace Main
             {
                 MessageBox.Show("Виділіть всі строки, які будуть експортовані!", "Maestro", MessageBoxButton.OK, MessageBoxImage.Hand);
             }
+        }
+
+        /// <summary>
+        /// Копирует сущности перед экспортом
+        /// </summary>
+        /// <param name="DGM"></param>
+        /// <param name="Entities"></param>
+        /// <param name="countRows"></param>
+        /// <returns></returns>
+        private static int CopyEntities(DataGrid DGM, ref List<Dictionary<string, dynamic>> Entities, int countRows)
+        {
+            foreach (DataGridCellInfo item in DGM.SelectedCells)
+            {
+                if (item.Item.ToString() != "{NewItemPlaceholder}" && Entities.FirstOrDefault(dict => dict.FirstOrDefault(d => d.Key == "Id").Value?.ToString() == item.Item.GetType().GetProperty("Id").GetValue(item.Item).ToString()) is null)
+                {
+                    foreach (var itemm in item.Item.GetType().GetProperties().Select(s => s.Name).ToList())
+                    {
+                        var q = Entities.FirstOrDefault(dict => dict.FirstOrDefault(d => d.Key == "Id").Value?.ToString() == item.Item.GetType().GetProperty("Id").GetValue(item.Item).ToString());
+                        if (q is null)
+                        {
+                            Entities.Add(new Dictionary<string, dynamic>() { { itemm, item.Item.GetType().GetProperty(itemm).GetValue(item.Item) } });
+                        }
+                        else
+                        {
+                            dynamic q1, q2, q3;
+                            switch (itemm)
+                            {
+                                case "Створив":
+                                case "Змінив":
+                                case "Правовласник":
+                                    q1 = item.Item.GetType().GetProperty(itemm).GetValue(item.Item);
+                                    q.Add(itemm, q1.GetType().GetProperty("Логін").GetValue(q1));
+                                    break;
+                                case "Статус":
+                                    q1 = item.Item.GetType().GetProperty(itemm).GetValue(item.Item);
+                                    q.Add(itemm, q1.GetType().GetProperty("Повністю").GetValue(q1));
+                                    break;
+                                case "Головний_розпорядник":
+                                    q1 = item.Item.GetType().GetProperty(itemm).GetValue(item.Item);
+                                    q.Add(itemm, q1.GetType().GetProperty("Найменування").GetValue(q1));
+                                    break;
+                                case "Мікрофонд":
+                                    q1 = item.Item.GetType().GetProperty(itemm).GetValue(item.Item);
+                                    q.Add(itemm, q1.GetType().GetProperty("Повністю").GetValue(q1));
+                                    if (q.ContainsKey("Фонд") == false)
+                                    {
+                                        q2 = q1.GetType().GetProperty("Фонд").GetValue(q1);
+                                        q3 = q2.GetType().GetProperty("Код").GetValue(q2);
+                                        q.Add("Фонд", q3);
+                                    }
+                                    break;
+                                case "КФК":
+                                case "Фонд":
+                                case "КДБ":
+                                case "КФБ":
+                                case "КЕКВ":
+                                    q1 = item.Item.GetType().GetProperty(itemm).GetValue(item.Item);
+                                    q.Add(itemm, q1.GetType().GetProperty("Код").GetValue(q1));
+                                    break;
+                                default:
+                                    q.Add(itemm, item.Item.GetType().GetProperty(itemm).GetValue(item.Item));
+                                    break;
+                            }
+                        }
+                    }
+                    countRows++;
+                }
+            }
+
+            return countRows;
+        }
+
+        /// <summary>
+        /// Функция возвращает абсолютный остаток по переданным аргументам, учитывая данные, как из БД, так и из локального хранилища
+        /// </summary>
+        /// <param name="year">Год на который составляется остаток</param>
+        /// <param name="kFK">КПБ(КФК)</param>
+        /// <param name="main_Manager">Главный распорядитель</param>
+        /// <param name="kEKB">КЕКВ</param>
+        /// <param name="foundation">Фонд</param>
+        /// <returns></returns>
+        public static List<double> GetRamainedFromDBPerMonth(DBSolom.Db db, int year, KFK kFK, Main_manager main_Manager, KEKB kEKB, Foundation foundation)
+        {
+            DBSolom.Db mdb = new Db(GetConnectionString);
+
+            #region "Fillings"
+            List<Filling> localFillings = db.Fillings.Local
+                                                            .Where(w =>
+                                                            w.Видалено == false &&
+                                                            w.Проведено.Year == year &&
+                                                            w.Головний_розпорядник.Найменування == main_Manager.Найменування &&
+                                                            w.КЕКВ.Код == kEKB.Код &&
+                                                            w.КФК.Код == kFK.Код &&
+                                                            w.Фонд.Код == foundation.Код)
+                                                            .ToList();
+
+            List<Filling> DBfillings = mdb.Fillings.Where(w =>
+                                                    w.Проведено.Year == year &&
+                                                    w.Видалено == false &&
+                                                    w.Головний_розпорядник.Найменування == main_Manager.Найменування &&
+                                                    w.КЕКВ.Код == kEKB.Код &&
+                                                    w.КФК.Код == kFK.Код &&
+                                                    w.Фонд.Код == foundation.Код)
+                                                    .ToList();
+
+
+
+            if (localFillings.Count != 0)
+            {
+                DBfillings = DBfillings.Where(w => localFillings.Select(s => s.Id).Contains(w.Id) == false).ToList();
+                DBfillings.AddRange(localFillings);
+            }
+
+            var EndFillings = DBfillings
+                .Select(s => new
+                {
+                    s.Фонд,
+                    s.КФК,
+                    s.Головний_розпорядник,
+                    s.КЕКВ,
+                    s.Січень,
+                    s.Лютий,
+                    s.Березень,
+                    s.Квітень,
+                    s.Травень,
+                    s.Червень,
+                    s.Липень,
+                    s.Серпень,
+                    s.Вересень,
+                    s.Жовтень,
+                    s.Листопад,
+                    s.Грудень
+                })
+                .ToList();
+            #endregion
+
+            #region "Corrections"
+            List<Correction> localCorrections = db.Corrections.Local.Where(w =>
+                                                                        w.Видалено == false &&
+                                                                        w.Проведено.Year == year &&
+                                                                        w.Головний_розпорядник.Найменування == main_Manager.Найменування &&
+                                                                        w.КЕКВ.Код == kEKB.Код &&
+                                                                        w.КФК.Код == kFK.Код &&
+                                                                        w.Мікрофонд.Фонд.Код == foundation.Код)
+                                                                        .ToList();
+
+            List<Correction> DBcorrections = mdb.Corrections.Where(w =>
+                                                                    w.Видалено == false &&
+                                                                    w.Головний_розпорядник.Найменування == main_Manager.Найменування &&
+                                                                    w.КЕКВ.Код == kEKB.Код &&
+                                                                    w.КФК.Код == kFK.Код &&
+                                                                    w.Мікрофонд.Фонд.Код == foundation.Код &&
+                                                                    w.Проведено.Year == year)
+                                                                    .ToList();
+
+            if (localCorrections.Count != 0)
+            {
+                DBcorrections = DBcorrections.Where(w => localCorrections.Select(s => s.Id).Contains(w.Id) == false).ToList();
+                DBcorrections.AddRange(localCorrections);
+            }
+
+            var EndCorrections = DBcorrections
+                .Select(s => new
+                {
+                    s.Мікрофонд.Фонд,
+                    s.КФК,
+                    s.Головний_розпорядник,
+                    s.КЕКВ,
+                    s.Січень,
+                    s.Лютий,
+                    s.Березень,
+                    s.Квітень,
+                    s.Травень,
+                    s.Червень,
+                    s.Липень,
+                    s.Серпень,
+                    s.Вересень,
+                    s.Жовтень,
+                    s.Листопад,
+                    s.Грудень
+                })
+                .ToList();
+            #endregion
+
+            #region "Financings"
+            List<Financing> localFinancings = db.Financings.Local.Where(w =>
+                                                                        w.Видалено == false &&
+                                                                        w.Проведено.Year == year &&
+                                                                        w.Головний_розпорядник.Найменування == main_Manager.Найменування &&
+                                                                        w.КЕКВ.Код == kEKB.Код &&
+                                                                        w.КФК.Код == kFK.Код &&
+                                                                        w.Мікрофонд.Фонд.Код == foundation.Код)
+                                                                        .ToList();
+
+            List<Financing> DBfinancings = mdb.Financings.Where(w =>
+                              w.Видалено == false &&
+                              w.Проведено.Year == year &&
+                              w.Головний_розпорядник.Найменування == main_Manager.Найменування &&
+                              w.КЕКВ.Код == kEKB.Код &&
+                              w.КФК.Код == kFK.Код &&
+                              w.Мікрофонд.Фонд.Код == foundation.Код)
+                              .ToList();
+
+            
+
+            if (localFinancings.Count != 0)
+            {
+                DBfinancings = DBfinancings.Where(w => localFinancings.Select(s => s.Id).Contains(w.Id) == false).ToList();
+                DBfinancings.AddRange(localFinancings);
+            }
+            #endregion
+
+            var CorrectPlan = EndFillings.Union(EndCorrections).ToList();
+
+            List<double> vs = new List<double>();
+
+            //Вычисление месячных остатков
+            foreach (var item in names_months)
+            {
+                int numberOfMonth = names_months.IndexOf(item) + 1;
+
+                double monthPlan = CorrectPlan.Sum(s => (double)s.GetType().GetProperty(item).GetValue(s));
+                double monthFinancing = DBfinancings.Where(w => w.Проведено.Month == numberOfMonth).Sum(ss => ss.Сума);
+
+                vs.Add(monthPlan - monthFinancing);
+            }
+
+            //Накопительно
+            for (int i = 1; i < 12; i++)
+            {
+                vs[i] += vs[i - 1];
+            }
+
+            return vs;
         }
     }
 
@@ -1587,4 +1816,6 @@ namespace Main
         public string Property { get; set; }
         public Dictionary<string, dynamic> Value = new Dictionary<string, dynamic>();
     }
+
+    
 }

@@ -22,17 +22,15 @@ namespace DBSolom
     public class Db : DbContext
     {
         public List<string> list { get; set; }
-        public List<string> names_months { get; set; }
 
     public Db(string conn) : base(conn)
         {
             DbConfiguration.SetConfiguration(new MyConfiguration());
             //Database.SetInitializer<Db>(new DropCreateDatabaseIfModelChanges<Db>());
             list = new List<string> { "==", "!=", ">", ">=", "<", "<=", "-", ">|<", "[,]" };
-            names_months = new List<string>() { "Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень", "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень" };
         }
 
-        //9
+        //10
         #region "Dictionary"
 
         public DbSet<MacroFoundation> MacroFoundations { get; set; }
@@ -40,6 +38,8 @@ namespace DBSolom
         public DbSet<Foundation> Foundations { get; set; }
 
         public DbSet<MicroFoundation> MicroFoundations { get; set; }
+
+        public DbSet<KFB> KFBs { get; set; }
 
         public DbSet<KDB> KDBs { get; set; }
 

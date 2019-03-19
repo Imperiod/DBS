@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
@@ -13,8 +14,11 @@ namespace DBSolom
         {
             Видалено = false;
             Створино = DateTime.Now;
+            Змінено = DateTime.Now;
         }
 
+        [Key]
+        [Editable(false)]
         public long Id { get; set; }
 
         public bool Видалено { get; set; }

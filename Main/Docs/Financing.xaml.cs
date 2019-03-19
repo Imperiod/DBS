@@ -40,6 +40,10 @@ namespace Main.Docs
         public Dictionary<string, TextBox> dict_txt = new Dictionary<string, TextBox>();
         List<Filters> GetFilters = new List<Filters>();
         public List<ToggleButton> CheckBoxes = new List<ToggleButton>();
+        bool IsInitialization = true;
+        CollectionViewSource CollectionViewSource { get; set; }
+
+        DBSolom.Db db = new Db(Func.GetConnectionString);
 
         #endregion
 
@@ -47,44 +51,9 @@ namespace Main.Docs
         {
             InitializeComponent();
 
-            #region "Load entity"
+            CollectionViewSource = ((CollectionViewSource)FindResource("cvs"));
 
-            foreach (var item in Func.GetDB.Financings.Local.ToList())
-            {
-                switch (Func.GetDB.Entry(item).State)
-                {
-                    case EntityState.Detached:
-                        break;
-                    case EntityState.Unchanged:
-                        break;
-                    case EntityState.Added:
-                        Func.GetDB.Financings.Local.Remove(item);
-                        break;
-                    case EntityState.Deleted:
-                        break;
-                    case EntityState.Modified:
-                        Func.GetDB.Entry(item).Reload();
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            Func.GetDB.Financings
-
-                        .Include(i => i.Головний_розпорядник).Include(i => i.Змінив).Include(i => i.КДБ)
-                        .Include(i => i.КЕКВ).Include(i => i.КФК).Include(i => i.Мікрофонд).Include(i => i.Створив)
-
-                        .OrderBy(o => o.Проведено).ThenBy(tb => tb.Мікрофонд).ThenBy(tb => tb.КФК)
-                        .ThenBy(tb => tb.Головний_розпорядник).ThenBy(tb => tb.КДБ).ThenBy(tb => tb.КЕКВ)
-
-                        .Load();
-
-            #endregion
-
-            ((CollectionViewSource)FindResource("cvs")).Source = Func.GetDB.Financings.Local;
-
-            ((CollectionViewSource)FindResource("cvs")).Filter += Func.CollectionView_Filter;
+            CollectionViewSource.Filter += Func.CollectionView_Filter;
 
             DGM.GroupStyle.Add(((GroupStyle)FindResource("one")));
 
@@ -93,21 +62,6 @@ namespace Main.Docs
             BTN_ResetGroup.Click += BTN_ResetGroup_Click;
             BTN_Save.Click += BTN_Save_Click;
             BTN_ExportToExcel.Click += Func.BTN_ExportToExcel_Click;
-
-            EXPMAESTRO.MouseEnter += Func.Expander_MouseEnter;
-            EXPMAESTRO.MouseLeave += Func.Expander_MouseLeave;
-
-            var t = 0;
-            foreach (var item in ((IItemProperties)DGM.Items).ItemProperties)
-            {
-                Func.GetFilters(EXPGRO, t, item, ref dict_cmb, ref dict_txt, ref GetLabels);
-
-                Func.GetGroups(t, item, ref CheckBoxes, ref EXPGRT);
-
-                Func.GetVisibilityOfColumns(t, item, ref EXPHDN);
-
-                t++;
-            }
         }
 
         #region "BUTTONS"
@@ -171,7 +125,7 @@ namespace Main.Docs
         {
             try
             {
-                Func.GetDB.SaveChanges();
+                db.SaveChanges();
                 MessageBox.Show("Зміни збережено!");
             }
             catch (Exception ex)
@@ -184,7 +138,7 @@ namespace Main.Docs
 
         private void DGM_Loaded(object sender, RoutedEventArgs e)
         {
-            if (Func.GetDB.Lows.Include(i => i.Правовласник).FirstOrDefault(f => f.Видалено == false && f.Правовласник.Логін == Func.Login && f.Financing == true) is null)
+            if (db.Lows.Include(i => i.Правовласник).FirstOrDefault(f => f.Видалено == false && f.Правовласник.Логін == Func.Login && f.Financing == true) is null)
             {
                 DGM.IsReadOnly = true;
             }
@@ -201,166 +155,119 @@ namespace Main.Docs
                         if (DGM.CurrentColumn.Header.ToString() == "Сума" &&
                             ((DBSolom.Financing)e.AddedCells[0].Item).Проведено != null &&
                             ((DBSolom.Financing)e.AddedCells[0].Item).Головний_розпорядник != null &&
-                            ((DBSolom.Financing)e.AddedCells[0].Item).КДБ != null &&
                             ((DBSolom.Financing)e.AddedCells[0].Item).КЕКВ != null &&
                             ((DBSolom.Financing)e.AddedCells[0].Item).КФК != null &&
                             ((DBSolom.Financing)e.AddedCells[0].Item).Мікрофонд != null)
                         {
-                            List<string> vs = Func.GetDB.names_months;
+                            List<string> vs = Func.names_months;
+                            double yearSumFilling = 0;
+                            double yearSumCorrection = 0;
+                            double yearSumFinancing = 0;
+                            double periodSumFilling = 0;
+                            double periodSumCorrection = 0;
+                            double periodSumFinancing = 0;
                                 
-                                #region "Fiels of Cell"
+                            #region "Fiels of Cell"
 
-                            DateTime date = new DateTime();
-                            date = ((DBSolom.Financing)e.AddedCells[0].Item).Проведено;
-                            var KFK = ((DBSolom.Financing)e.AddedCells[0].Item).КФК;
-                            var Main_manager = ((DBSolom.Financing)e.AddedCells[0].Item).Головний_розпорядник;
-                            var KDB = ((DBSolom.Financing)e.AddedCells[0].Item).КДБ;
-                            var KEKB = ((DBSolom.Financing)e.AddedCells[0].Item).КЕКВ;
-                            var FOND = ((DBSolom.Financing)e.AddedCells[0].Item).Мікрофонд.Фонд;
-                            var MicroFond = ((DBSolom.Financing)e.AddedCells[0].Item).Мікрофонд;
+                            DateTime date = ((DBSolom.Financing)e.AddedCells[0].Item).Проведено;
+                            KFK KFK = ((DBSolom.Financing)e.AddedCells[0].Item).КФК;
+                            Main_manager Main_manager = ((DBSolom.Financing)e.AddedCells[0].Item).Головний_розпорядник;
+                            KEKB KEKB = ((DBSolom.Financing)e.AddedCells[0].Item).КЕКВ;
+                            Foundation FOND = ((DBSolom.Financing)e.AddedCells[0].Item).Мікрофонд.Фонд;
+                            MicroFoundation MicroFond = ((DBSolom.Financing)e.AddedCells[0].Item).Мікрофонд;
 
                             #endregion
 
-                            #region "Microfoundation"                           
-
-                            #region "Microfilling"
-
-                            double mcfil = 0;
-                            var qmcfil = Func.GetDB.Microfillings
-                                                        .Include(i => i.Головний_розпорядник)
-                                                        .Include(i => i.КДБ)
-                                                        .Include(i => i.КЕКВ)
-                                                        .Include(i => i.КФК)
-                                                        .Include(i => i.Мікрофонд)
-                                        .Where(w => w.Видалено == false &&
-                                                    w.Головний_розпорядник.Id == Main_manager.Id &&
-                                                    w.Проведено.Year == date.Year &&
-                                                    w.КДБ.Id == KDB.Id &&
-                                                    w.КЕКВ.Id == KEKB.Id &&
-                                                    w.КФК.Id == KFK.Id &&
-                                                    w.Мікрофонд.Id == MicroFond.Id).ToList();
-
-                            for (int j = 0; j < date.Month; j++)
-                            {
-                                mcfil += qmcfil.Select(s => (double)s.GetType().GetProperty(vs[j]).GetValue(s)).Sum();
-                            }
-                            #endregion
-
-                            #region "Correction"
-
-                            double corr = 0;
-                            var qcorr = Func.GetDB.Corrections
-                                                    .Include(i => i.Головний_розпорядник)
-                                                    .Include(i => i.КДБ)
-                                                    .Include(i => i.КЕКВ)
-                                                    .Include(i => i.КФК)
-                                                    .Include(i => i.Мікрофонд)
-                                        .Where(w => w.Видалено == false &&
-                                                    w.Головний_розпорядник.Id == Main_manager.Id &&
-                                                    w.Проведено.Year == date.Year &&
-                                                    w.КДБ.Id == KDB.Id &&
-                                                    w.КЕКВ.Id == KEKB.Id &&
-                                                    w.КФК.Id == KFK.Id &&
-                                                    w.Мікрофонд.Id == MicroFond.Id).ToList();
-
-                            for (int j = 0; j < date.Month; j++)
-                            {
-                                corr += qcorr.Select(s => (double)s.GetType().GetProperty(vs[j]).GetValue(s)).Sum();
-                            }
-
-                            #endregion
-
-                            #region "Financing"
-
-                            var qfin = Func.GetDB.Financings.Local
-                                            .Where(w => w.Видалено == false &&
-                                                        w.Головний_розпорядник.Id == Main_manager.Id &&
-                                                        w.Проведено.Year == date.Year &&
-                                                        w.Проведено <= date &&
-                                                        w.КДБ.Id == KDB.Id &&
-                                                        w.КЕКВ.Id == KEKB.Id &&
-                                                        w.КФК.Id == KFK.Id &&
-                                                        w.Мікрофонд.Id == MicroFond.Id).ToList();
-
-                            double fin = qfin.Select(s => s.Сума).Sum();
-
-                            #endregion
-
-                            GRPBCurr.Content = (mcfil + corr - fin).ToString("N2", CultureInfo.CreateSpecificCulture("ru-RU"));
-
-                            #endregion
+                            DBSolom.Db mdb = new Db(Func.GetConnectionString);
 
                             #region "Foundation"
 
-                            #region "Microfilling"
+                            #region "Filling"
 
-                            var qfil = Func.GetDB.Fillings
+                            List<DBSolom.Filling> qfil = mdb.Fillings
                                             .Include(i => i.Головний_розпорядник)
+                                            .Include(i => i.КФБ)
                                             .Include(i => i.КДБ)
                                             .Include(i => i.КЕКВ)
                                             .Include(i => i.КФК)
                                             .Include(i => i.Фонд)
                                             .Where(w => w.Видалено == false &&
-                                                        w.Головний_розпорядник.Id == Main_manager.Id &&
+                                                        w.Головний_розпорядник.Найменування == Main_manager.Найменування &&
                                                         w.Проведено.Year == date.Year &&
-                                                        w.КДБ.Id == KDB.Id &&
-                                                        w.КЕКВ.Id == KEKB.Id &&
-                                                        w.КФК.Id == KFK.Id &&
-                                                        w.Фонд.Id == FOND.Id).ToList();
-
-                            mcfil = 0;
+                                                        w.КЕКВ.Код == KEKB.Код &&
+                                                        w.КФК.Код == KFK.Код &&
+                                                        w.Фонд.Код == FOND.Код).ToList();
 
                             for (int j = 0; j < date.Month; j++)
                             {
-                                mcfil += qfil.Select(s => (double)s.GetType().GetProperty(vs[j]).GetValue(s)).Sum();
+                                periodSumFilling += qfil.Select(s => (double)s.GetType().GetProperty(vs[j]).GetValue(s)).Sum();
+                            }
+                            for (int j = 0; j < 11; j++)
+                            {
+                                yearSumFilling += qfil.Select(s => (double)s.GetType().GetProperty(vs[j]).GetValue(s)).Sum();
                             }
 
                             #endregion
 
                             #region "Correction"
 
-                            qcorr = Func.GetDB.Corrections
+                            List<DBSolom.Correction> qcorr = mdb.Corrections
                                                 .Include(i => i.Головний_розпорядник)
+                                                .Include(i => i.КФБ)
                                                 .Include(i => i.КДБ)
                                                 .Include(i => i.КЕКВ)
                                                 .Include(i => i.КФК)
                                                 .Include(i => i.Мікрофонд)
                                         .Where(w => w.Видалено == false &&
-                                                    w.Головний_розпорядник.Id == Main_manager.Id &&
+                                                    w.Головний_розпорядник.Найменування == Main_manager.Найменування &&
                                                     w.Проведено.Year == date.Year &&
-                                                    w.КДБ.Id == KDB.Id &&
-                                                    w.КЕКВ.Id == KEKB.Id &&
-                                                    w.КФК.Id == KFK.Id &&
-                                                    w.Мікрофонд.Фонд.Id == FOND.Id).ToList();
+                                                    w.КЕКВ.Код == KEKB.Код &&
+                                                    w.КФК.Код == KFK.Код &&
+                                                    w.Мікрофонд.Фонд.Код == FOND.Код).ToList();
 
-                            corr = 0;
                             for (int j = 0; j < date.Month; j++)
                             {
-                                corr += qcorr.Select(s => (double)s.GetType().GetProperty(vs[j]).GetValue(s)).Sum();
+                                periodSumCorrection += qcorr.Select(s => (double)s.GetType().GetProperty(vs[j]).GetValue(s)).Sum();
+                            }
+                            for (int j = 0; j < 11; j++)
+                            {
+                                yearSumCorrection += qcorr.Select(s => (double)s.GetType().GetProperty(vs[j]).GetValue(s)).Sum();
                             }
 
                             #endregion
 
                             #region "Financing"
 
-                            qfin = Func.GetDB.Financings.Local
-                                                .Where(w => w.Видалено == false &&
-                                                            w.Головний_розпорядник.Id == Main_manager.Id &&
+                            List<DBSolom.Financing> qfin = mdb.Financings.Where(w => w.Видалено == false &&
+                                                            w.Головний_розпорядник.Найменування == Main_manager.Найменування &&
                                                             w.Проведено.Year == date.Year &&
-                                                            w.Проведено <= date &&
-                                                            w.КДБ.Id == KDB.Id &&
-                                                            w.КЕКВ.Id == KEKB.Id &&
-                                                            w.КФК.Id == KFK.Id &&
-                                                            w.Мікрофонд.Фонд.Id == FOND.Id).ToList();
+                                                            w.КЕКВ.Код == KEKB.Код &&
+                                                            w.КФК.Код == KFK.Код &&
+                                                            w.Мікрофонд.Фонд.Код == FOND.Код).ToList();
 
-                            fin = qfin.Select(s => s.Сума).Sum();
+                            db.Financings.Local.Where(w => w.Видалено == false &&
+                                                            w.Головний_розпорядник.Найменування == Main_manager.Найменування &&
+                                                            w.Проведено.Year == date.Year &&
+                                                            w.КЕКВ.Код == KEKB.Код &&
+                                                            w.КФК.Код == KFK.Код &&
+                                                            w.Мікрофонд.Фонд.Код == FOND.Код)
+                                                            .ToList()
+                                                            .ForEach(item =>
+                                                            {
+                                                                if (db.Entry(item).State != EntityState.Unchanged)
+                                                                {
+                                                                    qfin.Add(item);
+                                                                }
+                                                            });
+
+                            yearSumFinancing = qfin.Select(s => s.Сума).Sum();
+                            periodSumFinancing = qfin.Where(w => w.Проведено <= date).Select(s => s.Сума).Sum();
 
                             #endregion
 
-                            GRPBAll.Content = (mcfil + corr - fin).ToString("N2", CultureInfo.CreateSpecificCulture("ru-RU"));
-
+                            GRPBYearFond.Content = (yearSumFilling + yearSumCorrection - yearSumFinancing).ToString("N2", CultureInfo.CreateSpecificCulture("ru-RU"));
+                            GRPBPeriodFond.Content = (periodSumFilling + periodSumCorrection - periodSumFinancing).ToString("N2", CultureInfo.CreateSpecificCulture("ru-RU"));
                             #endregion
-
                         }
 
 
@@ -414,117 +321,49 @@ namespace Main.Docs
         {
             if (((DBSolom.Financing)e.Row.Item).Id == 0)
             {
-                ((DBSolom.Financing)e.Row.Item).Створив = Func.GetDB.Users.FirstOrDefault(f => f.Видалено == false && f.Логін == Func.Login);
+                ((DBSolom.Financing)e.Row.Item).Створив = db.Users.FirstOrDefault(f => f.Видалено == false && f.Логін == Func.Login);
             }
-            ((DBSolom.Financing)e.Row.Item).Змінив = Func.GetDB.Users.FirstOrDefault(f => f.Видалено == false && f.Логін == Func.Login);
+            ((DBSolom.Financing)e.Row.Item).Змінив = db.Users.FirstOrDefault(f => f.Видалено == false && f.Логін == Func.Login);
             ((DBSolom.Financing)e.Row.Item).Змінено = DateTime.Now;
 
-            if (e.Column.Header.ToString() == "Сума" &&
-                ((DBSolom.Financing)e.EditingElement.DataContext).Головний_розпорядник != null &&
-                ((DBSolom.Financing)e.EditingElement.DataContext).КДБ != null &&
+            if (((DBSolom.Financing)e.EditingElement.DataContext).Головний_розпорядник != null &&
                 ((DBSolom.Financing)e.EditingElement.DataContext).КЕКВ != null &&
                 ((DBSolom.Financing)e.EditingElement.DataContext).КФК != null &&
                 ((DBSolom.Financing)e.EditingElement.DataContext).Мікрофонд != null)
             {
-                List<string> vs = new List<string>() { "Січень", "Лютий", "Березень", "Квітень", "Травень", "Червень", "Липень", "Серпень", "Вересень", "Жовтень", "Листопад", "Грудень" };
-
                 #region "Fields of Cell"
-                DateTime date = new DateTime();
-                date = ((DBSolom.Financing)e.Row.Item).Проведено;
-                var KFK = ((DBSolom.Financing)e.Row.Item).КФК;
-                var Main_manager = ((DBSolom.Financing)e.Row.Item).Головний_розпорядник;
-                var KDB = ((DBSolom.Financing)e.Row.Item).КДБ;
-                var KEKB = ((DBSolom.Financing)e.Row.Item).КЕКВ;
-                var FOND = ((DBSolom.Financing)e.Row.Item).Мікрофонд.Фонд;
-                var MicroFond = ((DBSolom.Financing)e.Row.Item).Мікрофонд;
+                DateTime date = ((DBSolom.Financing)e.Row.Item).Проведено;
+                KFK KFK = ((DBSolom.Financing)e.Row.Item).КФК;
+                Main_manager Main_manager = ((DBSolom.Financing)e.Row.Item).Головний_розпорядник;
+                KEKB KEKB = ((DBSolom.Financing)e.Row.Item).КЕКВ;
+                Foundation FOND = ((DBSolom.Financing)e.Row.Item).Мікрофонд.Фонд;
+                MicroFoundation MicroFond = ((DBSolom.Financing)e.Row.Item).Мікрофонд;
                 #endregion
 
-                try
+                List<double> x = Func.GetRamainedFromDBPerMonth(db, date.Year, KFK, Main_manager, KEKB, FOND);
+                List<string> errors = new List<string>();
+
+                for (int i = 0; i < 12; i++)
                 {
-                    #region "Foundation"
-
-                    #region "Filling"
-
-                    var qmcfil = Func.GetDB.Fillings
-                                                .Include(i => i.Головний_розпорядник)
-                                                .Include(i => i.КДБ)
-                                                .Include(i => i.КЕКВ)
-                                                .Include(i => i.КФК)
-                                                .Include(i => i.Фонд)
-                                .Where(w => w.Видалено == false &&
-                                            w.Головний_розпорядник.Id == Main_manager.Id &&
-                                            w.Проведено.Year == date.Year &&
-                                            w.КЕКВ.Id == KEKB.Id &&
-                                            w.КФК.Id == KFK.Id &&
-                                            w.Фонд.Id == FOND.Id).ToList();
-
-                    double mcfil = 0;
-
-                    for (int j = 0; j < date.Month; j++)
+                    if (x[i] < 0)
                     {
-                        mcfil += qmcfil.Select(s => (double)s.GetType().GetProperty(vs[j]).GetValue(s)).Sum();
+                        errors.Add($"[Дата: {date.ToShortDateString()}] [Фонд: {FOND.Код}] [КПБ: {KFK.Код}]" +
+                            $" [Головний розпорядник: {Main_manager.Найменування}]" +
+                            $" [КЕКВ: {KEKB.Код}] [Місяць: {Func.names_months[i]}] [Залишок:{x[i]}]");
                     }
-
-                    #endregion
-
-                    #region "Correction"
-
-                    var qcorr = Func.GetDB.Corrections
-                                            .Include(i => i.Головний_розпорядник)
-                                            .Include(i => i.КДБ)
-                                            .Include(i => i.КЕКВ)
-                                            .Include(i => i.КФК)
-                                            .Include(i => i.Мікрофонд)
-                            .Where(w => w.Видалено == false &&
-                                        w.Головний_розпорядник.Id == Main_manager.Id &&
-                                        w.Проведено.Year == date.Year &&
-                                        w.КЕКВ.Id == KEKB.Id &&
-                                        w.КФК.Id == KFK.Id &&
-                                        w.Мікрофонд.Фонд.Id == FOND.Id).ToList();
-
-                    double corr = 0;
-
-                    for (int j = 0; j < date.Month; j++)
-                    {
-                        corr += qcorr.Select(s => (double)s.GetType().GetProperty(vs[j]).GetValue(s)).Sum();
-                    }
-
-                    #endregion
-
-                    #region "Financing"
-
-                    var qfin = Func.GetDB.Financings.Local
-                        .Where(w => w.Видалено == false &&
-                                    w.Головний_розпорядник.Id == Main_manager.Id &&
-                                    w.Проведено.Year == date.Year &&
-                                    w.Проведено <= date &&
-                                    w.КДБ.Id == KDB.Id &&
-                                    w.КЕКВ.Id == KEKB.Id &&
-                                    w.КФК.Id == KFK.Id &&
-                                    w.Мікрофонд.Фонд.Id == FOND.Id).ToList();
-
-                    double fin = qfin.Select(s => s.Сума).Sum();
-
-                    #endregion
-
-                    if (mcfil + corr - fin < 0)
-                    {
-                        e.Cancel = true;
-                        ((TextBox)e.EditingElement).Text = (0.00).ToString();
-                        ((DBSolom.Financing)e.Row.Item).Сума = 0;
-                        MessageBox.Show("Недостатньо коштів за фондом: " + (mcfil + corr - fin).ToString("N2", CultureInfo.CreateSpecificCulture("ru-RU")));
-                    }
-
-                    GRPBAll.Content = (mcfil + corr - fin).ToString("N2", CultureInfo.CreateSpecificCulture("ru-RU"));
-
-                    #endregion
                 }
-                catch (Exception ex)
+                if (errors.Count > 0)
                 {
                     e.Cancel = true;
                     ((TextBox)e.EditingElement).Text = (0.00).ToString();
                     ((DBSolom.Financing)e.Row.Item).Сума = 0;
-                    MessageBox.Show(ex.Message);
+                    string s = "";
+                    foreach (var item in errors)
+                    {
+                        s = s + item + "\n";
+                    }
+                    MessageBox.Show(s, "Maestro", MessageBoxButton.OK, MessageBoxImage.Error);
+                    return;
                 }
             }
         }
@@ -576,8 +415,61 @@ namespace Main.Docs
 
         private void DGM_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
         {
-            Func.GenerateColumnForDataGrid(ref counterForDGMColumns, e);
+            Func.GenerateColumnForDataGrid(db, ref counterForDGMColumns, e);
         }
+
+        private void DatePicker_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (SDate.SelectedDate != null && EDate.SelectedDate != null)
+            {
+                #region "Load entity"
+
+                DateTime FinalDate = (EDate.SelectedDate.Value.AddDays(1) - TimeSpan.FromSeconds(1));
+
+                db.Financings
+                            .Include(i => i.Головний_розпорядник)
+                            .Include(i => i.Змінив)
+                            .Include(i => i.КЕКВ)
+                            .Include(i => i.КФК)
+                            .Include(i => i.Мікрофонд)
+                            .Include(i => i.Створив)
+                            .Where(w => w.Проведено >= SDate.SelectedDate && w.Проведено <= FinalDate)
+                            .Load();
+                
+                #endregion
+
+                if (IsInitialization)
+                {
+                    CollectionViewSource.Source = db.Financings.Local;
+
+                    DGM.ItemsSource = CollectionViewSource.View;
+
+                    CollectionViewSource.SortDescriptions.Add(new SortDescription("Проведено", ListSortDirection.Ascending));
+                    CollectionViewSource.SortDescriptions.Add(new SortDescription("Мікрофонд.Повністю", ListSortDirection.Ascending));
+                    CollectionViewSource.SortDescriptions.Add(new SortDescription("КФК.Код", ListSortDirection.Ascending));
+                    CollectionViewSource.SortDescriptions.Add(new SortDescription("Головний_розпорядник.Найменування", ListSortDirection.Ascending));
+                    CollectionViewSource.SortDescriptions.Add(new SortDescription("КЕКВ.Код", ListSortDirection.Ascending));
+
+                    int t = 0;
+                    foreach (ItemPropertyInfo item in ((IItemProperties)DGM.Items).ItemProperties)
+                    {
+                        Func.GetFilters(EXPGRO, t, item, ref dict_cmb, ref dict_txt, ref GetLabels);
+
+                        Func.GetGroups(t, item, ref CheckBoxes, ref EXPGRT);
+
+                        Func.GetVisibilityOfColumns(t, item, ref EXPHDN);
+
+                        t++;
+                    }
+
+                    IsInitialization = false;
+                }
+
+                CollectionViewSource.GetDefaultView(DGM.ItemsSource).Refresh();
+            }
+        }
+
+
     }
 
     public class FinancingGroupTotalConverter : IValueConverter

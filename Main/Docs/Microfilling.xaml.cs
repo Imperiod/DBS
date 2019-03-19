@@ -37,6 +37,10 @@ namespace Main.Docs
         public Dictionary<string, TextBox> dict_txt = new Dictionary<string, TextBox>();
         List<Filters> GetFilters = new List<Filters>();
         public List<ToggleButton> CheckBoxes = new List<ToggleButton>();
+        bool IsInitialization = true;
+        CollectionViewSource CollectionViewSource { get; set; }
+
+        DBSolom.Db db = new Db(Func.GetConnectionString);
 
         #endregion
 
@@ -44,44 +48,9 @@ namespace Main.Docs
         {
             InitializeComponent();
 
-            #region "Load entity"
+            CollectionViewSource = ((CollectionViewSource)FindResource("cvs"));
 
-            foreach (var item in Func.GetDB.Microfillings.Local.ToList())
-            {
-                switch (Func.GetDB.Entry(item).State)
-                {
-                    case EntityState.Detached:
-                        break;
-                    case EntityState.Unchanged:
-                        break;
-                    case EntityState.Added:
-                        Func.GetDB.Microfillings.Local.Remove(item);
-                        break;
-                    case EntityState.Deleted:
-                        break;
-                    case EntityState.Modified:
-                        Func.GetDB.Entry(item).Reload();
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            Func.GetDB.Microfillings
-
-                        .Include(i => i.Головний_розпорядник).Include(i => i.Змінив).Include(i => i.КДБ)
-                        .Include(i => i.КЕКВ).Include(i => i.КФК).Include(i => i.Мікрофонд).Include(i => i.Створив)
-
-                        .OrderBy(o=>o.Проведено).ThenBy(tb => tb.Мікрофонд).ThenBy(tb=>tb.КФК)
-                        .ThenBy(tb => tb.Головний_розпорядник.Найменування).ThenBy(tb=>tb.КДБ).ThenBy(tb=>tb.КЕКВ)
-
-                        .Load();
-
-            #endregion
-
-            ((CollectionViewSource)FindResource("cvs")).Source = Func.GetDB.Microfillings.Local;
-
-            ((CollectionViewSource)FindResource("cvs")).Filter += Func.CollectionView_Filter;
+            CollectionViewSource.Filter += Func.CollectionView_Filter;
 
             DGM.GroupStyle.Add(((GroupStyle)FindResource("one")));
 
@@ -90,21 +59,6 @@ namespace Main.Docs
             BTN_ResetGroup.Click += BTN_ResetGroup_Click;
             BTN_Save.Click += BTN_Save_Click;
             BTN_ExportToExcel.Click += Func.BTN_ExportToExcel_Click;
-
-            EXPMAESTRO.MouseEnter += Func.Expander_MouseEnter;
-            EXPMAESTRO.MouseLeave += Func.Expander_MouseLeave;
-
-            var t = 0;
-            foreach (var item in ((IItemProperties)DGM.Items).ItemProperties)
-            {
-                Func.GetFilters(EXPGRO, t, item, ref dict_cmb, ref dict_txt, ref GetLabels);
-
-                Func.GetGroups(t, item, ref CheckBoxes, ref EXPGRT);
-
-                Func.GetVisibilityOfColumns(t, item, ref EXPHDN);
-
-                t++;
-            }
         }
 
         #region "BUTTONS"
@@ -169,7 +123,7 @@ namespace Main.Docs
         {
             try
             {
-                Func.GetDB.SaveChanges();
+                db.SaveChanges();
                 MessageBox.Show("Зміни збережено!");
             }
             catch (Exception ex)
@@ -178,154 +132,12 @@ namespace Main.Docs
             }
             DGM.Items.Refresh();
         }
-        private void BTN_ExportToExcel_Click(object sender, RoutedEventArgs e)
-        {
-            bool IsExist = false;
-            if (DGM.SelectedCells.Count > 0)
-            {
-                List<MicroFilling> microFillings = new List<MicroFilling>();
-
-                foreach (var item in DGM.SelectedCells)
-                {
-                    if (item.Item.ToString() != "{NewItemPlaceholder}" && microFillings.FirstOrDefault(f => f.Id == ((MicroFilling)item.Item).Id) is null)
-                    {
-                        microFillings.Add(((MicroFilling)item.Item));
-                    }
-                }
-
-                OpenFileDialog openFileDialog = new OpenFileDialog();
-                openFileDialog.Filter = "Excel files (*.xlsx;*.xlsm;*.xls)|*.xlsx;*.xlsm;*.xls";
-                if (openFileDialog.ShowDialog() == true)
-                {
-                    PB.Minimum = 0;
-                    PB.Maximum = microFillings.Count;
-                    PB.Value = 1;
-
-                    Action action = () => { PB.Value++; };
-                    var Task = new Task(() =>
-                    {
-                        Microsoft.Office.Interop.Excel.Application application = new Microsoft.Office.Interop.Excel.Application();
-                        application.AskToUpdateLinks = false;
-                        application.DisplayAlerts = false;
-                        Microsoft.Office.Interop.Excel.Workbook workbook = application.Workbooks.Open(openFileDialog.FileName);
-                        Microsoft.Office.Interop.Excel.Worksheet worksheet = null;
-
-                        foreach (Microsoft.Office.Interop.Excel.Worksheet item in workbook.Worksheets)
-                        {
-                            if (item.Name == "Maestro_Data")
-                            {
-                                IsExist = true;
-                                worksheet = item;
-                                break;
-                            }
-                        }
-
-                        if (IsExist)
-                        {
-                            worksheet.Cells.Clear();
-                            if (worksheet.ListObjects.Count != 0)
-                            {
-                                for (int i = 0; i < worksheet.ListObjects.Count; i++)
-                                {
-                                    if (worksheet.ListObjects[i].Name == "Maestro_DataTable")
-                                    {
-                                        worksheet.ListObjects.Item[i].Delete();
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                        else
-                        {
-                            worksheet = workbook.Worksheets.Add();
-                            worksheet.Name = "Maestro_Data";
-                        }
-
-                        int r = 1;
-                        worksheet.Cells[r, 1] = "Id";
-                        worksheet.Cells[r, 2] = "Видалено";
-                        worksheet.Cells[r, 3] = "Створив";
-                        worksheet.Cells[r, 4] = "Створино";
-                        worksheet.Cells[r, 5] = "Змінив";
-                        worksheet.Cells[r, 6] = "Змінено";
-                        worksheet.Cells[r, 7] = "Проведено";
-                        worksheet.Cells[r, 8] = "Підписано";
-                        worksheet.Cells[r, 9] = "Головний_розпорядник";
-                        worksheet.Cells[r, 10] = "КФК";
-                        worksheet.Cells[r, 11] = "Фонд";
-                        worksheet.Cells[r, 12] = "Мікрофонд";
-                        worksheet.Cells[r, 13] = "КДБ";
-                        worksheet.Cells[r, 14] = "КЕКВ";
-                        worksheet.Cells[r, 15] = "Січень";
-                        worksheet.Cells[r, 16] = "Лютий";
-                        worksheet.Cells[r, 17] = "Березень";
-                        worksheet.Cells[r, 18] = "Квітень";
-                        worksheet.Cells[r, 19] = "Травень";
-                        worksheet.Cells[r, 20] = "Червень";
-                        worksheet.Cells[r, 21] = "Липень";
-                        worksheet.Cells[r, 22] = "Серпень";
-                        worksheet.Cells[r, 23] = "Вересень";
-                        worksheet.Cells[r, 24] = "Жовтень";
-                        worksheet.Cells[r, 25] = "Листопад";
-                        worksheet.Cells[r, 26] = "Грудень";
-                        r++;
-
-                        worksheet.ListObjects.Add(Microsoft.Office.Interop.Excel.XlListObjectSourceType.xlSrcRange, worksheet.Range[worksheet.Cells[1, 1], worksheet.Cells[microFillings.Count, 26]], Type.Missing, Microsoft.Office.Interop.Excel.XlYesNoGuess.xlYes, Type.Missing).Name = "Maestro_DataTable";
-
-                        foreach (var item in microFillings)
-                        {
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 1] = item.Id;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 2] = item.Видалено;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 3] = item.Створив.Логін;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 4] = item.Створино.ToShortDateString();
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 5] = item.Змінив.Логін;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 6] = item.Змінено.ToShortDateString();
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 7] = item.Проведено.ToShortDateString();
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 8] = item.Підписано;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 9] = item.Головний_розпорядник.Найменування;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 10] = item.КФК.Код;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 11] = item.Мікрофонд.Фонд.Код;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 12] = item.Мікрофонд.Повністю;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 13] = item.КДБ.Код;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 14] = item.КЕКВ.Код;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 15] = item.Січень;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 16] = item.Лютий;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 17] = item.Березень;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 18] = item.Квітень;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 19] = item.Травень;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 20] = item.Червень;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 21] = item.Липень;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 22] = item.Серпень;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 23] = item.Вересень;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 24] = item.Жовтень;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 25] = item.Листопад;
-                            worksheet.ListObjects["Maestro_DataTable"].Range.Cells[r, 26] = item.Грудень;
-                            PB.Dispatcher.Invoke(action);
-                            r++;
-                        }
-
-                        MessageBox.Show("Виконано!", "Maestro", MessageBoxButton.OK, MessageBoxImage.Information);
-                        application.Visible = true;
-                        openFileDialog = null;
-                        application = null;
-                        workbook = null;
-                        worksheet = null;
-                        PB.Dispatcher.Invoke(() => PB.Value = 0);
-                    });
-
-                    Task.Start();
-                }
-            }
-            else
-            {
-                MessageBox.Show("Виділіть всі строки, які будуть експортовані!", "Maestro", MessageBoxButton.OK, MessageBoxImage.Hand);
-            }
-        }
+        
         #endregion
 
         private void DGM_Loaded(object sender, RoutedEventArgs e)
         {
-            if (Func.GetDB.Lows.Include(i => i.Правовласник).FirstOrDefault(f => f.Видалено == false && f.Правовласник.Логін == Func.Login && f.Microfilling == true) is null)
+            if (db.Lows.Include(i => i.Правовласник).FirstOrDefault(f => f.Видалено == false && f.Правовласник.Логін == Func.Login && f.Microfilling == true) is null)
             {
                 DGM.IsReadOnly = true;
             }
@@ -339,51 +151,75 @@ namespace Main.Docs
                 {
                     if (DGM.SelectedCells.Count == 1)
                     {
-                        if (Func.GetDB.names_months.Contains(DGM.CurrentColumn.Header.ToString()) &&
+                        if (Func.names_months.Contains(DGM.CurrentColumn.Header.ToString()) &&
                             ((MicroFilling)e.AddedCells[0].Item).Головний_розпорядник != null &&
+                            ((MicroFilling)e.AddedCells[0].Item).КФБ != null &&
                             ((MicroFilling)e.AddedCells[0].Item).КДБ != null &&
                             ((MicroFilling)e.AddedCells[0].Item).КЕКВ != null &&
                             ((MicroFilling)e.AddedCells[0].Item).КФК != null &&
                             ((MicroFilling)e.AddedCells[0].Item).Мікрофонд != null)
                         {
                             #region "Fiels of Cell"
-                            DateTime date = new DateTime();
-                            date = ((MicroFilling)DGM.CurrentItem).Проведено;
-                            var KFK = ((MicroFilling)DGM.CurrentItem).КФК;
-                            var Main_manager = ((MicroFilling)DGM.CurrentItem).Головний_розпорядник;
-                            var KDB = ((MicroFilling)DGM.CurrentItem).КДБ;
-                            var KEKB = ((MicroFilling)DGM.CurrentItem).КЕКВ;
-                            var MicroFond = ((MicroFilling)DGM.CurrentItem).Мікрофонд;
+                            DateTime date = ((MicroFilling)DGM.CurrentItem).Проведено;
+                            KFK KFK = ((MicroFilling)DGM.CurrentItem).КФК;
+                            Main_manager Main_manager = ((MicroFilling)DGM.CurrentItem).Головний_розпорядник;
+                            KFB KFB = ((MicroFilling)DGM.CurrentItem).КФБ;
+                            KDB KDB = ((MicroFilling)DGM.CurrentItem).КДБ;
+                            KEKB KEKB = ((MicroFilling)DGM.CurrentItem).КЕКВ;
+                            MicroFoundation MicroFond = ((MicroFilling)DGM.CurrentItem).Мікрофонд;
                             #endregion
+
+                            DBSolom.Db mdb = new Db(Func.GetConnectionString);
 
                             #region "Current"
                             //Заполнение////////////////////////////////////////////////////////////////////////////////////
 
-                            var qfill = Func.GetDB.Fillings
+                            List<DBSolom.Filling> qfill = mdb.Fillings
                                 .Include(i => i.Головний_розпорядник)
+                                .Include(i => i.КФБ)
                                 .Include(i => i.КДБ)
                                 .Include(i => i.КЕКВ)
                                 .Include(i => i.КФК)
                                 .Include(i => i.Фонд)
                                 .Where(w => w.Видалено == false &&
-                                            w.Головний_розпорядник.Id == Main_manager.Id &&
-                                            w.КДБ.Id == KDB.Id &&
-                                            w.КЕКВ.Id == KEKB.Id &&
-                                            w.КФК.Id == KFK.Id &&
-                                            w.Фонд.Id == MicroFond.Фонд.Id &&
+                                            w.Головний_розпорядник.Найменування == Main_manager.Найменування &&
+                                            w.КФБ.Код == KFB.Код &&
+                                            w.КДБ.Код == KDB.Код &&
+                                            w.КЕКВ.Код == KEKB.Код &&
+                                            w.КФК.Код == KFK.Код &&
+                                            w.Фонд.Код == MicroFond.Фонд.Код &&
                                             w.Проведено.Year == date.Year).ToList();
 
                             double fill = qfill.Select(s => (double)(s.GetType().GetProperty(DGM.CurrentColumn.Header.ToString()).GetValue(s))).Sum();
                             ////////////////////////////////////////////////////////////////////////////////////////////////
                             //Мікрозаполнение///////////////////////////////////////////////////////////////////////////////
-                            var qcurr = Func.GetDB.Microfillings.Local
+                            List<MicroFilling> qcurr = mdb.Microfillings
                                 .Where(w => w.Видалено == false &&
-                                            w.Головний_розпорядник.Id == Main_manager.Id &&
+                                            w.Головний_розпорядник.Найменування == Main_manager.Найменування &&
                                             w.Проведено.Year == date.Year &&
-                                            w.КДБ.Id == KDB.Id &&
-                                            w.КЕКВ.Id == KEKB.Id &&
-                                            w.КФК.Id == KFK.Id &&
-                                            w.Мікрофонд.Фонд.Id == MicroFond.Фонд.Id).ToList();
+                                            w.КФБ.Код == KFB.Код &&
+                                            w.КДБ.Код == KDB.Код &&
+                                            w.КЕКВ.Код == KEKB.Код &&
+                                            w.КФК.Код == KFK.Код &&
+                                            w.Мікрофонд.Фонд.Код == MicroFond.Фонд.Код).ToList();
+
+                            db.Microfillings.Local
+                                .Where(w => w.Видалено == false &&
+                                            w.Головний_розпорядник.Найменування == Main_manager.Найменування &&
+                                            w.Проведено.Year == date.Year &&
+                                            w.КФБ.Код == KFB.Код &&
+                                            w.КДБ.Код == KDB.Код &&
+                                            w.КЕКВ.Код == KEKB.Код &&
+                                            w.КФК.Код == KFK.Код &&
+                                            w.Мікрофонд.Фонд.Код == MicroFond.Фонд.Код)
+                                            .ToList()
+                                            .ForEach(item =>
+                                            {
+                                                if (db.Entry(item).State != EntityState.Unchanged)
+                                                {
+                                                    qcurr.Add(item);
+                                                }
+                                            });
 
                             double curr = qcurr.Select(s => (double)(s.GetType().GetProperty(DGM.CurrentColumn.Header.ToString()).GetValue(s))).Sum();
                             ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -393,27 +229,45 @@ namespace Main.Docs
 
                             #endregion
 
+                            mdb = new Db(Func.GetConnectionString);
+
                             #region "All"
                             //Заполнение////////////////////////////////////////////////////////////////////////////////////
-                            qfill = Func.GetDB.Fillings
+                            qfill = mdb.Fillings
                                         .Include(i => i.Головний_розпорядник)
                                         .Include(i => i.КФК)
                                         .Include(i => i.Фонд)
                                     .Where(w => w.Видалено == false &&
-                                                w.Головний_розпорядник.Id == Main_manager.Id &&
-                                                w.КФК.Id == KFK.Id &&
-                                                w.Фонд.Id == MicroFond.Фонд.Id &&
-                                                w.Проведено.Year == date.Year).ToList();
+                                                w.Головний_розпорядник.Найменування == Main_manager.Найменування &&
+                                                w.КФК.Код == KFK.Код &&
+                                                w.Фонд.Код == MicroFond.Фонд.Код &&
+                                                w.Проведено.Year == date.Year)
+                                                .ToList();
 
                             fill = qfill.Select(s => (double)(s.GetType().GetProperty(DGM.CurrentColumn.Header.ToString()).GetValue(s))).Sum();
                             ////////////////////////////////////////////////////////////////////////////////////////////////
                             //Мікрозаполнение///////////////////////////////////////////////////////////////////////////////
-                            qcurr = Func.GetDB.Microfillings.Local
+                            qcurr = mdb.Microfillings
                                 .Where(w => w.Видалено == false &&
-                                            w.Головний_розпорядник.Id == Main_manager.Id &&
+                                            w.Головний_розпорядник.Найменування == Main_manager.Найменування &&
                                             w.Проведено.Year == date.Year &&
-                                            w.КФК.Id == KFK.Id &&
-                                            w.Мікрофонд.Фонд.Id == MicroFond.Фонд.Id).ToList();
+                                            w.КФК.Код == KFK.Код &&
+                                            w.Мікрофонд.Фонд.Код == MicroFond.Фонд.Код).ToList();
+
+                            db.Microfillings.Local
+                                .Where(w => w.Видалено == false &&
+                                            w.Головний_розпорядник.Найменування == Main_manager.Найменування &&
+                                            w.Проведено.Year == date.Year &&
+                                            w.КФК.Код == KFK.Код &&
+                                            w.Мікрофонд.Фонд.Код == MicroFond.Фонд.Код)
+                                            .ToList()
+                                            .ForEach(item =>
+                                            {
+                                                if (db.Entry(item).State != EntityState.Unchanged)
+                                                {
+                                                    qcurr.Add(item);
+                                                }
+                                            });
                             curr = qcurr.Select(s => (double)(s.GetType().GetProperty(DGM.CurrentColumn.Header.ToString()).GetValue(s))).Sum();
                             ////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -477,7 +331,7 @@ namespace Main.Docs
 
         private void DGM_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
         {
-            Func.GenerateColumnForDataGrid(ref counterForDGMColumns, e);
+            Func.GenerateColumnForDataGrid(db, ref counterForDGMColumns, e);
         }
 
         private void IsAllowEditing(DataGridBeginningEditEventArgs e)
@@ -523,10 +377,65 @@ namespace Main.Docs
         {
             if (((MicroFilling)e.Row.Item).Id == 0)
             {
-                ((MicroFilling)e.Row.Item).Створив = Func.GetDB.Users.FirstOrDefault(f => f.Видалено == false && f.Логін == Func.Login);
+                ((MicroFilling)e.Row.Item).Створив = db.Users.FirstOrDefault(f => f.Видалено == false && f.Логін == Func.Login);
             }
-            ((MicroFilling)e.Row.Item).Змінив = Func.GetDB.Users.FirstOrDefault(f => f.Видалено == false && f.Логін == Func.Login);
+            ((MicroFilling)e.Row.Item).Змінив = db.Users.FirstOrDefault(f => f.Видалено == false && f.Логін == Func.Login);
             ((MicroFilling)e.Row.Item).Змінено = DateTime.Now;
+        }
+
+        private void DatePicker_SelectedDateChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (SDate.SelectedDate != null && EDate.SelectedDate != null)
+            {
+                #region "Load entity"
+
+                DateTime FinalDate = (EDate.SelectedDate.Value.AddDays(1) - TimeSpan.FromSeconds(1));
+
+                db.Microfillings
+                            .Include(i => i.Головний_розпорядник)
+                            .Include(i => i.Змінив)
+                            .Include(i => i.КФБ)
+                            .Include(i => i.КДБ)
+                            .Include(i => i.КЕКВ)
+                            .Include(i => i.КФК)
+                            .Include(i => i.Мікрофонд)
+                            .Include(i => i.Створив)
+                            .Where(w => w.Проведено >= SDate.SelectedDate && w.Проведено <= FinalDate)
+                            .Load();
+
+                #endregion
+
+                if (IsInitialization)
+                {
+                    CollectionViewSource.Source = db.Microfillings.Local;
+
+                    DGM.ItemsSource = CollectionViewSource.View;
+
+                    CollectionViewSource.SortDescriptions.Add(new SortDescription("Проведено", ListSortDirection.Ascending));
+                    CollectionViewSource.SortDescriptions.Add(new SortDescription("Мікрофонд.Повністю", ListSortDirection.Ascending));
+                    CollectionViewSource.SortDescriptions.Add(new SortDescription("КФК.Код", ListSortDirection.Ascending));
+                    CollectionViewSource.SortDescriptions.Add(new SortDescription("Головний_розпорядник.Найменування", ListSortDirection.Ascending));
+                    CollectionViewSource.SortDescriptions.Add(new SortDescription("КФБ.Код", ListSortDirection.Ascending));
+                    CollectionViewSource.SortDescriptions.Add(new SortDescription("КДБ.Код", ListSortDirection.Ascending));
+                    CollectionViewSource.SortDescriptions.Add(new SortDescription("КЕКВ.Код", ListSortDirection.Ascending));
+
+                    int t = 0;
+                    foreach (ItemPropertyInfo item in ((IItemProperties)DGM.Items).ItemProperties)
+                    {
+                        Func.GetFilters(EXPGRO, t, item, ref dict_cmb, ref dict_txt, ref GetLabels);
+
+                        Func.GetGroups(t, item, ref CheckBoxes, ref EXPGRT);
+
+                        Func.GetVisibilityOfColumns(t, item, ref EXPHDN);
+
+                        t++;
+                    }
+
+                    IsInitialization = false;
+                }
+
+                CollectionViewSource.GetDefaultView(DGM.ItemsSource).Refresh();
+            }
         }
     }
     #region "Converters"

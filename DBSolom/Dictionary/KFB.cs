@@ -2,15 +2,14 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
-using System.Runtime.Serialization;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace DBSolom
 {
-    public class Main_manager
+    public class KFB
     {
-        public Main_manager()
+        public KFB()
         {
             Видалено = false;
             Створино = DateTime.Now;
@@ -36,14 +35,8 @@ namespace DBSolom
         public DateTime Змінено { get; set; }
 
         [Required(AllowEmptyStrings = false)]
-        public string Найменування { get; set; }
+        public long Код { get; set; }
 
         public string Повністю { get; set; }
-
-        public int КПОЛ { get; set; }
-
-        public int Код_ГУДКСУ { get; set; }
-
-        public int Код_УДКСУ { get; set; }
     }
 }

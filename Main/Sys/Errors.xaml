@@ -1,0 +1,17 @@
+﻿<Window x:Class="Maestro.Sys.Errors"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Maestro.Sys"
+        mc:Ignorable="d"
+        Title="Maestro: [Помилки]" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="50"></RowDefinition>
+            <RowDefinition></RowDefinition>
+        </Grid.RowDefinitions>
+        <Label Grid.Row="0" HorizontalAlignment="Center" FontWeight="Bold" FontSize="16">Тут перераховані помилки, які виникли під час останньої дії:</Label>
+        <DataGrid Grid.Row="1" x:Name="DGM"></DataGrid>
+    </Grid>
+</Window>

@@ -36,6 +36,8 @@ namespace Main.Sys
         List<Filters> GetFilters = new List<Filters>();
         public List<ToggleButton> CheckBoxes = new List<ToggleButton>();
 
+        DBSolom.Db db = new Db(Func.GetConnectionString);
+
         #endregion
 
         public User()
@@ -43,126 +45,25 @@ namespace Main.Sys
             InitializeComponent();
 
             #region "Load entity"
-
-            foreach (var item in Func.GetDB.Users.Local.ToList())
-            {
-                switch (Func.GetDB.Entry(item).State)
-                {
-                    case EntityState.Detached:
-                        break;
-                    case EntityState.Unchanged:
-                        break;
-                    case EntityState.Added:
-                        Func.GetDB.Users.Local.Remove(item);
-                        break;
-                    case EntityState.Deleted:
-                        break;
-                    case EntityState.Modified:
-                        Func.GetDB.Entry(item).Reload();
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            Func.GetDB.Users.Load();
+            
+            db.Users.Load();
 
             #endregion
 
-            ((CollectionViewSource)FindResource("cvs")).Source = Func.GetDB.Users.Local;
+            ((CollectionViewSource)FindResource("cvs")).Source = db.Users.Local;
 
             ((CollectionViewSource)FindResource("cvs")).Filter += Func.CollectionView_Filter;
 
             DGM.GroupStyle.Add(((GroupStyle)FindResource("one")));
 
-            BTN_Accept.Click += BTN_Accept_Click;
-            BTN_Reset.Click += BTN_Reset_Click;
-            BTN_ResetGroup.Click += BTN_ResetGroup_Click;
             BTN_Save.Click += BTN_Save_Click;
-
-            EXPMAESTRO.MouseEnter += Func.Expander_MouseEnter;
-            EXPMAESTRO.MouseLeave += Func.Expander_MouseLeave;
-
-            var t = 0;
-            foreach (var item in ((IItemProperties)DGM.Items).ItemProperties)
-            {
-                if (item.Name == "Пароль" || item.Name == "New")
-                {
-                    continue;
-                }
-
-                Func.GetFilters(EXPGRO, t, item, ref dict_cmb, ref dict_txt, ref GetLabels);
-
-                Func.GetGroups(t, item, ref CheckBoxes, ref EXPGRT);
-
-                Func.GetVisibilityOfColumns(t, item, ref EXPHDN);
-
-                t++;
-            }
         }
 
-        #region "BUTTONS"
-        public void BTN_Accept_Click(object sender, RoutedEventArgs e)
-        {
-            Filters filters = new Filters();
-            string str = "";
-            bool first = true;
-
-            for (int i = 0; i < GetLabels.Count; i++)
-            {
-                if (dict_txt[GetLabels[i].Content.ToString()].Text != "")
-                {
-                    type = dict_cmb[GetLabels[i].Content.ToString()].Text;
-                    prop = GetLabels[i].Content.ToString();
-                    value = dict_txt[GetLabels[i].Content.ToString()].Text;
-                    filters.GetFilters.Add(new Dictionary<string, dynamic>() { { "type", type }, { "prop", prop }, { "value", value } });
-
-                    str += first ? prop + " " + type + " " + value : " & " + prop + " " + type + " " + value;
-                    first = false;
-                }
-            }
-
-            LBFilters.Items.Add(str);
-
-            for (int i = 0; i < dict_cmb.Count; i++)
-            {
-                dict_cmb.Select(s => s.Value).ToList()[i].SelectedValue = null;
-                dict_txt.Select(s => s.Value).ToList()[i].Text = null;
-            }
-            type = "";
-            prop = "";
-            value = null;
-
-            GetFilters.Add(filters);
-
-            CollectionViewSource.GetDefaultView(DGM.ItemsSource).Refresh();
-        }
-        public void BTN_Reset_Click(object sender, RoutedEventArgs e)
-        {
-            for (int i = 0; i < dict_cmb.Count; i++)
-            {
-                dict_cmb.Select(s => s.Value).ToList()[i].SelectedValue = null;
-                dict_txt.Select(s => s.Value).ToList()[i].Text = null;
-            }
-            type = "";
-            prop = "";
-            value = null;
-
-            LBFilters.Items.Clear();
-            GetFilters.Clear();
-            CollectionViewSource.GetDefaultView(DGM.ItemsSource).Refresh();
-        }
-        public void BTN_ResetGroup_Click(object sender, RoutedEventArgs e)
-        {
-            ICollectionView cvTasks = CollectionViewSource.GetDefaultView(DGM.ItemsSource);
-            CheckBoxes.ForEach(a => a.IsChecked = false);
-            cvTasks.GroupDescriptions.Clear();
-        }
         public void BTN_Save_Click(object sender, RoutedEventArgs e)
         {
             try
             {
-                Func.GetDB.SaveChanges();
+                db.SaveChanges();
                 MessageBox.Show("Зміни збережено!");
             }
             catch (Exception ex)
@@ -171,11 +72,10 @@ namespace Main.Sys
             }
             DGM.Items.Refresh();
         }
-        #endregion
 
         private void DGM_Loaded(object sender, RoutedEventArgs e)
         {
-            if (Func.GetDB.Lows.FirstOrDefault(f => f.Видалено == false && f.Правовласник.Логін == Func.Login && f.User == true) is null)
+            if (db.Lows.FirstOrDefault(f => f.Видалено == false && f.Правовласник.Логін == Func.Login && f.User == true) is null)
             {
                 DGM.IsReadOnly = true;
             }
@@ -183,7 +83,7 @@ namespace Main.Sys
 
         private void DGM_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
         {
-            Func.GenerateColumnForDataGrid(ref counterForDGMColumns, e);
+            Func.GenerateColumnForDataGrid(db, ref counterForDGMColumns, e);
         }
 
         private void DGM_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)

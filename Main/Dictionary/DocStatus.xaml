@@ -80,9 +80,10 @@
                     <ColumnDefinition></ColumnDefinition>
                     <ColumnDefinition></ColumnDefinition>
                     <ColumnDefinition></ColumnDefinition>
+                    <ColumnDefinition></ColumnDefinition>
                 </Grid.ColumnDefinitions>
                 
-                <Expander Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="4" IsExpanded="False" Margin="5" Header="Фільтри:" BorderBrush="LightBlue" BorderThickness="2">
+                <Expander Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" IsExpanded="False" Margin="5" Header="Фільтри:" BorderBrush="LightBlue" BorderThickness="2">
                     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                         <Grid x:Name="EXPGRO">
                             <Grid.RowDefinitions>
@@ -104,7 +105,7 @@
                         </Grid>
                     </ScrollViewer>
                 </Expander>
-                <Expander x:Name="expander" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="4" IsExpanded="False" Margin="5" Header="Групи:" BorderBrush="LightBlue" BorderThickness="2">
+                <Expander x:Name="expander" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" IsExpanded="False" Margin="5" Header="Групи:" BorderBrush="LightBlue" BorderThickness="2">
                     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                         <Grid x:Name="EXPGRT">
                             <Grid.ColumnDefinitions>
@@ -119,7 +120,7 @@
                         </Grid>
                     </ScrollViewer>
                 </Expander>
-                <Expander Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="4" IsExpanded="False" Margin="5" Header="Видимість:" BorderBrush="LightBlue" BorderThickness="2">
+                <Expander Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="5" IsExpanded="False" Margin="5" Header="Видимість:" BorderBrush="LightBlue" BorderThickness="2">
                     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                         <Grid x:Name="EXPHDN">
                             <Grid.ColumnDefinitions>
@@ -139,6 +140,7 @@
                 <Button x:Name="BTN_Reset" Grid.Row="3" Grid.Column="1" Margin="10">Скинути усі фільтри</Button>
                 <Button x:Name="BTN_ResetGroup" Grid.Row="3" Grid.Column="2" Margin="10">Скинути групування</Button>
                 <Button x:Name="BTN_Save" Grid.Row="3" Grid.Column="3" Margin="10">Зберегти зміни</Button>
+                <Button x:Name="BTN_ExportToExcel" Grid.Row="3" Grid.Column="4" Margin="10">Експортувати в Excel</Button>
             </Grid>
         </Expander>
 

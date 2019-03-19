@@ -36,6 +36,8 @@ namespace Main.Dictionary
         List<Filters> GetFilters = new List<Filters>();
         public List<ToggleButton> CheckBoxes = new List<ToggleButton>();
 
+        DBSolom.Db db = new Db(Func.GetConnectionString);
+
         #endregion
 
         public MicroFoundation()
@@ -43,36 +45,18 @@ namespace Main.Dictionary
             InitializeComponent();
 
             #region "Load entity"
-
-            foreach (var item in Func.GetDB.MicroFoundations.Local.ToList())
-            {
-                switch (Func.GetDB.Entry(item).State)
-                {
-                    case EntityState.Detached:
-                        break;
-                    case EntityState.Unchanged:
-                        break;
-                    case EntityState.Added:
-                        Func.GetDB.MicroFoundations.Local.Remove(item);
-                        break;
-                    case EntityState.Deleted:
-                        break;
-                    case EntityState.Modified:
-                        Func.GetDB.Entry(item).Reload();
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            Func.GetDB.MicroFoundations
-                            .Include(i => i.Фонд).Include(i => i.Змінив).Include(i => i.Створив)
-                            .OrderBy(o=>o.Фонд.Код).ThenBy(tb=>tb.Повністю)
+            
+            db.MicroFoundations
+                            .Include(i => i.Фонд)
+                            .Include(i => i.Змінив)
+                            .Include(i => i.Створив)
+                            .OrderBy(o => o.Фонд.Код)
+                            .ThenBy(tb => tb.Повністю)
                             .Load();
 
             #endregion
 
-            ((CollectionViewSource)FindResource("cvs")).Source = Func.GetDB.MicroFoundations.Local;
+            ((CollectionViewSource)FindResource("cvs")).Source = db.MicroFoundations.Local;
 
             ((CollectionViewSource)FindResource("cvs")).Filter += Func.CollectionView_Filter;
 
@@ -82,11 +66,14 @@ namespace Main.Dictionary
             BTN_Reset.Click += BTN_Reset_Click;
             BTN_ResetGroup.Click += BTN_ResetGroup_Click;
             BTN_Save.Click += BTN_Save_Click;
+            BTN_ExportToExcel.Click += Func.BTN_ExportToExcel_Click;
 
-            EXPMAESTRO.MouseEnter += Func.Expander_MouseEnter;
-            EXPMAESTRO.MouseLeave += Func.Expander_MouseLeave;
+            GetViewOfToolBox();
+        }
 
-            var t = 0;
+        private void GetViewOfToolBox()
+        {
+            int t = 0;
             foreach (var item in ((IItemProperties)DGM.Items).ItemProperties)
             {
                 Func.GetFilters(EXPGRO, t, item, ref dict_cmb, ref dict_txt, ref GetLabels);
@@ -160,7 +147,7 @@ namespace Main.Dictionary
         {
             try
             {
-                Func.GetDB.SaveChanges();
+                db.SaveChanges();
                 MessageBox.Show("Зміни збережено!");
             }
             catch (Exception ex)
@@ -173,13 +160,7 @@ namespace Main.Dictionary
 
         private void DGM_Loaded(object sender, RoutedEventArgs e)
         {
-            if (Func.GetDB.Lows
-                .Include(i => i.Змінив)
-                .Include(i => i.Правовласник)
-                .Include(i => i.Створив)
-                .FirstOrDefault(f => f.Видалено == false &&
-                                     f.Правовласник.Логін == Func.Login &&
-                                     f.Microfoundation == true) is null)
+            if (db.Lows.Include(i => i.Правовласник).FirstOrDefault(f => f.Видалено == false && f.Правовласник.Логін == Func.Login && f.Microfoundation == true) is null)
             {
                 DGM.IsReadOnly = true;
             }
@@ -189,15 +170,15 @@ namespace Main.Dictionary
         {
             if (((DBSolom.MicroFoundation)e.Row.Item).Id == 0)
             {
-                ((DBSolom.MicroFoundation)e.Row.Item).Створив = Func.GetDB.Users.FirstOrDefault(f => f.Видалено == false && f.Логін == Func.Login);
+                ((DBSolom.MicroFoundation)e.Row.Item).Створив = db.Users.FirstOrDefault(f => f.Видалено == false && f.Логін == Func.Login);
             }
-            ((DBSolom.MicroFoundation)e.Row.Item).Змінив = Func.GetDB.Users.FirstOrDefault(f => f.Видалено == false && f.Логін == Func.Login);
+            ((DBSolom.MicroFoundation)e.Row.Item).Змінив = db.Users.FirstOrDefault(f => f.Видалено == false && f.Логін == Func.Login);
             ((DBSolom.MicroFoundation)e.Row.Item).Змінено = DateTime.Now;
         }
 
         private void DGM_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
         {
-            Func.GenerateColumnForDataGrid(ref counterForDGMColumns, e);
+            Func.GenerateColumnForDataGrid(db, ref counterForDGMColumns, e);
         }
     }
 }

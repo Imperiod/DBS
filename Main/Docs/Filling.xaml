@@ -145,6 +145,7 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <ListBox Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="25" x:Name="LBFilters"></ListBox>
                         </Grid>
@@ -157,6 +158,7 @@
                                 <RowDefinition></RowDefinition>
                             </Grid.RowDefinitions>
                             <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
@@ -215,6 +217,7 @@
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                         </Grid>
                     </ScrollViewer>
@@ -245,6 +248,20 @@
                 <GroupBox x:Name="GRPBMax" Grid.Column="4" FontWeight="Bold" FontSize="14" Header="Максимум:" Margin="2"/>
             </Grid>
         </Expander>
-        <ProgressBar x:Name="PB" Grid.Row="3" Margin="5" Height="25" />
+
+        <Grid Grid.Row="3">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition Width="auto"/>
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Label Grid.Column="0" Content="Початок періоду:"/>
+            <DatePicker x:Name="SDate" Grid.Column="1" SelectedDateChanged="DatePicker_SelectedDateChanged"/>
+            <Label Grid.Column="2" Content="Кінець періоду:"/>
+            <DatePicker x:Name="EDate" Grid.Column="3" SelectedDateChanged="DatePicker_SelectedDateChanged"/>
+            <ProgressBar x:Name="PB" Grid.Column="4" Margin="5,0,5,0" Height="25" />
+        </Grid>
     </Grid>
 </Window>

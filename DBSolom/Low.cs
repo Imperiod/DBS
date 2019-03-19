@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,12 +13,14 @@ namespace DBSolom
         {
             Видалено = false;
             Створино = DateTime.Now;
+            Змінено = DateTime.Now;
 
-            //9
+            //10
             DocStatus = false;
             Macrofoundation = false;
             Foundation = false;
             Microfoundation = false;
+            KFB = false;
             KDB = false;
             KEKB = false;
             KFK = false;
@@ -34,18 +37,25 @@ namespace DBSolom
             Lowt = false;
         }
 
+        [Key]
+        [Editable(false)]
         public long Id { get; set; }
 
         public bool Видалено { get; set; }
 
+        [Required(AllowEmptyStrings = false)]
         public User Створив { get; set; }
 
+        [Required(AllowEmptyStrings = false)]
         public DateTime Створино { get; set; }
 
+        [Required(AllowEmptyStrings = false)]
         public User Змінив { get; set; }
 
+        [Required(AllowEmptyStrings = false)]
         public DateTime Змінено { get; set; }
 
+        [Required(AllowEmptyStrings = false)]
         public User Правовласник { get; set; }
 
         #region "Tables"
@@ -59,6 +69,8 @@ namespace DBSolom
         public bool Foundation { get; set; }
 
         public bool Microfoundation { get; set; }
+
+        public bool KFB { get; set; }
 
         public bool KDB { get; set; }
 

@@ -55,6 +55,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Dictionary\KFB.cs" />
     <Compile Include="Dictionary\MacroFoundation.cs" />
     <Compile Include="Dictionary\MicroFoundation.cs" />
     <Compile Include="Docs\Correction.cs" />

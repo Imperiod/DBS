@@ -19,6 +19,8 @@ namespace Main
 {
     public partial class Login : Window
     {
+        DBSolom.Db db = new DBSolom.Db(Func.GetConnectionString);
+
         public Login()
         {
             InitializeComponent();
@@ -37,7 +39,7 @@ namespace Main
             await Dispatcher.BeginInvoke(new ThreadStart(() => { BTN.Visibility = Visibility.Collapsed; PB.Visibility = Visibility.Visible; }));
             if (l != "")
             {
-                var q = Func.GetDB.Users.FirstOrDefault(w => w.Видалено == false && w.Логін == l);
+                var q = db.Users.FirstOrDefault(w => w.Видалено == false && w.Логін == l);
                 if (q is null)
                 {
                     MessageBox.Show("Такого логіна не існує.", "Maestro", MessageBoxButton.OK, MessageBoxImage.Error);
@@ -59,7 +61,7 @@ namespace Main
 
                     q.Пароль = pass;
                     q.New = false;
-                    await Task.Factory.StartNew(() => Func.GetDB.SaveChanges());
+                    await Task.Factory.StartNew(() => db.SaveChanges());
                     MessageBox.Show("Пароль встановлено.\n\nПри повторному вході використовуйте ваш новий пароль.", "Maestro", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                     Func.Login = q.Логін;
                     await Dispatcher.BeginInvoke( new ThreadStart( () => { MainWindow mainWindow = new MainWindow(); mainWindow.Show(); Close(); } ) );

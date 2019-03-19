@@ -36,6 +36,8 @@ namespace Main.Sys
         List<Filters> GetFilters = new List<Filters>();
         public List<ToggleButton> CheckBoxes = new List<ToggleButton>();
 
+        DBSolom.Db db = new Db(Func.GetConnectionString);
+
         #endregion
 
         public Low()
@@ -43,39 +45,17 @@ namespace Main.Sys
             InitializeComponent();
 
             #region "Load entity"
-
-            foreach (var item in Func.GetDB.Lows.Local.ToList())
-            {
-                switch (Func.GetDB.Entry(item).State)
-                {
-                    case EntityState.Detached:
-                        break;
-                    case EntityState.Unchanged:
-                        break;
-                    case EntityState.Added:
-                        Func.GetDB.Lows.Local.Remove(item);
-                        break;
-                    case EntityState.Deleted:
-                        break;
-                    case EntityState.Modified:
-                        Func.GetDB.Entry(item).Reload();
-                        break;
-                    default:
-                        break;
-                }
-            }
-
-            Func.GetDB.Lows
-
-                    .Include(i => i.Правовласник).Include(i => i.Змінив).Include(i => i.Створив)
-
+            
+            db.Lows
+                    .Include(i => i.Правовласник)
+                    .Include(i => i.Змінив)
+                    .Include(i => i.Створив)
                     .OrderBy(o=>o.Правовласник.Логін)
-
                     .Load();
 
             #endregion
             
-            ((CollectionViewSource)FindResource("cvs")).Source = Func.GetDB.Lows.Local;
+            ((CollectionViewSource)FindResource("cvs")).Source = db.Lows.Local;
 
             ((CollectionViewSource)FindResource("cvs")).Filter += Func.CollectionView_Filter;
 
@@ -85,9 +65,6 @@ namespace Main.Sys
             BTN_Reset.Click += BTN_Reset_Click;
             BTN_ResetGroup.Click += BTN_ResetGroup_Click;
             BTN_Save.Click += BTN_Save_Click;
-
-            EXPMAESTRO.MouseEnter += Func.Expander_MouseEnter;
-            EXPMAESTRO.MouseLeave += Func.Expander_MouseLeave;
 
             var t = 0;
             foreach (var item in ((IItemProperties)DGM.Items).ItemProperties)
@@ -163,7 +140,7 @@ namespace Main.Sys
         {
             try
             {
-                Func.GetDB.SaveChanges();
+                db.SaveChanges();
                 MessageBox.Show("Зміни збережено!");
             }
             catch (Exception ex)
@@ -176,7 +153,7 @@ namespace Main.Sys
 
         private void DGM_Loaded(object sender, RoutedEventArgs e)
         {
-            if (Func.GetDB.Lows.FirstOrDefault(f => f.Видалено == false && f.Правовласник.Логін == Func.Login && f.Lowt == true) is null)
+            if (db.Lows.FirstOrDefault(f => f.Видалено == false && f.Правовласник.Логін == Func.Login && f.Lowt == true) is null)
             {
                 DGM.IsReadOnly = true;
             }
@@ -186,15 +163,15 @@ namespace Main.Sys
         {
             if (((DBSolom.Low)e.Row.Item).Id == 0)
             {
-                ((DBSolom.Low)e.Row.Item).Створив = Func.GetDB.Users.Local.FirstOrDefault(f => f.Видалено == false && f.Логін == Func.Login);
+                ((DBSolom.Low)e.Row.Item).Створив = db.Users.Local.FirstOrDefault(f => f.Видалено == false && f.Логін == Func.Login);
             }
-            ((DBSolom.Low)e.Row.Item).Змінив = Func.GetDB.Users.Local.FirstOrDefault(f => f.Видалено == false && f.Логін == Func.Login);
+            ((DBSolom.Low)e.Row.Item).Змінив = db.Users.Local.FirstOrDefault(f => f.Видалено == false && f.Логін == Func.Login);
             ((DBSolom.Low)e.Row.Item).Змінено = DateTime.Now;
         }
 
         private void DGM_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
         {
-            Func.GenerateColumnForDataGrid(ref counterForDGMColumns, e);
+            Func.GenerateColumnForDataGrid(db, ref counterForDGMColumns, e);
         }
     }
 }

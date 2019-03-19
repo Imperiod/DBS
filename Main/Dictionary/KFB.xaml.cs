@@ -1,11 +1,9 @@
-﻿using DBSolom;
+﻿using Main;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data.Entity;
 using System.Linq;
-using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -20,8 +18,12 @@ using System.Windows.Shapes;
 
 namespace Main.Dictionary
 {
-    public partial class KDB : Window
+    /// <summary>
+    /// Логика взаимодействия для KFB.xaml
+    /// </summary>
+    public partial class KFB : Window
     {
+    
         #region "Variables"
 
         public string type = "";
@@ -35,17 +37,17 @@ namespace Main.Dictionary
         List<Filters> GetFilters = new List<Filters>();
         public List<ToggleButton> CheckBoxes = new List<ToggleButton>();
 
-        DBSolom.Db db = new Db(Func.GetConnectionString);
+        DBSolom.Db db = new DBSolom.Db(Func.GetConnectionString);
 
         #endregion
 
-        public KDB()
+        public KFB()
         {
             InitializeComponent();
 
             #region "Load entity"
-            
-            db.KDBs
+           
+            db.KFBs
                     .Include(i => i.Змінив)
                     .Include(i => i.Створив)
                     .OrderBy(o => o.Код)
@@ -53,7 +55,7 @@ namespace Main.Dictionary
 
             #endregion
 
-            ((CollectionViewSource)FindResource("cvs")).Source = db.KDBs.Local;
+            ((CollectionViewSource)FindResource("cvs")).Source = db.KFBs.Local;
 
             ((CollectionViewSource)FindResource("cvs")).Filter += Func.CollectionView_Filter;
 
@@ -63,14 +65,8 @@ namespace Main.Dictionary
             BTN_Reset.Click += BTN_Reset_Click;
             BTN_ResetGroup.Click += BTN_ResetGroup_Click;
             BTN_Save.Click += BTN_Save_Click;
-            BTN_ExportToExcel.Click += Func.BTN_ExportToExcel_Click;
 
-            GetViewOfToolBox();
-        }
-
-        private void GetViewOfToolBox()
-        {
-            int t = 0;
+            var t = 0;
             foreach (var item in ((IItemProperties)DGM.Items).ItemProperties)
             {
                 Func.GetFilters(EXPGRO, t, item, ref dict_cmb, ref dict_txt, ref GetLabels);
@@ -157,7 +153,7 @@ namespace Main.Dictionary
 
         private void DGM_Loaded(object sender, RoutedEventArgs e)
         {
-            if (db.Lows.Include(i => i.Правовласник).FirstOrDefault(f => f.Видалено == false && f.Правовласник.Логін == Func.Login && f.KDB == true) is null)
+            if (db.Lows.Include(i => i.Правовласник).FirstOrDefault(f => f.Видалено == false && f.Правовласник.Логін == Func.Login && f.KFB == true) is null)
             {
                 DGM.IsReadOnly = true;
             }
@@ -165,12 +161,12 @@ namespace Main.Dictionary
 
         private void DGM_CellEditEnding(object sender, DataGridCellEditEndingEventArgs e)
         {
-            if (((DBSolom.KDB)e.Row.Item).Id == 0)
+            if (((DBSolom.KFB)e.Row.Item).Id == 0)
             {
-                ((DBSolom.KDB)e.Row.Item).Створив = db.Users.FirstOrDefault(f => f.Видалено == false && f.Логін == Func.Login);
+                ((DBSolom.KFB)e.Row.Item).Створив = db.Users.FirstOrDefault(f => f.Видалено == false && f.Логін == Func.Login);
             }
-            ((DBSolom.KDB)e.Row.Item).Змінив = db.Users.FirstOrDefault(f => f.Видалено == false && f.Логін == Func.Login);
-            ((DBSolom.KDB)e.Row.Item).Змінено = DateTime.Now;
+            ((DBSolom.KFB)e.Row.Item).Змінив = db.Users.FirstOrDefault(f => f.Видалено == false && f.Логін == Func.Login);
+            ((DBSolom.KFB)e.Row.Item).Змінено = DateTime.Now;
         }
 
         private void DGM_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
@@ -179,3 +175,4 @@ namespace Main.Dictionary
         }
     }
 }
+

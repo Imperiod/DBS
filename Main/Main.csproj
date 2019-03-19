@@ -14,7 +14,7 @@
     <WarningLevel>4</WarningLevel>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
     <IsWebBootstrapper>false</IsWebBootstrapper>
-    <PublishUrl>E:\Solom\</PublishUrl>
+    <PublishUrl>Z:\LeXX\Solom\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
     <UpdateEnabled>true</UpdateEnabled>
@@ -32,7 +32,7 @@
     <PublisherName>Alexandr Gazha</PublisherName>
     <WebPage>publish.htm</WebPage>
     <OpenBrowserOnPublish>false</OpenBrowserOnPublish>
-    <ApplicationRevision>109</ApplicationRevision>
+    <ApplicationRevision>125</ApplicationRevision>
     <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
     <UseApplicationTrust>true</UseApplicationTrust>
     <CreateDesktopShortcut>true</CreateDesktopShortcut>
@@ -87,6 +87,7 @@
     <Reference Include="EntityFramework.SqlServer, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>..\packages\EntityFramework.6.2.0\lib\net45\EntityFramework.SqlServer.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.JScript" />
     <Reference Include="Microsoft.VisualBasic" />
     <Reference Include="System" />
     <Reference Include="System.ComponentModel.DataAnnotations" />
@@ -109,6 +110,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Dictionary\KFB.xaml.cs">
+      <DependentUpon>KFB.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Dictionary\MicroFoundation.xaml.cs">
       <DependentUpon>MicroFoundation.xaml</DependentUpon>
     </Compile>
@@ -121,6 +125,12 @@
     <Compile Include="Func.cs" />
     <Compile Include="Functional\CurrPlan.xaml.cs">
       <DependentUpon>CurrPlan.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Functional\Remainders.xaml.cs">
+      <DependentUpon>Remainders.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Sys\Errors.xaml.cs">
+      <DependentUpon>Errors.xaml</DependentUpon>
     </Compile>
     <Compile Include="Sys\Low.xaml.cs">
       <DependentUpon>Low.xaml</DependentUpon>
@@ -143,6 +153,10 @@
     <Page Include="Dictionary\KEKB.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Dictionary\KFB.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
     </Page>
     <Page Include="Dictionary\KFK.xaml">
       <SubType>Designer</SubType>
@@ -181,6 +195,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Functional\CurrPlan.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Functional\Remainders.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -233,6 +251,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Sys\Errors.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Sys\Low.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

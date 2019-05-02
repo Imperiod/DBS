@@ -8,10 +8,12 @@
         Title="Maestro: [Помилки]" Height="450" Width="800">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="50"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
+            <RowDefinition Height="30"></RowDefinition>
             <RowDefinition></RowDefinition>
         </Grid.RowDefinitions>
         <Label Grid.Row="0" HorizontalAlignment="Center" FontWeight="Bold" FontSize="16">Тут перераховані помилки, які виникли під час останньої дії:</Label>
-        <DataGrid Grid.Row="1" x:Name="DGM"></DataGrid>
+        <Label Grid.Row="1" HorizontalAlignment="Center" FontWeight="Bold" FontSize="16">У всій операції імпорту відмовлено (!)</Label>
+        <ListView Grid.Row="2" x:Name="LVM"></ListView>
     </Grid>
 </Window>

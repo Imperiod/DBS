@@ -183,7 +183,6 @@ namespace Main
                                 KDB kDB;
                                 KEKB kEKB;
                                 List<Filling> fillings = new List<Filling>();
-                                List<string> errors = new List<string>();
                                 #endregion
 
                                 for (int i = 2; i <= application.WorksheetFunction.CountA(worksheet.Columns[1]); i++)
@@ -255,24 +254,23 @@ namespace Main
                                     fillings.Add(filling);
                                 }
 
+                                List<string> errors = new List<string>();
+
                                 foreach (var item in fillings)
                                 {
-                                    List<double> x = Func.GetRamainedFromDBPerMonth(db, item.Проведено.Year, item.КФК, item.Головний_розпорядник, item.КЕКВ, item.Фонд);
-                                    for (int i = 0; i < 12; i++)
+                                    errors.AddRange(Func.ChangeFinDocIsAllow(db, item.Проведено, item.КФК, item.Головний_розпорядник, item.КЕКВ, item.Фонд));
+                                    if (errors.Count == 0)
                                     {
-                                        double t = (double)item.GetType().GetProperty(Func.names_months[i]).GetValue(item);
-                                        if (x[i] + t < 0)
-                                        {
-                                            errors.Add($"[Дата: {item.Проведено.ToShortDateString()}] [Фонд: {item.Фонд.Код}] [КПБ: {item.КФК.Код}]" +
-                                                $" [Головний розпорядник: {item.Головний_розпорядник.Найменування}]" +
-                                                $" [КЕКВ: {item.КЕКВ.Код}] [Місяць: {Func.names_months[i]}] [Залишок:{x[i]}] [Корегування: {t}] [Різниця: {x[i] - t}]");
-                                        }
+                                        db.Fillings.Local.Add(item);
+                                    }
+                                    else
+                                    {
+                                        break;
                                     }
                                 }
 
                                 if (errors.Count == 0)
                                 {
-                                    db.Fillings.AddRange(fillings);
                                     db.SaveChanges();
                                     MessageBox.Show("Готово!", "Maestro", MessageBoxButton.OK, MessageBoxImage.Information);
                                 }
@@ -294,6 +292,10 @@ namespace Main
                                 if (workbook != null)
                                 {
                                     workbook.Close(false);
+                                }
+                                if (application != null)
+                                {
+                                    application.Quit();
                                 }
                                 application = null;
                                 openFileDialog = null;
@@ -338,6 +340,8 @@ namespace Main
                             User user = db.Users.First(f => f.Видалено == false && f.Логін == Func.Login);
                             try
                             {
+                                #region "Variables"
+                                
                                 application = new Excel.Application();
                                 application.AskToUpdateLinks = false;
                                 application.DisplayAlerts = false;
@@ -358,6 +362,8 @@ namespace Main
                                 KEKB kEKB;
                                 MicroFoundation microFoundation;
                                 List<MicroFilling> fillings = new List<MicroFilling>();
+
+                                #endregion
 
                                 for (int i = 2; i <= application.WorksheetFunction.CountA(worksheet.Columns[1]); i++)
                                 {
@@ -426,8 +432,7 @@ namespace Main
 
                                     fillings.Add(filling);
                                 }
-
-                                workbook.Close(false);
+                                
                                 db.Microfillings.AddRange(fillings);
                                 db.SaveChanges();
                                 MessageBox.Show("Готово!", "Maestro", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -438,6 +443,8 @@ namespace Main
                             }
                             finally
                             {
+                                if (workbook != null) { workbook.Close(false); }
+                                if (application != null) { application.Quit(); }
                                 application = null;
                                 openFileDialog = null;
                                 workbook = null;
@@ -543,37 +550,30 @@ namespace Main
 
                                     localFinancings.Add(financing);
                                 }
-                                
-                                var EndFinancings = localFinancings.GroupBy(g => new
-                                {
-                                    g.Проведено.Year,
-                                    g.Головний_розпорядник,
-                                    g.КЕКВ,
-                                    g.КФК,
-                                    g.Мікрофонд.Фонд
-                                }).ToList();
 
-                                foreach (var item in EndFinancings)
+                                foreach (var item in localFinancings)
                                 {
-                                    List<double> x = Func.GetRamainedFromDBPerMonth(db, item.Key.Year, item.Key.КФК, item.Key.Головний_розпорядник, item.Key.КЕКВ, item.Key.Фонд);
-                                    double f = 0;
-
-                                    for (int i = 0; i < 12; i++)
+                                    var x = Func.GetCurrentPlanAndRemainderFromDBPerMonth(db, item.Проведено.Year, item.КФК, item.Головний_розпорядник, item.КЕКВ, item.Мікрофонд.Фонд);
+                                    if ((x[TypeOfFinanceData.Remainders][item.Проведено.Month - 1] - item.Сума) < 0)
                                     {
-                                        f = item.Where(w => w.Проведено.Month == (i + 1)).Sum(s => s.Сума);
-
-                                        if (x[i] - f < 0)
-                                        {
-                                            errors.Add($"[Дата: {item.Min(m=>m.Проведено).ToShortDateString()}-{item.Max(m=>m.Проведено).ToShortDateString()}] [Фонд: {item.Key.Фонд.Код}] [КПБ: {item.Key.КФК.Код}]" +
-                                                $" [Головний розпорядник: {item.Key.Головний_розпорядник.Найменування}]" +
-                                                $" [КЕКВ: {item.Key.КЕКВ.Код}] [Місяць: {Func.names_months[i]}] [Залишок:{x[i]}] [Фінансування: {f}] [Різниця: {x[i] - f}]");
-                                        }
+                                        errors.Add($"[Дата: {item.Проведено.ToShortDateString()}] [Фонд: {item.Мікрофонд.Фонд.Код}]" +
+                                            $" [КПБ: {item.КФК.Код}] [Головний розпорядник: {item.Головний_розпорядник.Найменування}]" +
+                                            $" [КЕКВ: {item.КЕКВ.Код}] [Місяць: {Func.names_months[item.Проведено.Month - 1]}]" +
+                                            $" [Остаток:{x[TypeOfFinanceData.Remainders][item.Проведено.Month - 1]}]");
+                                    }
+                                    
+                                    if (errors.Count == 0)
+                                    {
+                                        db.Financings.Local.Add(item);
+                                    }
+                                    else
+                                    {
+                                        break;
                                     }
                                 }
 
                                 if (errors.Count == 0)
                                 {
-                                    db.Financings.AddRange(localFinancings);
                                     db.SaveChanges();
                                     MessageBox.Show("Готово!", "Maestro", MessageBoxButton.OK, MessageBoxImage.Information);
                                 }
@@ -592,14 +592,18 @@ namespace Main
                             }
                             finally
                             {
+                                worksheet = null;
+                                openFileDialog = null;
                                 if (workbook != null)
                                 {
                                     workbook.Close(false);
+                                    workbook = null;
                                 }
-                                application = null;
-                                openFileDialog = null;
-                                workbook = null;
-                                worksheet = null;
+                                if (application != null)
+                                {
+                                    application.Quit();
+                                    application = null;
+                                }
                             }
                         });
 

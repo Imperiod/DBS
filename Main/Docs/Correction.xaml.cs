@@ -32,6 +32,8 @@ namespace Main.Docs
         public string prop = "";
         public object value = null;
         public int counterForDGMColumns = 0;
+        public int counterForDGCurrColumns = 0;
+        public int counterForDGRemColumns = 0;
 
         public List<Label> GetLabels = new List<Label>();
         public Dictionary<string, ComboBox> dict_cmb = new Dictionary<string, ComboBox>();
@@ -42,7 +44,8 @@ namespace Main.Docs
         CollectionViewSource CollectionViewSource { get; set; }
 
         DBSolom.Db db = new Db(Func.GetConnectionString);
-
+        List<ListMonths> CurrPlanList = new List<ListMonths>();
+        List<ListMonths> RemList = new List<ListMonths>();
         #endregion
 
         public Correction()
@@ -60,6 +63,9 @@ namespace Main.Docs
             BTN_ResetGroup.Click += BTN_ResetGroup_Click;
             BTN_Save.Click += BTN_Save_Click;
             BTN_ExportToExcel.Click += Func.BTN_ExportToExcel_Click;
+
+            DGCurrentPlan.ItemsSource = CurrPlanList;
+            DGRemainders.ItemsSource = RemList;
         }
 
         #region "BUTTONS"
@@ -173,67 +179,47 @@ namespace Main.Docs
                             Foundation FOND = ((DBSolom.Correction)e.AddedCells[0].Item).Мікрофонд.Фонд;
                             #endregion
 
-                            #region "Годовой план"
-                            double plan = 0;
-                            DBSolom.Filling qplan = mdb.Fillings.FirstOrDefault(w =>
-                                            w.Видалено == false &&
-                                            w.Головний_розпорядник.Id == Main_manager.Id &&
-                                            w.Проведено.Year == date.Year &&
-                                            w.КФБ.Код == KFB.Код &&
-                                            w.КДБ.Код == KDB.Код &&
-                                            w.КЕКВ.Код == KEKB.Код &&
-                                            w.КФК.Код == KFK.Код &&
-                                            w.Фонд.Код == FOND.Код);
-                            if (qplan != null)
+                            CurrPlanList.Clear();
+                            RemList.Clear();
+
+                            var x = Func.GetCurrentPlanAndRemainderFromDBPerMonth(db, date.Year, KFK, Main_manager, KEKB, FOND);
+
+                            ListMonths curr = new ListMonths()
                             {
-                                plan = (double)qplan.GetType().GetProperty(e.AddedCells[0].Column.Header.ToString()).GetValue(qplan);
-                            }
-                            #endregion
-
-                            #region "Довідки"
-                            //I'm unioning local correction entity with all entity from DB
-                            List<DBSolom.Correction> qcorr = mdb.Corrections
-                                                                            .Where(w =>
-                                                                                    w.Видалено == false &&
-                                                                                    w.Головний_розпорядник.Найменування == Main_manager.Найменування &&
-                                                                                    w.Проведено.Year == date.Year &&
-                                                                                    w.КФБ.Код == KFB.Код &&
-                                                                                    w.КДБ.Код == KDB.Код &&
-                                                                                    w.КЕКВ.Код == KEKB.Код &&
-                                                                                    w.КФК.Код == KFK.Код &&
-                                                                                    w.Мікрофонд.Фонд.Код == FOND.Код)
-                                                                                    .ToList();
-                            db.Corrections.Local.Where(w =>
-                                                               w.Видалено == false &&
-                                                               w.Головний_розпорядник.Найменування == Main_manager.Найменування &&
-                                                               w.Проведено.Year == date.Year &&
-                                                               w.КФБ.Код == KFB.Код &&
-                                                               w.КДБ.Код == KDB.Код &&
-                                                               w.КЕКВ.Код == KEKB.Код &&
-                                                               w.КФК.Код == KFK.Код &&
-                                                               w.Мікрофонд.Фонд.Код == FOND.Код)
-                                                               .ToList()
-                                                               .ForEach(item =>
-                                                               {
-                                                                   if (db.Entry(item).State != EntityState.Unchanged)
-                                                                   {
-                                                                       qcorr.Add(item);
-                                                                   }
-                                                               });
-                            double corrections = 0;
-                            if (qcorr.Count != 0)
+                                Січень = x[TypeOfFinanceData.CurrentPlan][0],
+                                Лютий = x[TypeOfFinanceData.CurrentPlan][1],
+                                Березень = x[TypeOfFinanceData.CurrentPlan][2],
+                                Квітень = x[TypeOfFinanceData.CurrentPlan][3],
+                                Травень = x[TypeOfFinanceData.CurrentPlan][4],
+                                Червень = x[TypeOfFinanceData.CurrentPlan][5],
+                                Липень = x[TypeOfFinanceData.CurrentPlan][6],
+                                Серпень = x[TypeOfFinanceData.CurrentPlan][7],
+                                Вересень = x[TypeOfFinanceData.CurrentPlan][8],
+                                Жовтень = x[TypeOfFinanceData.CurrentPlan][9],
+                                Листопад = x[TypeOfFinanceData.CurrentPlan][10],
+                                Грудень = x[TypeOfFinanceData.CurrentPlan][11]
+                            };
+                            CurrPlanList.Add(curr);
+                            
+                            ListMonths rem = new ListMonths()
                             {
-                                corrections = qcorr.Select(s => (double)s.GetType().GetProperty(e.AddedCells[0].Column.Header.ToString()).GetValue(s)).Sum();
-                            }
+                                Січень = x[TypeOfFinanceData.Remainders][0],
+                                Лютий = x[TypeOfFinanceData.Remainders][1],
+                                Березень = x[TypeOfFinanceData.Remainders][2],
+                                Квітень = x[TypeOfFinanceData.Remainders][3],
+                                Травень = x[TypeOfFinanceData.Remainders][4],
+                                Червень = x[TypeOfFinanceData.Remainders][5],
+                                Липень = x[TypeOfFinanceData.Remainders][6],
+                                Серпень = x[TypeOfFinanceData.Remainders][7],
+                                Вересень = x[TypeOfFinanceData.Remainders][8],
+                                Жовтень = x[TypeOfFinanceData.Remainders][9],
+                                Листопад = x[TypeOfFinanceData.Remainders][10],
+                                Грудень = x[TypeOfFinanceData.Remainders][11]
+                            };
+                            RemList.Add(rem);
 
-                            #endregion
-
-                            GRPBPlan.Content = plan.ToString("N2", CultureInfo.CreateSpecificCulture("ru-RU"));
-
-                            GRPBCorr.Content = corrections.ToString("N2", CultureInfo.CreateSpecificCulture("ru-RU"));
-
-                            GRPBNow.Content = (plan + corrections).ToString("N2", CultureInfo.CreateSpecificCulture("ru-RU"));
-
+                            CollectionViewSource.GetDefaultView(DGCurrentPlan.ItemsSource).Refresh();
+                            CollectionViewSource.GetDefaultView(DGRemainders.ItemsSource).Refresh();
                         }
 
 
@@ -250,9 +236,6 @@ namespace Main.Docs
                     }
                     else
                     {
-                        GRPBPlan.Content = "Лише 1 комірка";
-                        GRPBCorr.Content = "Лише 1 комірка";
-                        GRPBNow.Content = "Лише 1 комірка";
 
                         double sum = 0;
                         int counter = 0;
@@ -313,18 +296,8 @@ namespace Main.Docs
                 Foundation FOND = ((DBSolom.Correction)e.EditingElement.DataContext).Мікрофонд.Фонд;
                 #endregion
 
-                List<double> x = Func.GetRamainedFromDBPerMonth(db, date.Year, KFK, Main_manager, KEKB, FOND);
-                List<string> errors = new List<string>();
+                List<string> errors = Func.ChangeFinDocIsAllow(db, date, KFK, Main_manager, KEKB, FOND);
 
-                for (int i = 0; i < 12; i++)
-                {
-                    if (x[i] < 0)
-                    {
-                        errors.Add($"[Дата: {date.ToShortDateString()}] [Фонд: {FOND.Код}] [КПБ: {KFK.Код}]" +
-                            $" [Головний розпорядник: {Main_manager.Найменування}]" +
-                            $" [КЕКВ: {KEKB.Код}] [Місяць: {Func.names_months[i]}] [Залишок:{x[i]}]");
-                    }
-                }
                 if (errors.Count > 0)
                 {
                     e.Cancel = true;
@@ -446,6 +419,16 @@ namespace Main.Docs
 
                 CollectionViewSource.GetDefaultView(DGM.ItemsSource).Refresh();
             }
+        }
+
+        private void DGCurrentPlan_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
+        {
+            Func.GenerateColumnForDataGrid(db, ref counterForDGCurrColumns, e);
+        }
+
+        private void DGRemainders_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
+        {
+            Func.GenerateColumnForDataGrid(db, ref counterForDGRemColumns, e);
         }
     }
 

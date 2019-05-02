@@ -71,7 +71,7 @@ namespace Main.Docs
             string str = "";
             bool first = true;
 
-            for(int i = 0; i < GetLabels.Count; i++)
+            for (int i = 0; i < GetLabels.Count; i++)
             {
                 if (dict_txt[GetLabels[i].Content.ToString()].Text != "")
                 {
@@ -166,7 +166,7 @@ namespace Main.Docs
                             double periodSumFilling = 0;
                             double periodSumCorrection = 0;
                             double periodSumFinancing = 0;
-                                
+
                             #region "Fiels of Cell"
 
                             DateTime date = ((DBSolom.Financing)e.AddedCells[0].Item).Проведено;
@@ -325,46 +325,40 @@ namespace Main.Docs
             }
             ((DBSolom.Financing)e.Row.Item).Змінив = db.Users.FirstOrDefault(f => f.Видалено == false && f.Логін == Func.Login);
             ((DBSolom.Financing)e.Row.Item).Змінено = DateTime.Now;
-
-            if (((DBSolom.Financing)e.EditingElement.DataContext).Головний_розпорядник != null &&
-                ((DBSolom.Financing)e.EditingElement.DataContext).КЕКВ != null &&
-                ((DBSolom.Financing)e.EditingElement.DataContext).КФК != null &&
-                ((DBSolom.Financing)e.EditingElement.DataContext).Мікрофонд != null)
+            if (e.EditAction != DataGridEditAction.Cancel)
             {
-                #region "Fields of Cell"
-                DateTime date = ((DBSolom.Financing)e.Row.Item).Проведено;
-                KFK KFK = ((DBSolom.Financing)e.Row.Item).КФК;
-                Main_manager Main_manager = ((DBSolom.Financing)e.Row.Item).Головний_розпорядник;
-                KEKB KEKB = ((DBSolom.Financing)e.Row.Item).КЕКВ;
-                Foundation FOND = ((DBSolom.Financing)e.Row.Item).Мікрофонд.Фонд;
-                MicroFoundation MicroFond = ((DBSolom.Financing)e.Row.Item).Мікрофонд;
-                #endregion
-
-                List<double> x = Func.GetRamainedFromDBPerMonth(db, date.Year, KFK, Main_manager, KEKB, FOND);
-                List<string> errors = new List<string>();
-
-                for (int i = 0; i < 12; i++)
+                if (((DBSolom.Financing)e.EditingElement.DataContext).Головний_розпорядник != null &&
+                    ((DBSolom.Financing)e.EditingElement.DataContext).КЕКВ != null &&
+                    ((DBSolom.Financing)e.EditingElement.DataContext).КФК != null &&
+                    ((DBSolom.Financing)e.EditingElement.DataContext).Мікрофонд != null)
                 {
-                    if (x[i] < 0)
+                    #region "Fields of Cell"
+                    DateTime date = ((DBSolom.Financing)e.Row.Item).Проведено;
+                    KFK KFK = ((DBSolom.Financing)e.Row.Item).КФК;
+                    Main_manager Main_manager = ((DBSolom.Financing)e.Row.Item).Головний_розпорядник;
+                    KEKB KEKB = ((DBSolom.Financing)e.Row.Item).КЕКВ;
+                    Foundation FOND = ((DBSolom.Financing)e.Row.Item).Мікрофонд.Фонд;
+                    MicroFoundation MicroFond = ((DBSolom.Financing)e.Row.Item).Мікрофонд;
+                    #endregion
+
+                    var x = Func.GetCurrentPlanAndRemainderFromDBPerMonth(db, date.Year, KFK, Main_manager, KEKB, FOND);
+
+                    if ((x[TypeOfFinanceData.Remainders][date.Month - 1] < 0))
                     {
-                        errors.Add($"[Дата: {date.ToShortDateString()}] [Фонд: {FOND.Код}] [КПБ: {KFK.Код}]" +
-                            $" [Головний розпорядник: {Main_manager.Найменування}]" +
-                            $" [КЕКВ: {KEKB.Код}] [Місяць: {Func.names_months[i]}] [Залишок:{x[i]}]");
+                        DGM.CancelEdit(DataGridEditingUnit.Cell);
+
+                        MessageBox.Show(($"[Дата: {date.ToShortDateString()}] [Фонд: {FOND.Код}] [КПБ: {KFK.Код}]" +
+                            $" [Головний розпорядник: {Main_manager.Найменування}] [КЕКВ: {KEKB.Код}]" +
+                            $" [Місяць: {Func.names_months[date.Month - 1]}] [Остаток:{x[TypeOfFinanceData.Remainders][date.Month - 1]}]"),
+                            "Maestro", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                        return;
                     }
                 }
-                if (errors.Count > 0)
-                {
-                    e.Cancel = true;
-                    ((TextBox)e.EditingElement).Text = (0.00).ToString();
-                    ((DBSolom.Financing)e.Row.Item).Сума = 0;
-                    string s = "";
-                    foreach (var item in errors)
-                    {
-                        s = s + item + "\n";
-                    }
-                    MessageBox.Show(s, "Maestro", MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
+            }
+            else
+            {
+                ((DBSolom.Financing)e.Row.Item).Сума = 0;
             }
         }
 
@@ -435,7 +429,7 @@ namespace Main.Docs
                             .Include(i => i.Створив)
                             .Where(w => w.Проведено >= SDate.SelectedDate && w.Проведено <= FinalDate)
                             .Load();
-                
+
                 #endregion
 
                 if (IsInitialization)

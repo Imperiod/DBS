@@ -269,18 +269,8 @@ namespace Main.Docs
                 Foundation FOND = ((DBSolom.Filling)e.EditingElement.DataContext).Фонд;
                 #endregion
 
-                List<double> x = Func.GetRamainedFromDBPerMonth(db, date.Year, KFK, Main_manager, KEKB, FOND);
-                List<string> errors = new List<string>();
+                List<string> errors = Func.ChangeFinDocIsAllow(db, date, KFK, Main_manager, KEKB, FOND);
 
-                for (int i = 0; i < 12; i++)
-                {
-                    if (x[i] < 0)
-                    {
-                        errors.Add($"[Дата: {date.ToShortDateString()}] [Фонд: {FOND.Код}] [КПБ: {KFK.Код}]" +
-                            $" [Головний розпорядник: {Main_manager.Найменування}]" +
-                            $" [КЕКВ: {KEKB.Код}] [Місяць: {Func.names_months[i]}] [Залишок:{x[i]}]");
-                    }
-                }
                 if (errors.Count > 0)
                 {
                     e.Cancel = true;

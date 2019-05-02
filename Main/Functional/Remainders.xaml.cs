@@ -99,7 +99,6 @@ namespace Maestro.Functional
                 #endregion
 
                 GetCurrPlanEntities = new CurrPlanEntities(db, (DateTime)SDate.SelectedDate, (DateTime)EDate.SelectedDate);
-
                 CollectionViewSource.Source = GetCurrPlanEntities.GetEntities;
                 DGM.ItemsSource = CollectionViewSource.View;
 
@@ -128,7 +127,6 @@ namespace Maestro.Functional
                 }
 
                 counterElementsDGM = GetCurrPlanEntities.GetEntities.Count;
-                CollectionViewSource.View.Refresh();
                 DGM.FrozenColumnCount = 9;
             }
         }

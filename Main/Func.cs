@@ -38,22 +38,22 @@ namespace Main
         {
             get
             {
-                string s = "";
+                string resultString = "";
                 if (ConnectionString is null || ConnectionString == "")
                 {
 #if DEBUG
-                    var f = System.IO.File.OpenText(Environment.CurrentDirectory.Substring(0, Environment.CurrentDirectory.LastIndexOf("Main")) + "Main\\Connection.imperiod");
+                    var file = System.IO.File.OpenText(Environment.CurrentDirectory.Substring(0, Environment.CurrentDirectory.LastIndexOf("Main")) + "Main\\Connection.imperiod");
 #else
-                    var f = System.IO.File.OpenText(Environment.CurrentDirectory + "\\Connection.imperiod");
+                    var file = System.IO.File.OpenText(Environment.CurrentDirectory + "\\Connection.imperiod");
 #endif
-                    s = f.ReadLine();
-                    f.Close();
+                    resultString = file.ReadLine();
+                    file.Close();
                 }
                 else
                 {
-                    s = ConnectionString;
+                    resultString = ConnectionString;
                 }
-                return s;
+                return resultString;
             }
         }
 
@@ -65,15 +65,17 @@ namespace Main
         static public void GenerateColumnForDataGrid(DBSolom.Db db, ref int counterForDGMColumns, DataGridAutoGeneratingColumnEventArgs e)
         {
             CultureInfo cultureInfo = new CultureInfo("ru-RU", true);
+            string headerString = e.Column.Header.ToString();
+            object header = e.Column.Header;
 
-            switch (e.Column.Header.ToString())
+            switch (headerString)
             {
                 case "Id":
                     e.Column = new DataGridTextColumn()
                     {
-                        Header = e.Column.Header,
+                        Header = header,
                         Visibility = Visibility.Hidden,
-                        Binding = new Binding("Id") { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
+                        Binding = new Binding(headerString) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
                         IsReadOnly = true,
                         DisplayIndex = counterForDGMColumns
                     };
@@ -81,43 +83,18 @@ namespace Main
                 case "Видалено":
                     e.Column = new DataGridCheckBoxColumn()
                     {
-                        Header = e.Column.Header,
+                        Header = header,
                         Visibility = Visibility.Hidden,
-                        Binding = new Binding("Видалено") { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
+                        Binding = new Binding(headerString) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
                         IsThreeState = false,
                         DisplayIndex = counterForDGMColumns
                     };
                     break;
                 case "Створив":
-                    e.Column = new DataGridComboBoxColumn()
-                    {
-                        Header = e.Column.Header,
-                        Visibility = Visibility.Hidden,
-                        ItemsSource = db.Users
-                        .Where(w => w.Видалено == false)
-                        .OrderBy(o => o.Логін).ToList(),
-
-                        DisplayMemberPath = "Логін",
-                        SelectedValueBinding = new Binding("Створив") { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
-                        IsReadOnly = true,
-                        DisplayIndex = counterForDGMColumns,
-                        SortMemberPath = "Створив.Логін"
-                    };
-                    break;
-                case "Створино":
-                    e.Column = new DataGridTextColumn()
-                    {
-                        Header = e.Column.Header,
-                        Visibility = Visibility.Hidden,
-                        Binding = new Binding("Створино") { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, StringFormat = "dd.MM.yyyy HH:mm" },
-                        IsReadOnly = true,
-                        DisplayIndex = counterForDGMColumns
-                    };
-                    break;
                 case "Змінив":
                     e.Column = new DataGridComboBoxColumn()
                     {
-                        Header = e.Column.Header,
+                        Header = header,
                         Visibility = Visibility.Hidden,
 
                         ItemsSource = db.Users
@@ -125,18 +102,19 @@ namespace Main
                         .OrderBy(o => o.Логін).ToList(),
 
                         DisplayMemberPath = "Логін",
-                        SelectedValueBinding = new Binding("Змінив") { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
+                        SelectedValueBinding = new Binding(headerString) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
                         IsReadOnly = true,
                         DisplayIndex = counterForDGMColumns,
-                        SortMemberPath = "Змінив.Логін"
+                        SortMemberPath = headerString+".Логін"
                     };
                     break;
+                case "Створино":
                 case "Змінено":
                     e.Column = new DataGridTextColumn()
                     {
-                        Header = e.Column.Header,
+                        Header = header,
                         Visibility = Visibility.Hidden,
-                        Binding = new Binding("Змінено") { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, StringFormat = "dd.MM.yyyy HH:mm" },
+                        Binding = new Binding(headerString) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, StringFormat = "dd.MM.yyyy HH:mm" },
                         IsReadOnly = true,
                         DisplayIndex = counterForDGMColumns
                     };
@@ -144,39 +122,32 @@ namespace Main
                 case "Правовласник":
                     e.Column = new DataGridComboBoxColumn()
                     {
-                        Header = e.Column.Header,
+                        Header = header,
 
                         ItemsSource = db.Users
                         .Where(w => w.Видалено == false)
                         .OrderBy(o => o.Логін).ToList(),
 
                         DisplayMemberPath = "Логін",
-                        SelectedValueBinding = new Binding("Правовласник") { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
+                        SelectedValueBinding = new Binding(headerString) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
                         IsReadOnly = false,
                         DisplayIndex = counterForDGMColumns,
-                        SortMemberPath = "Правовласник.Логін"
+                        SortMemberPath = headerString+".Логін"
                     };
                     break;
                 case "Контакти":
-                    e.Column = new DataGridTextColumn()
-                    {
-                        Header = e.Column.Header,
-                        Binding = new Binding("Контакти") { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
-                        DisplayIndex = counterForDGMColumns
-                    };
-                    break;
                 case "Логін":
                     e.Column = new DataGridTextColumn()
                     {
                         Header = e.Column.Header,
-                        Binding = new Binding("Логін") { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
+                        Binding = new Binding(headerString) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
                         DisplayIndex = counterForDGMColumns
                     };
                     break;
                 case "Проведено":
                     #region "DatePicker"
 
-                    Binding dateBind = new Binding("Проведено") { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, StringFormat = "dd.MM.yyyy" };
+                    Binding dateBind = new Binding(headerString) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged, StringFormat = "dd.MM.yyyy" };
 
                     FrameworkElementFactory datePickerFactoryElem = new FrameworkElementFactory(typeof(DatePicker));
                     datePickerFactoryElem.SetValue(DatePicker.SelectedDateProperty, dateBind);
@@ -190,7 +161,7 @@ namespace Main
 
                     DataGridTemplateColumn templateColumn = new DataGridTemplateColumn()
                     {
-                        Header = e.Column.Header,
+                        Header = header,
                         CellEditingTemplate = cellTemplate,
                         CellTemplate = dataTemplate,
                         DisplayIndex = counterForDGMColumns
@@ -203,32 +174,35 @@ namespace Main
                 case "Підписано":
                     e.Column = new DataGridCheckBoxColumn()
                     {
-                        Header = e.Column.Header,
-                        Binding = new Binding("Підписано") { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
+                        Header = header,
+                        Binding = new Binding(headerString) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
                         IsThreeState = false,
                         DisplayIndex = counterForDGMColumns
                     };
                     break;
                 case "Внутрішній_номер":
-                    e.Column = new DataGridTextColumn()
-                    {
-                        Header = e.Column.Header,
-                        Binding = new Binding("Внутрішній_номер") { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
-                        DisplayIndex = counterForDGMColumns
-                    };
-                    break;
                 case "Підстава":
+                case "Повністю":
+                case "Найменування":
+                case "Код":
+                case "КПОЛ":
+                case "Код_ГУДКСУ":
+                case "Код_УДКСУ":
+                case "ЕГРПОУ":
+                case "Рівень_розпорядника":
                     e.Column = new DataGridTextColumn()
                     {
-                        Header = e.Column.Header,
-                        Binding = new Binding("Підстава") { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
+                        Header = header,
+                        Binding = new Binding(headerString) { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
                         DisplayIndex = counterForDGMColumns
                     };
                     break;
                 case "Статус":
                     e.Column = new DataGridComboBoxColumn()
                     {
-                        Header = e.Column.Header,
+                        Header = header,
+                        Width = DataGridLength.Auto,
+
                         ItemsSource = db.DocStatuses
                         .Include(i => i.Змінив)
                         .Include(i => i.Створив)
@@ -236,73 +210,9 @@ namespace Main
                         .OrderBy(o => o.Повністю).ToList(),
 
                         DisplayMemberPath = "Повністю",
-                        SelectedValueBinding = new Binding("Статус") { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
+                        SelectedValueBinding = new Binding(headerString) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
                         DisplayIndex = counterForDGMColumns,
-                        SortMemberPath = "Статус.Повністю"
-                    };
-                    break;
-                case "Повністю":
-                    e.Column = new DataGridTextColumn()
-                    {
-                        Header = e.Column.Header,
-                        Binding = new Binding("Повністю") { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
-                        DisplayIndex = counterForDGMColumns
-                    };
-                    break;
-                case "Найменування":
-                    e.Column = new DataGridTextColumn()
-                    {
-                        Header = e.Column.Header,
-                        Binding = new Binding("Найменування") { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
-                        DisplayIndex = counterForDGMColumns
-                    };
-                    break;
-                case "Код":
-                    e.Column = new DataGridTextColumn()
-                    {
-                        Header = e.Column.Header,
-                        Binding = new Binding("Код") { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
-                        DisplayIndex = counterForDGMColumns
-                    };
-                    break;
-                case "КПОЛ":
-                    e.Column = new DataGridTextColumn()
-                    {
-                        Header = e.Column.Header,
-                        Binding = new Binding("КПОЛ") { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
-                        DisplayIndex = counterForDGMColumns
-                    };
-                    break;
-                case "Код_ГУДКСУ":
-                    e.Column = new DataGridTextColumn()
-                    {
-                        Header = e.Column.Header,
-                        Binding = new Binding("Код_ГУДКСУ") { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
-                        DisplayIndex = counterForDGMColumns
-                    };
-                    break;
-                case "Код_УДКСУ":
-                    e.Column = new DataGridTextColumn()
-                    {
-                        Header = e.Column.Header,
-                        Binding = new Binding("Код_УДКСУ") { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
-                        DisplayIndex = counterForDGMColumns
-                    };
-                    break;
-                case "ЕГРПОУ":
-                    e.Column = new DataGridTextColumn()
-                    {
-                        Header = e.Column.Header,
-                        Binding = new Binding("ЕГРПОУ") { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
-                        DisplayIndex = counterForDGMColumns
-                    };
-                    break;
-                case "Рівень_розпорядника":
-                    e.Column = new DataGridTextColumn()
-                    {
-                        Header = e.Column.Header,
-                        Binding = new Binding("Рівень_розпорядника") { Mode = BindingMode.TwoWay, UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
-                        DisplayIndex = counterForDGMColumns
+                        SortMemberPath = headerString+".Повністю"
                     };
                     break;
                 case "Розпорядник":
@@ -327,7 +237,7 @@ namespace Main
                     e.Column = new DataGridComboBoxColumn()
                     {
                         Header = e.Column.Header,
-                        Width = 140,
+                        Width = DataGridLength.Auto,
                         ItemsSource = db.Main_Managers
                         .Include(i => i.Змінив)
                         .Include(i => i.Створив)
@@ -344,7 +254,7 @@ namespace Main
                     e.Column = new DataGridComboBoxColumn()
                     {
                         Header = e.Column.Header,
-                        Width = 80,
+                        Width = DataGridLength.Auto,
                         ItemsSource = db.KFKs
                         .Include(i => i.Змінив)
                         .Include(i => i.Створив)
@@ -378,7 +288,7 @@ namespace Main
                     e.Column = new DataGridComboBoxColumn()
                     {
                         Header = e.Column.Header,
-                        Width = 60,
+                        Width = DataGridLength.Auto,
                         ItemsSource = db.Foundations
                         .Include(i => i.Змінив)
                         .Include(i => i.Створив)
@@ -396,7 +306,7 @@ namespace Main
                     e.Column = new DataGridComboBoxColumn()
                     {
                         Header = e.Column.Header,
-                        Width = 220,
+                        Width = DataGridLength.Auto,
                         ItemsSource = db.MicroFoundations
                         .Include(i => i.Змінив)
                         .Include(i => i.Створив)
@@ -414,7 +324,7 @@ namespace Main
                     e.Column = new DataGridComboBoxColumn()
                     {
                         Header = e.Column.Header,
-                        Width = 90,
+                        Width = DataGridLength.Auto,
                         ItemsSource = db.KFBs
                         .Include(i => i.Змінив)
                         .Include(i => i.Створив)
@@ -431,7 +341,7 @@ namespace Main
                     e.Column = new DataGridComboBoxColumn()
                     {
                         Header = e.Column.Header,
-                        Width = 90,
+                        Width = DataGridLength.Auto,
                         ItemsSource = db.KDBs
                         .Include(i => i.Змінив)
                         .Include(i => i.Створив)
@@ -448,7 +358,7 @@ namespace Main
                     e.Column = new DataGridComboBoxColumn()
                     {
                         Header = e.Column.Header,
-                        Width = 60,
+                        Width = DataGridLength.Auto,
                         ItemsSource = db.KEKBs
                         .Include(i => i.Змінив)
                         .Include(i => i.Створив)
@@ -465,7 +375,7 @@ namespace Main
                     e.Column = new DataGridComboBoxColumn()
                     {
                         Header = e.Column.Header,
-                        Width = 50,
+                        Width = DataGridLength.Auto,
                         ItemsSource = new List<string> { "План", "Факт", "Н_Залишок", "М_Залишок" },
                         SelectedValueBinding = new Binding("Дані")
                         {
@@ -507,221 +417,25 @@ namespace Main
                     };
                     break;
                 case "Рік":
-                    e.Column = new DataGridTextColumn()
-                    {
-                        Header = e.Column.Header,
-                        Width = 150,
-                        Binding = new Binding("Рік")
-                        {
-                            Mode = BindingMode.TwoWay,
-                            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
-                            Converter = new FillingDigitConverter()
-                        },
-
-                        DisplayIndex = counterForDGMColumns
-                    };
-                    break;
                 case "Період":
-                    e.Column = new DataGridTextColumn()
-                    {
-                        Header = e.Column.Header,
-                        Width = 150,
-                        Binding = new Binding("Період")
-                        {
-                            Mode = BindingMode.TwoWay,
-                            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
-                            Converter = new FillingDigitConverter()
-                        },
-
-                        DisplayIndex = counterForDGMColumns
-                    };
-                    break;
                 case "Січень":
-                    e.Column = new DataGridTextColumn()
-                    {
-                        Header = e.Column.Header,
-                        Width = 150,
-                        Binding = new Binding("Січень")
-                        {
-                            Mode = BindingMode.TwoWay,
-                            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
-                            Converter = new FillingDigitConverter()
-                        },
-
-                        DisplayIndex = counterForDGMColumns
-                    };
-                    break;
                 case "Лютий":
-                    e.Column = new DataGridTextColumn()
-                    {
-                        Header = e.Column.Header,
-                        Width = 150,
-                        Binding = new Binding("Лютий")
-                        {
-                            Mode = BindingMode.TwoWay,
-                            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
-                            Converter = new FillingDigitConverter()
-                        },
-
-                        DisplayIndex = counterForDGMColumns
-                    };
-                    break;
                 case "Березень":
-                    e.Column = new DataGridTextColumn()
-                    {
-                        Header = e.Column.Header,
-                        Width = 150,
-                        Binding = new Binding("Березень")
-                        {
-                            Mode = BindingMode.TwoWay,
-                            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
-                            Converter = new FillingDigitConverter()
-                        },
-
-                        DisplayIndex = counterForDGMColumns
-                    };
-                    break;
                 case "Квітень":
-                    e.Column = new DataGridTextColumn()
-                    {
-                        Header = e.Column.Header,
-                        Width = 150,
-                        Binding = new Binding("Квітень")
-                        {
-                            Mode = BindingMode.TwoWay,
-                            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
-                            Converter = new FillingDigitConverter()
-                        },
-
-                        DisplayIndex = counterForDGMColumns
-                    };
-                    break;
                 case "Травень":
-                    e.Column = new DataGridTextColumn()
-                    {
-                        Header = e.Column.Header,
-                        Width = 150,
-                        Binding = new Binding("Травень")
-                        {
-                            Mode = BindingMode.TwoWay,
-                            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
-                            Converter = new FillingDigitConverter()
-                        },
-
-                        DisplayIndex = counterForDGMColumns
-                    };
-                    break;
                 case "Червень":
-                    e.Column = new DataGridTextColumn()
-                    {
-                        Header = e.Column.Header,
-                        Width = 150,
-                        Binding = new Binding("Червень")
-                        {
-                            Mode = BindingMode.TwoWay,
-                            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
-                            Converter = new FillingDigitConverter()
-                        },
-
-                        DisplayIndex = counterForDGMColumns
-                    };
-                    break;
                 case "Липень":
-                    e.Column = new DataGridTextColumn()
-                    {
-                        Header = e.Column.Header,
-                        Width = 150,
-                        Binding = new Binding("Липень")
-                        {
-                            Mode = BindingMode.TwoWay,
-                            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
-                            Converter = new FillingDigitConverter()
-                        },
-
-                        DisplayIndex = counterForDGMColumns
-                    };
-                    break;
                 case "Серпень":
-                    e.Column = new DataGridTextColumn()
-                    {
-                        Header = e.Column.Header,
-                        Width = 150,
-                        Binding = new Binding("Серпень")
-                        {
-                            Mode = BindingMode.TwoWay,
-                            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
-                            Converter = new FillingDigitConverter()
-                        },
-
-                        DisplayIndex = counterForDGMColumns
-                    };
-                    break;
                 case "Вересень":
-                    e.Column = new DataGridTextColumn()
-                    {
-                        Header = e.Column.Header,
-                        Width = 150,
-                        Binding = new Binding("Вересень")
-                        {
-                            Mode = BindingMode.TwoWay,
-                            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
-                            Converter = new FillingDigitConverter()
-                        },
-
-                        DisplayIndex = counterForDGMColumns
-                    };
-                    break;
                 case "Жовтень":
-                    e.Column = new DataGridTextColumn()
-                    {
-                        Header = e.Column.Header,
-                        Width = 150,
-                        Binding = new Binding("Жовтень")
-                        {
-                            Mode = BindingMode.TwoWay,
-                            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
-                            Converter = new FillingDigitConverter()
-                        },
-
-                        DisplayIndex = counterForDGMColumns
-                    };
-                    break;
                 case "Листопад":
-                    e.Column = new DataGridTextColumn()
-                    {
-                        Header = e.Column.Header,
-                        Width = 150,
-                        Binding = new Binding("Листопад")
-                        {
-                            Mode = BindingMode.TwoWay,
-                            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
-                            Converter = new FillingDigitConverter()
-                        },
-
-                        DisplayIndex = counterForDGMColumns
-                    };
-                    break;
                 case "Грудень":
-                    e.Column = new DataGridTextColumn()
-                    {
-                        Header = e.Column.Header,
-                        Width = 150,
-                        Binding = new Binding("Грудень")
-                        {
-                            Mode = BindingMode.TwoWay,
-                            UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
-                            Converter = new FillingDigitConverter()
-                        },
-
-                        DisplayIndex = counterForDGMColumns
-                    };
-                    break;
                 case "Сума":
                     e.Column = new DataGridTextColumn()
                     {
-                        Header = e.Column.Header,
-                        Width = 150,
-                        Binding = new Binding("Сума")
+                        Header = header,
+                        Width = DataGridLength.Auto,
+                        Binding = new Binding(headerString)
                         {
                             Mode = BindingMode.TwoWay,
                             UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
@@ -734,9 +448,9 @@ namespace Main
                 case "Уточнений_план":
                     e.Column = new DataGridTextColumn()
                     {
-                        Header = e.Column.Header,
+                        Header = header,
                         IsReadOnly = true,
-                        Binding = new Binding("Уточнений_план")
+                        Binding = new Binding(headerString)
                         {
                             Mode = BindingMode.TwoWay,
                             UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged,
@@ -1203,83 +917,76 @@ namespace Main
         {
             Window active_window = (Window)((TypeInfo)sender.GetType()).DeclaredProperties.FirstOrDefault(f => f.Name == "InheritanceContext").GetValue(sender);
             List<Filters> filters = (List<Filters>)((TypeInfo)active_window.GetType()).DeclaredFields.First(f => f.Name == "GetFilters").GetValue(active_window);
-            bool result;
 
-
-            if (filters.Count == 0)
+            if (filters.Count > 0)
             {
-                result = true;
-            }
-            else if ((e.Item.GetType().GetProperties().FirstOrDefault(f => f.Name == "Id") is null) || ((e.Item.GetType().GetProperties().FirstOrDefault(f => f.Name == "Id") != null) && (long)e.Item.GetType().GetProperty("Id").GetValue(e.Item) != 0))
-            {
-                List<bool> fdv = new List<bool>();
-                try
+                if ((e.Item.GetType().GetProperties().FirstOrDefault(f => f.Name == "Id") is null) || ((e.Item.GetType().GetProperties().FirstOrDefault(f => f.Name == "Id") != null) && (long)e.Item.GetType().GetProperty("Id").GetValue(e.Item) != 0))
                 {
-                    foreach (Filters item in filters) //Перебор всех фильтров по типу ИЛИ
+                    List<bool> resultList = new List<bool>();
+                    try
                     {
-                        fdv.Add(GetFill(item));
+                        foreach (Filters item in filters) //Перебор всех фильтров по типу ИЛИ
+                        {
+                            resultList.Add(CheckOneEntity(item));
+                        }
+                        e.Accepted = resultList.Where(w => w == true).Count() > 0 ? true : false;
+                    }
+                    catch (Exception ex)
+                    {
+                        e.Accepted = false;
                     }
                 }
-                catch
-                {
-                    result = false;
-                }
-                result = fdv.Where(w => w == true).Count() > 0 ? true : false;
             }
-            else
+            
+            bool CheckOneEntity(Filters filter)
             {
-                result = true;
-            }
+                object OriginalValue = null;
+                dynamic RealValue = null;
+                string PropertyName = null;
+                string typeValue = null;
+                List<bool> resultOfEquels = new List<bool>();
 
-            e.Accepted = result;
-
-            bool GetFill(Filters filter)
-            {
-                object q = null;
-                dynamic ValueQuery = null;
-                string name = "";
-                string stringBuilder = "";
-                string endstring = "return ";
-                foreach (var micro_item in filter.GetFilters) //Перебор всех фильтров по типу И (если хоть один не проходит тогда False
+                foreach (var micro_item in filter.GetFilters) //Перебор всех фильтров по типу И (если хоть один не проходит тогда False)
                 {
-                    string typeValue = "";
-
+                    //Определение главных переменных - оригинальное значение, тип значения и сравниваемое значение
                     if (e.Item.GetType().GetProperty(micro_item["prop"]).PropertyType.FullName.Contains("DBSolom"))
                     {
-                        var x = ((PropertyInfo[])e.Item.GetType().GetProperty(micro_item["prop"]).GetValue(e.Item).GetType().GetProperties()).Select(k => k.Name).ToList();
-                        q = e.Item.GetType().GetProperty(micro_item["prop"]).GetValue(e.Item);
+                        var ListPropertysOfEntity = ((PropertyInfo[])e.Item.GetType().GetProperty(micro_item["prop"]).GetValue(e.Item).GetType().GetProperties()).Select(k => k.Name).ToList();
+                        OriginalValue = e.Item.GetType().GetProperty(micro_item["prop"]).GetValue(e.Item);
 
-                        if (x.Contains("Код"))
+                        if (ListPropertysOfEntity.Contains("Код"))
                         {
-                            name = "Код";
+                            PropertyName = "Код";
                         }
-                        else if (x.Contains("Найменування"))
+                        else if (ListPropertysOfEntity.Contains("Найменування"))
                         {
-                            name = "Найменування";
+                            PropertyName = "Найменування";
                         }
-                        else if (x.Contains("Повністю"))
+                        else if (ListPropertysOfEntity.Contains("Повністю"))
                         {
-                            name = "Повністю";
+                            PropertyName = "Повністю";
                         }
-                        else if (x.Contains("Логін"))
+                        else if (ListPropertysOfEntity.Contains("Логін"))
                         {
-                            name = "Логін";
+                            PropertyName = "Логін";
                         }
 
-                        if (q.GetType().GetProperty(name).GetValue(q) is null)
+                        if (OriginalValue.GetType().GetProperty(PropertyName).GetValue(OriginalValue) is null)
                         {
                             return false;
                         }
 
-                        ValueQuery = q.GetType().GetProperty(name).GetValue(q);
-                        typeValue = ValueQuery.GetType().Name;
+                        RealValue = OriginalValue.GetType().GetProperty(PropertyName).GetValue(OriginalValue);
+                        typeValue = RealValue.GetType().Name;
                     }
                     else
                     {
                         typeValue = e.Item.GetType().GetProperty(micro_item["prop"]).GetValue(e.Item).GetType().Name;
-                        ValueQuery = e.Item.GetType().GetProperty(micro_item["prop"]).GetValue(e.Item);
+                        RealValue = e.Item.GetType().GetProperty(micro_item["prop"]).GetValue(e.Item);
                     }
 
+
+                    //Ветвление по операциям сравнения
                     if (micro_item["type"] == "-")
                     {
                         bool switcher = true;
@@ -1307,16 +1014,23 @@ namespace Main
 
                         if (typeValue == "String")
                         {
-                            stringBuilder = $"{RemoveBadSymbols(ValueQuery.ToString()).Length} >= {RemoveBadSymbols(start).Length} && {RemoveBadSymbols(ValueQuery.ToString()).Length} <= {RemoveBadSymbols(end).Length}";
+                            resultOfEquels.Add(
+                                                RemoveBadSymbols(RealValue.ToString()).Length >= RemoveBadSymbols(start).Length &&
+                                                RemoveBadSymbols(RealValue.ToString()).Length <= RemoveBadSymbols(end).Length
+                                              );
                         }
                         else
                         {
-                            stringBuilder = $"{typeValue}.Parse(\"{RemoveBadSymbols(ValueQuery.ToString())}\") >= {typeValue}.Parse(\"{RemoveBadSymbols(start)}\") && {typeValue}.Parse(\"{RemoveBadSymbols(ValueQuery.ToString())}\") <= {typeValue}.Parse(\"{RemoveBadSymbols(end)}\")";
+                            resultOfEquels.Add(Tech.CodeGeneration.CodeGenerator.ExecuteCode<bool>($"return {typeValue}.Parse(RealValue) >= {typeValue}.Parse(FirstFilterValue) && {typeValue}.Parse(RealValue) <= {typeValue}.Parse(SecondFilterValue);",
+                                                Tech.CodeGeneration.CodeParameter.Create("FirstFilterValue", RemoveBadSymbols(start)),
+                                                Tech.CodeGeneration.CodeParameter.Create("SecondFilterValue", RemoveBadSymbols(end)),
+                                                Tech.CodeGeneration.CodeParameter.Create("RealValue", RemoveBadSymbols(RealValue.ToString()))
+                                                ));
                         }
                     }
                     else if (micro_item["type"] == "[,]")
                     {
-                        List<dynamic> list = new List<dynamic>();
+                        List<string> list = new List<string>();
                         string temp = "";
 
                         #region "FillList"
@@ -1337,55 +1051,34 @@ namespace Main
                             }
                         }
                         #endregion
-
-                        stringBuilder = $"new System.Collections.Generic.List<{typeValue}>()" + "{";
-
-                        foreach (var item in list)
-                        {
-                            if (list.Last() == item)
-                            {
-                                if (typeValue == "String")
-                                {
-                                    stringBuilder += $"\"{item.ToString().ToLower()}\"" + "}" + $".Contains(\"{RemoveBadSymbols(ValueQuery.ToString().ToLower())}\")";
-                                }
-                                else
-                                {
-                                    stringBuilder += $"{typeValue}.Parse(\"{item.ToString()}\")" + "}" + $".Contains({typeValue}.Parse(\"{ValueQuery.ToString()}\"))";
-                                }
-                            }
-                            else
-                            {
-                                if (typeValue == "String")
-                                {
-                                    stringBuilder += $"\"{item.ToString().ToLower()}\", ";
-                                }
-                                else
-                                {
-                                    stringBuilder += $"{typeValue}.Parse(\"{item.ToString()}\"), ";
-                                }
-                            }
-                        }
+                        resultOfEquels.Add(list.Contains(RemoveBadSymbols(RealValue.ToString()).ToLower()));
                     }
                     else if (micro_item["type"] == ">|<")
                     {
-                        stringBuilder = $"\"{RemoveBadSymbols(ValueQuery.ToString()).ToLower()}\".Contains(\"{RemoveBadSymbols(micro_item["value"].ToString()).ToLower()}\")";
+                        resultOfEquels.Add(
+                                            RemoveBadSymbols(RealValue.ToString()).ToLower()
+                                            .Contains(RemoveBadSymbols(micro_item["value"].ToString()).ToLower())
+                                          );
                     }
                     else
                     {
                         if (typeValue == "String")
                         {
-                            stringBuilder = $"\"{RemoveBadSymbols(ValueQuery.ToString())}\" {micro_item["type"].ToString()} \"{RemoveBadSymbols(micro_item["value"].ToString())}\"";
+                            resultOfEquels.Add(
+                                                RemoveBadSymbols(RealValue.ToString()) == RemoveBadSymbols(micro_item["value"].ToString())
+                                              );
                         }
                         else
                         {
-                            stringBuilder = $"{typeValue}.Parse(\"{RemoveBadSymbols(ValueQuery.ToString())}\") {micro_item["type"].ToString()} {typeValue}.Parse(\"{RemoveBadSymbols(micro_item["value"].ToString())}\")";
+                            resultOfEquels.Add(Tech.CodeGeneration.CodeGenerator.ExecuteCode<bool>($"return {typeValue}.Parse(RealValue) == {typeValue}.Parse(FilterValue);",
+                            Tech.CodeGeneration.CodeParameter.Create("FilterValue", RemoveBadSymbols(micro_item["value"].ToString())),
+                            Tech.CodeGeneration.CodeParameter.Create("RealValue", RemoveBadSymbols(RealValue.ToString()))
+                            ));
                         }
                     }
-                    endstring += "(" + stringBuilder + ") && ";
                 }
-                endstring = endstring.Substring(0, endstring.Length - 4) + ";";
 
-                return Tech.CodeGeneration.CodeGenerator.ExecuteCode<bool>(endstring);
+                return resultOfEquels.Where(w => w == false).Count() > 0 ? false : true;
             }
         }
 
@@ -1482,11 +1175,11 @@ namespace Main
 
                         if (TableExist == false)
                         {
-                            worksheet.ListObjects.Add(Microsoft.Office.Interop.Excel.XlListObjectSourceType.xlSrcRange, worksheet.Range[worksheet.Cells[1, 1], worksheet.Cells[countRows, countColumns]], Type.Missing, Microsoft.Office.Interop.Excel.XlYesNoGuess.xlYes, Type.Missing).Name = "Maestro_DataTable";
+                            worksheet.ListObjects.Add(Microsoft.Office.Interop.Excel.XlListObjectSourceType.xlSrcRange, worksheet.Range[worksheet.Cells[1, 1], worksheet.Cells[countRows + 1, countColumns]], Type.Missing, Microsoft.Office.Interop.Excel.XlYesNoGuess.xlYes, Type.Missing).Name = "Maestro_DataTable";
                         }
                         else
                         {
-                            worksheet.Range[worksheet.Cells[2, 1], worksheet.Cells[1000, 50]].Clear();
+                            worksheet.Range[worksheet.Cells[2, 1], worksheet.Cells[10000, 50]].Clear();
                         }
 
                         //Filling
@@ -1591,15 +1284,83 @@ namespace Main
         }
 
         /// <summary>
-        /// Функция возвращает абсолютный остаток по переданным аргументам, учитывая данные, как из БД, так и из локального хранилища
+        /// Метод возвращает накопительный остаток по переданным аргументам, учитывая данные, как из БД, так и из локального хранилища
         /// </summary>
-        /// <param name="year">Год на который составляется остаток</param>
+        /// <param name="db">Контекст БД</param>
+        /// <param name="year">Год</param>
         /// <param name="kFK">КПБ(КФК)</param>
         /// <param name="main_Manager">Главный распорядитель</param>
         /// <param name="kEKB">КЕКВ</param>
         /// <param name="foundation">Фонд</param>
-        /// <returns></returns>
-        public static List<double> GetRamainedFromDBPerMonth(DBSolom.Db db, int year, KFK kFK, Main_manager main_Manager, KEKB kEKB, Foundation foundation)
+        /// <returns>Накопительный остаток</returns>
+        static List<double> GetRemainderFromDBPerMonth(DBSolom.Db db, int year, KFK kFK, Main_manager main_Manager, KEKB kEKB, Foundation foundation)
+        {
+            DBSolom.Db mdb = new Db(GetConnectionString);
+
+            #region "Financings"
+            List<Financing> localFinancings = db.Financings.Local.Where(w =>
+                                                                        w.Видалено == false &&
+                                                                        w.Проведено.Year == year &&
+                                                                        w.Головний_розпорядник.Найменування == main_Manager.Найменування &&
+                                                                        w.КЕКВ.Код == kEKB.Код &&
+                                                                        w.КФК.Код == kFK.Код &&
+                                                                        w.Мікрофонд.Фонд.Код == foundation.Код)
+                                                                        .ToList();
+
+            List<Financing> DBfinancings = mdb.Financings
+                              .Where(w =>
+                              w.Видалено == false &&
+                              w.Проведено.Year == year &&
+                              w.Головний_розпорядник.Найменування == main_Manager.Найменування &&
+                              w.КЕКВ.Код == kEKB.Код &&
+                              w.КФК.Код == kFK.Код &&
+                              w.Мікрофонд.Фонд.Код == foundation.Код)
+                              .ToList();
+
+
+
+            if (localFinancings.Count != 0)
+            {
+                DBfinancings = DBfinancings.Where(w => localFinancings.Select(s => s.Id).Contains(w.Id) == false).ToList();
+                DBfinancings.AddRange(localFinancings);
+            }
+            #endregion
+
+            var CorrectPlan = GetCurrentPlanFromDBPerMonth(db, year, kFK, main_Manager, kEKB, foundation);
+
+            List<double> vs = new List<double>();
+
+            //Вычисление месячных остатков
+            foreach (var item in names_months)
+            {
+                int numberOfMonth = names_months.IndexOf(item) + 1;
+
+                double monthPlan = CorrectPlan[numberOfMonth - 1];
+                double monthFinancing = DBfinancings.Where(w => w.Проведено.Month == numberOfMonth).Sum(ss => ss.Сума);
+
+                vs.Add(monthPlan - monthFinancing);
+            }
+
+            //Накопительно
+            for (int i = 1; i < 12; i++)
+            {
+                vs[i] += vs[i - 1];
+            }
+
+            return vs;
+        }
+
+        /// <summary>
+        /// Метод возвращает уточненный план по переданным аргументам, учитывая данные, как из БД, так и из локального хранилища
+        /// </summary>
+        /// <param name="db">Контекст БД</param>
+        /// <param name="year">Год</param>
+        /// <param name="kFK">КПБ(КФК)</param>
+        /// <param name="main_Manager">Главный распорядитель</param>
+        /// <param name="kEKB">КЕКВ</param>
+        /// <param name="foundation">Фонд</param>
+        /// <returns>Уточненный план</returns>
+        static List<double> GetCurrentPlanFromDBPerMonth(DBSolom.Db db, int year, KFK kFK, Main_manager main_Manager, KEKB kEKB, Foundation foundation)
         {
             DBSolom.Db mdb = new Db(GetConnectionString);
 
@@ -1614,7 +1375,12 @@ namespace Main
                                                             w.Фонд.Код == foundation.Код)
                                                             .ToList();
 
-            List<Filling> DBfillings = mdb.Fillings.Where(w =>
+            List<Filling> DBfillings = mdb.Fillings
+                                                    .Include(i => i.Фонд)
+                                                    .Include(i => i.КФК)
+                                                    .Include(i => i.Головний_розпорядник)
+                                                    .Include(i => i.КЕКВ)
+                                                    .Where(w =>
                                                     w.Проведено.Year == year &&
                                                     w.Видалено == false &&
                                                     w.Головний_розпорядник.Найменування == main_Manager.Найменування &&
@@ -1664,7 +1430,12 @@ namespace Main
                                                                         w.Мікрофонд.Фонд.Код == foundation.Код)
                                                                         .ToList();
 
-            List<Correction> DBcorrections = mdb.Corrections.Where(w =>
+            List<Correction> DBcorrections = mdb.Corrections
+                                                                    .Include(i => i.Мікрофонд.Фонд)
+                                                                    .Include(i => i.КФК)
+                                                                    .Include(i => i.Головний_розпорядник)
+                                                                    .Include(i => i.КЕКВ)
+                                                                    .Where(w =>
                                                                     w.Видалено == false &&
                                                                     w.Головний_розпорядник.Найменування == main_Manager.Найменування &&
                                                                     w.КЕКВ.Код == kEKB.Код &&
@@ -1702,56 +1473,73 @@ namespace Main
                 .ToList();
             #endregion
 
-            #region "Financings"
-            List<Financing> localFinancings = db.Financings.Local.Where(w =>
-                                                                        w.Видалено == false &&
-                                                                        w.Проведено.Year == year &&
-                                                                        w.Головний_розпорядник.Найменування == main_Manager.Найменування &&
-                                                                        w.КЕКВ.Код == kEKB.Код &&
-                                                                        w.КФК.Код == kFK.Код &&
-                                                                        w.Мікрофонд.Фонд.Код == foundation.Код)
-                                                                        .ToList();
-
-            List<Financing> DBfinancings = mdb.Financings.Where(w =>
-                              w.Видалено == false &&
-                              w.Проведено.Year == year &&
-                              w.Головний_розпорядник.Найменування == main_Manager.Найменування &&
-                              w.КЕКВ.Код == kEKB.Код &&
-                              w.КФК.Код == kFK.Код &&
-                              w.Мікрофонд.Фонд.Код == foundation.Код)
-                              .ToList();
-
-            
-
-            if (localFinancings.Count != 0)
-            {
-                DBfinancings = DBfinancings.Where(w => localFinancings.Select(s => s.Id).Contains(w.Id) == false).ToList();
-                DBfinancings.AddRange(localFinancings);
-            }
-            #endregion
-
             var CorrectPlan = EndFillings.Union(EndCorrections).ToList();
 
             List<double> vs = new List<double>();
 
-            //Вычисление месячных остатков
+            //Вычисление месячных планов
             foreach (var item in names_months)
             {
                 int numberOfMonth = names_months.IndexOf(item) + 1;
 
                 double monthPlan = CorrectPlan.Sum(s => (double)s.GetType().GetProperty(item).GetValue(s));
-                double monthFinancing = DBfinancings.Where(w => w.Проведено.Month == numberOfMonth).Sum(ss => ss.Сума);
 
-                vs.Add(monthPlan - monthFinancing);
-            }
-
-            //Накопительно
-            for (int i = 1; i < 12; i++)
-            {
-                vs[i] += vs[i - 1];
+                vs.Add(monthPlan);
             }
 
             return vs;
+        }
+
+        /// <summary>
+        /// Метод возвращает уточненный план и остатки (накопительно) по переданным аргументам, учитывая данные, как из БД, так и из локального хранилища
+        /// </summary>
+        /// <param name="db">Контекст БД</param>
+        /// <param name="year">Год</param>
+        /// <param name="kFK">КПБ(КФК)</param>
+        /// <param name="main_Manager">Главный распорядитель</param>
+        /// <param name="kEKB">КЕКВ</param>
+        /// <param name="foundation">Фонд</param>
+        /// <returns>Уточненный план и накопительный остаток</returns>
+        public static Dictionary<TypeOfFinanceData, List<double>> GetCurrentPlanAndRemainderFromDBPerMonth(DBSolom.Db db, int year, KFK kFK, Main_manager main_Manager, KEKB kEKB, Foundation foundation)
+        {
+            Dictionary<TypeOfFinanceData, List<double>> vs = new Dictionary<TypeOfFinanceData, List<double>>();
+            vs.Add(TypeOfFinanceData.CurrentPlan, GetCurrentPlanFromDBPerMonth(db, year, kFK, main_Manager, kEKB, foundation));
+            vs.Add(TypeOfFinanceData.Remainders, GetRemainderFromDBPerMonth(db, year, kFK, main_Manager, kEKB, foundation));
+            return vs;
+        }
+
+        /// <summary>
+        /// Метод возвращает детализированное описание списка ошибок касаемых проведения фин. документов
+        /// </summary>
+        /// <param name="db">Контекст БД</param>
+        /// <param name="date">Дата</param>
+        /// <param name="kFK">КПБ(КФК)</param>
+        /// <param name="main_Manager">Главный распорядитель</param>
+        /// <param name="kEKB">КЕКВ</param>
+        /// <param name="foundation">Фонд</param>
+        /// <returns>Список ошибок</returns>
+        public static List<string> ChangeFinDocIsAllow(DBSolom.Db db, DateTime date, KFK kFK, Main_manager main_Manager, KEKB kEKB, Foundation foundation)
+        {
+            var x = GetCurrentPlanAndRemainderFromDBPerMonth(db, date.Year, kFK, main_Manager, kEKB, foundation);
+            List<string> errors = new List<string>();
+
+            for (int i = 0; i < 12; i++)
+            {
+                if (x[TypeOfFinanceData.Remainders][i] < 0)
+                {
+                    errors.Add($"[Дата: {date.ToShortDateString()}] [Фонд: {foundation.Код}] [КПБ: {kFK.Код}]" +
+                        $" [Головний розпорядник: {main_Manager.Найменування}]" +
+                        $" [КЕКВ: {kEKB.Код}] [Місяць: {names_months[i]}] [Остаток:{x[TypeOfFinanceData.Remainders][i]}]");
+                }
+                if (x[TypeOfFinanceData.CurrentPlan][i] < 0)
+                {
+                    errors.Add($"[Дата: {date.ToShortDateString()}] [Фонд: {foundation.Код}] [КПБ: {kFK.Код}]" +
+                        $" [Головний розпорядник: {main_Manager.Найменування}]" +
+                        $" [КЕКВ: {kEKB.Код}] [Місяць: {names_months[i]}] [План:{x[TypeOfFinanceData.CurrentPlan][i]}]");
+                }
+            }
+
+            return errors;
         }
     }
 
@@ -1817,5 +1605,25 @@ namespace Main
         public Dictionary<string, dynamic> Value = new Dictionary<string, dynamic>();
     }
 
-    
+    public enum TypeOfFinanceData
+    {
+        CurrentPlan,
+        Remainders
+    }
+
+    public class ListMonths
+    {
+        public double Січень { get; set; }
+        public double Лютий { get; set; }
+        public double Березень { get; set; }
+        public double Квітень { get; set; }
+        public double Травень { get; set; }
+        public double Червень { get; set; }
+        public double Липень { get; set; }
+        public double Серпень { get; set; }
+        public double Вересень { get; set; }
+        public double Жовтень { get; set; }
+        public double Листопад { get; set; }
+        public double Грудень { get; set; }
+    }
 }

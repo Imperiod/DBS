@@ -127,7 +127,6 @@ namespace Main.Functional
                 }
 
                 counterElementsDGM = GetCurrPlanEntities.GetEntities.Count;
-                CollectionViewSource.View.Refresh();
                 DGM.FrozenColumnCount = 7;
             }
         }

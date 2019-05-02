@@ -240,27 +240,31 @@
                 <Grid.RowDefinitions>
                     <RowDefinition></RowDefinition>
                     <RowDefinition></RowDefinition>
+                    <RowDefinition></RowDefinition>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto"></ColumnDefinition>
+                    <ColumnDefinition/>
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                     <ColumnDefinition/>
                 </Grid.ColumnDefinitions>
-                
-                <GroupBox x:Name="GRPBPlan" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" FontWeight="Bold" FontSize="14" Header="План:" Margin="2" />
-                <GroupBox x:Name="GRPBCorr" Grid.Row="0" Grid.Column="2" Grid.ColumnSpan="2" FontWeight="Bold" FontSize="14" Header="Корегування:" Margin="2" />
-                <GroupBox x:Name="GRPBNow" Grid.Row="0" Grid.Column="4" FontWeight="Bold" FontSize="14" Header="Залишок:" Margin="2" />
-                
-                <GroupBox x:Name="GRPBElm" Grid.Row="1" Grid.Column="0" FontWeight="Bold" FontSize="14" Header="Елементів:" Margin="2" />
-                <GroupBox x:Name="GRPBSum" Grid.Row="1" Grid.Column="1" FontWeight="Bold" FontSize="14" Header="Сума:" Margin="2"/>
-                <GroupBox x:Name="GRPBSred" Grid.Row="1" Grid.Column="2" FontWeight="Bold" FontSize="14" Header="Середнє:" Margin="2"/>
-                <GroupBox x:Name="GRPBMin" Grid.Row="1" Grid.Column="3" FontWeight="Bold" FontSize="14" Header="Мінімум:" Margin="2"/>
-                <GroupBox x:Name="GRPBMax" Grid.Row="1" Grid.Column="4" FontWeight="Bold" FontSize="14" Header="Максимум:" Margin="2"/>
+
+                <GroupBox Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" FontWeight="Bold" FontSize="14" Header="Уточнений план:" Margin="2">
+                    <DataGrid x:Name="DGCurrentPlan" IsReadOnly="True" AutoGeneratingColumn="DGCurrentPlan_AutoGeneratingColumn"/>
+                </GroupBox>
+                <GroupBox Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" FontWeight="Bold" FontSize="14" Header="Накопичувальний залишок:" Margin="2">
+                    <DataGrid x:Name="DGRemainders" IsReadOnly="True" AutoGeneratingColumn="DGRemainders_AutoGeneratingColumn"/>
+                </GroupBox>
+
+                <GroupBox x:Name="GRPBElm" Grid.Row="2" Grid.Column="0" FontWeight="Bold" FontSize="14" Header="Елементів:" Margin="2" />
+                <GroupBox x:Name="GRPBSum" Grid.Row="2" Grid.Column="1" FontWeight="Bold" FontSize="14" Header="Сума:" Margin="2"/>
+                <GroupBox x:Name="GRPBSred" Grid.Row="2" Grid.Column="2" FontWeight="Bold" FontSize="14" Header="Середнє:" Margin="2"/>
+                <GroupBox x:Name="GRPBMin" Grid.Row="2" Grid.Column="3" FontWeight="Bold" FontSize="14" Header="Мінімум:" Margin="2"/>
+                <GroupBox x:Name="GRPBMax" Grid.Row="2" Grid.Column="4" FontWeight="Bold" FontSize="14" Header="Максимум:" Margin="2"/>
             </Grid>
         </Expander>
-        
+
         <Grid Grid.Row="3">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="auto"/>

@@ -23,7 +23,7 @@ namespace Maestro.Sys
         {
             InitializeComponent();
 
-            DGM.ItemsSource = errors;
+            LVM.ItemsSource = errors;
         }
     }
 }

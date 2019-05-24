@@ -1066,12 +1066,11 @@ namespace Main
                         {
                             resultOfEquels.Add(
                                 Tech.CodeGeneration.CodeGenerator.ExecuteCode<bool>(
-                                    $"return RealValue operator FilterValue;",
+                                    $"return RealValue {micro_item["type"]} FilterValue ;",
                                     Tech.CodeGeneration.CodeParameter.Create(
                                         "FilterValue", RemoveBadSymbols(micro_item["value"].ToString())),
                                     Tech.CodeGeneration.CodeParameter.Create(
-                                        "RealValue", RemoveBadSymbols(RealValue.ToString())),
-                                    Tech.CodeGeneration.CodeParameter.Create("operator", micro_item["type"])
+                                        "RealValue", RemoveBadSymbols(RealValue.ToString()))
                                                                                     )
                                               );
                         }
@@ -1079,12 +1078,11 @@ namespace Main
                         {
                             resultOfEquels.Add(
                                 Tech.CodeGeneration.CodeGenerator.ExecuteCode<bool>(
-                                    $"return {typeValue}.Parse(RealValue) operator {typeValue}.Parse(FilterValue);",
+                                    $"return {typeValue}.Parse(RealValue) {micro_item["type"]} {typeValue}.Parse(FilterValue);",
                                     Tech.CodeGeneration.CodeParameter.Create(
                                         "FilterValue", RemoveBadSymbols(micro_item["value"].ToString())),
                                     Tech.CodeGeneration.CodeParameter.Create(
-                                        "RealValue", RemoveBadSymbols(RealValue.ToString())),
-                                    Tech.CodeGeneration.CodeParameter.Create("operator", micro_item["type"])
+                                        "RealValue", RemoveBadSymbols(RealValue.ToString()))
                                                                                     )
                                               );
                         }

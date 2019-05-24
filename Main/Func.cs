@@ -1065,15 +1065,28 @@ namespace Main
                         if (typeValue == "String")
                         {
                             resultOfEquels.Add(
-                                                RemoveBadSymbols(RealValue.ToString()) == RemoveBadSymbols(micro_item["value"].ToString())
+                                Tech.CodeGeneration.CodeGenerator.ExecuteCode<bool>(
+                                    $"return RealValue operator FilterValue;",
+                                    Tech.CodeGeneration.CodeParameter.Create(
+                                        "FilterValue", RemoveBadSymbols(micro_item["value"].ToString())),
+                                    Tech.CodeGeneration.CodeParameter.Create(
+                                        "RealValue", RemoveBadSymbols(RealValue.ToString())),
+                                    Tech.CodeGeneration.CodeParameter.Create("operator", micro_item["type"])
+                                                                                    )
                                               );
                         }
                         else
                         {
-                            resultOfEquels.Add(Tech.CodeGeneration.CodeGenerator.ExecuteCode<bool>($"return {typeValue}.Parse(RealValue) == {typeValue}.Parse(FilterValue);",
-                            Tech.CodeGeneration.CodeParameter.Create("FilterValue", RemoveBadSymbols(micro_item["value"].ToString())),
-                            Tech.CodeGeneration.CodeParameter.Create("RealValue", RemoveBadSymbols(RealValue.ToString()))
-                            ));
+                            resultOfEquels.Add(
+                                Tech.CodeGeneration.CodeGenerator.ExecuteCode<bool>(
+                                    $"return {typeValue}.Parse(RealValue) operator {typeValue}.Parse(FilterValue);",
+                                    Tech.CodeGeneration.CodeParameter.Create(
+                                        "FilterValue", RemoveBadSymbols(micro_item["value"].ToString())),
+                                    Tech.CodeGeneration.CodeParameter.Create(
+                                        "RealValue", RemoveBadSymbols(RealValue.ToString())),
+                                    Tech.CodeGeneration.CodeParameter.Create("operator", micro_item["type"])
+                                                                                    )
+                                              );
                         }
                     }
                 }

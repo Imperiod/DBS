@@ -463,7 +463,55 @@ namespace Main.Docs
             }
         }
 
+        private void Window_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.F9)
+            {
+                CopyEntityInTable();
+            }
+        }
 
+        private void CopyEntityInTable()
+        {
+            if (DGM.CurrentItem is null || DGM.SelectedCells?.Count > 1)
+            {
+                MessageBox.Show("Встаньте на 1 ячейку необходимой строки!", "Maestro: [Коригування]", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            }
+            else
+            {
+                DBSolom.Financing row = (DBSolom.Financing)DGM.CurrentItem;
+                if (row.Головний_розпорядник is null || row.КЕКВ is null || row.КФК is null || row.Мікрофонд is null)
+                {
+                    MessageBox.Show("Заполните все данные в строке!", "Maestro: [Коригування]", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                }
+                else
+                {
+                    DBSolom.Financing financing = new DBSolom.Financing()
+                    {
+                        Головний_розпорядник = row.Головний_розпорядник,
+                        КФК = row.КФК,
+                        КЕКВ = row.КЕКВ,
+                        Мікрофонд = row.Мікрофонд,
+                        Змінив = db.Users.FirstOrDefault(f => f.Видалено == false && f.Логін == Func.Login),
+                        Створив = db.Users.FirstOrDefault(f => f.Видалено == false && f.Логін == Func.Login)
+                    };
+                    db.Financings.Local.Add(financing);
+
+                    DGM.CommitEdit();
+                    DGM.CommitEdit();
+
+                    CollectionViewSource.View.Refresh();
+                    DGM.CurrentItem = financing;
+                    DGM.CurrentCell = new DataGridCellInfo(financing, DGM.Columns.First(f => f.Header.ToString() == "Головний_розпорядник"));
+                    DGM.BeginEdit();
+                }
+            }
+        }
+
+        private void BTN_Copy_Click(object sender, RoutedEventArgs e)
+        {
+            CopyEntityInTable();
+        }
     }
 
     public class FinancingGroupTotalConverter : IValueConverter

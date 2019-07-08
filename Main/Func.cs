@@ -1181,7 +1181,7 @@ namespace Main
                         foreach (var column in Entities.First().Keys)
                         {
                             countColumns++;
-                            worksheet.Cells[1, countColumns] = column;
+                            worksheet.Cells[1, countColumns].Value2 = column;
                         }
 
                         if (TableExist == false)
@@ -1199,7 +1199,7 @@ namespace Main
                             int currentColumn = 1;
                             foreach (string ent in item.Keys)
                             {
-                                worksheet.Cells[currentRow, currentColumn] = item.FirstOrDefault(dict => dict.Key == ent).Value;
+                                worksheet.Cells[currentRow, currentColumn].Value2 = item.FirstOrDefault(dict => dict.Key == ent).Value;
                                 currentColumn++;
                             }
                             currentRow++;

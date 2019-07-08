@@ -200,7 +200,7 @@ namespace Main.Docs
                                 Грудень = x[TypeOfFinanceData.CurrentPlan][11]
                             };
                             CurrPlanList.Add(curr);
-                            
+
                             ListMonths rem = new ListMonths()
                             {
                                 Січень = x[TypeOfFinanceData.Remainders][0],
@@ -429,6 +429,62 @@ namespace Main.Docs
         private void DGRemainders_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
         {
             Func.GenerateColumnForDataGrid(db, ref counterForDGRemColumns, e);
+        }
+
+        private void Window_KeyUp(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.F9)
+            {
+                CopyEntityInTable();
+            }
+        }
+
+        private void CopyEntityInTable()
+        {
+            if (DGM.CurrentItem is null || DGM.SelectedCells?.Count > 1)
+            {
+                MessageBox.Show("Встаньте на 1 ячейку необходимой строки!", "Maestro: [Коригування]", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+            }
+            else
+            {
+                DBSolom.Correction row = (DBSolom.Correction)DGM.CurrentItem;
+                if (row.Головний_розпорядник is null || row.КЕКВ is null || row.КФК is null || row.Мікрофонд is null || row.Внутрішній_номер is null || row.КДБ is null || row.КФБ is null || row.Підстава is null)
+                {
+                    MessageBox.Show("Заполните все данные в строке!", "Maestro: [Коригування]", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                }
+                else
+                {
+                    DBSolom.Correction correction = new DBSolom.Correction()
+                    {
+                        Внутрішній_номер = row.Внутрішній_номер,
+                        Головний_розпорядник = row.Головний_розпорядник,
+                        КДБ = row.КДБ,
+                        КЕКВ = row.КЕКВ,
+                        КФБ = row.КФБ,
+                        КФК = row.КФК,
+                        Мікрофонд = row.Мікрофонд,
+                        Підстава = row.Підстава,
+                        Статус = db.DocStatuses.FirstOrDefault(f => f.Повністю == "Зареєстровано" && f.Видалено == false),
+                        Змінив = db.Users.FirstOrDefault(f => f.Видалено == false && f.Логін == Func.Login),
+                        Створив = db.Users.FirstOrDefault(f => f.Видалено == false && f.Логін == Func.Login)
+                    };
+                    db.Corrections.Local.Add(correction);
+
+                    DGM.CommitEdit();
+                    DGM.CommitEdit();
+
+                    CollectionViewSource.View.Refresh();
+
+                    DGM.CurrentItem = correction;
+                    DGM.CurrentCell = new DataGridCellInfo(correction, DGM.Columns.First(f => f.Header.ToString() == "Внутрішній_номер"));
+                    DGM.BeginEdit();
+                }
+            }
+        }
+
+        private void BTN_Copy_Click(object sender, RoutedEventArgs e)
+        {
+            CopyEntityInTable();
         }
     }
 

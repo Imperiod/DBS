@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Main.Docs"
         mc:Ignorable="d"
-        Title="Maestro: [Фінансування]" Height="450" Width="800">
+        Title="Maestro: [Фінансування]" Height="450" Width="800" KeyUp="Window_KeyUp">
     <Window.Resources>
         <local:FinancingGroupTotalConverter  x:Key="TotalConverter" />
 
@@ -85,9 +85,10 @@
                     <ColumnDefinition />
                     <ColumnDefinition />
                     <ColumnDefinition />
+                    <ColumnDefinition />
                 </Grid.ColumnDefinitions>
                 
-                <Expander x:Name="EXPFILTERS" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="5" IsExpanded="False" Margin="5" Header="Фільтри:" BorderBrush="LightBlue" BorderThickness="2">
+                <Expander x:Name="EXPFILTERS" Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="6" IsExpanded="False" Margin="5" Header="Фільтри:" BorderBrush="LightBlue" BorderThickness="2">
                     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                         <Grid x:Name="EXPGRO">
                             <Grid.RowDefinitions>
@@ -115,7 +116,7 @@
                         </Grid>
                     </ScrollViewer>
                 </Expander>
-                <Expander x:Name="EXPGROUPS" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="5" IsExpanded="False" Margin="5" Header="Групи:" BorderBrush="LightBlue" BorderThickness="2">
+                <Expander x:Name="EXPGROUPS" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="6" IsExpanded="False" Margin="5" Header="Групи:" BorderBrush="LightBlue" BorderThickness="2">
                     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                         <Grid x:Name="EXPGRT">
                             <Grid.ColumnDefinitions>
@@ -136,7 +137,7 @@
                         </Grid>
                     </ScrollViewer>
                 </Expander>
-                <Expander x:Name="EXPVISIBILITY" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="5" IsExpanded="False" Margin="5" Header="Видимість:" BorderBrush="LightBlue" BorderThickness="2">
+                <Expander x:Name="EXPVISIBILITY" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="6" IsExpanded="False" Margin="5" Header="Видимість:" BorderBrush="LightBlue" BorderThickness="2">
                     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
                         <Grid x:Name="EXPHDN">
                             <Grid.ColumnDefinitions>
@@ -163,6 +164,7 @@
                 <Button x:Name="BTN_ResetGroup" Grid.Row="3" Grid.Column="2" Margin="10">Скинути групування</Button>
                 <Button x:Name="BTN_Save" Grid.Row="3" Grid.Column="3" Margin="10">Зберегти зміни</Button>
                 <Button x:Name="BTN_ExportToExcel" Grid.Row="3" Grid.Column="4" Margin="10">Експортувати в Excel</Button>
+                <Button x:Name="BTN_Copy" Grid.Row="3" Grid.Column="5" Margin="10" FontWeight="Bold" Foreground="Red" Background="#FF383434" Click="BTN_Copy_Click">Скопіювати: [F9]</Button>
             </Grid>
         </Expander>
 

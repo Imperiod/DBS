@@ -8,17 +8,11 @@ namespace DBSolom
 {
     public class User
     {
-        public User()
-        {
-            Видалено = false;
-            New = true;
-        }
-
         public int Id { get; set; }
 
-        public bool Видалено { get; set; }
+        public bool Видалено { get; set; } = false;
 
-        public bool New { get; set; }
+        public bool New { get; set; } = true;
 
         public string Контакти { get; set; }
 

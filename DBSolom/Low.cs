@@ -9,51 +9,23 @@ namespace DBSolom
 {
     public class Low
     {
-        public Low()
-        {
-            Видалено = false;
-            Створино = DateTime.Now;
-            Змінено = DateTime.Now;
-
-            //10
-            DocStatus = false;
-            Macrofoundation = false;
-            Foundation = false;
-            Microfoundation = false;
-            KFB = false;
-            KDB = false;
-            KEKB = false;
-            KFK = false;
-            Main_manager = false;
-            Manager = false;
-
-            //4
-            Correction = false;
-            Filling = false;
-            Microfilling = false;
-            Financing = false;
-
-            //1
-            Lowt = false;
-        }
-
         [Key]
         [Editable(false)]
         public long Id { get; set; }
 
-        public bool Видалено { get; set; }
+        public bool Видалено { get; set; } = false;
 
         [Required(AllowEmptyStrings = false)]
         public User Створив { get; set; }
 
         [Required(AllowEmptyStrings = false)]
-        public DateTime Створино { get; set; }
+        public DateTime Створино { get; set; } = DateTime.Now;
 
         [Required(AllowEmptyStrings = false)]
         public User Змінив { get; set; }
 
         [Required(AllowEmptyStrings = false)]
-        public DateTime Змінено { get; set; }
+        public DateTime Змінено { get; set; } = DateTime.Now;
 
         [Required(AllowEmptyStrings = false)]
         public User Правовласник { get; set; }
@@ -62,43 +34,43 @@ namespace DBSolom
 
         #region "Dictionary"
 
-        public bool DocStatus { get; set; }
+        public bool DocStatus { get; set; } = false;
 
-        public bool Macrofoundation { get; set; }
+        public bool Macrofoundation { get; set; } = false;
 
-        public bool Foundation { get; set; }
+        public bool Foundation { get; set; } = false;
 
-        public bool Microfoundation { get; set; }
+        public bool Microfoundation { get; set; } = false;
 
-        public bool KFB { get; set; }
+        public bool KFB { get; set; } = false;
 
-        public bool KDB { get; set; }
+        public bool KDB { get; set; } = false;
 
-        public bool KEKB { get; set; }
+        public bool KEKB { get; set; } = false;
 
-        public bool KFK { get; set; }
+        public bool KFK { get; set; } = false;
 
-        public bool Main_manager { get; set; }
+        public bool Main_manager { get; set; } = false;
 
-        public bool Manager { get; set; }
+        public bool Manager { get; set; } = false;
 
         #endregion
 
         #region "Docs"
 
-        public bool Correction { get; set; }
+        public bool Correction { get; set; } = false;
 
-        public bool Filling { get; set; }
+        public bool Filling { get; set; } = false;
 
-        public bool Microfilling { get; set; }
+        public bool Microfilling { get; set; } = false;
 
-        public bool Financing { get; set; }
+        public bool Financing { get; set; } = false;
 
         #endregion
 
-        public bool User { get; set; }
+        public bool User { get; set; } = false;
 
-        public bool Lowt { get; set; }
+        public bool Lowt { get; set; } = false;
         #endregion
     }
 }

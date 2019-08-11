@@ -931,7 +931,7 @@ namespace Main
                         }
                         e.Accepted = resultList.Where(w => w == true).Count() > 0 ? true : false;
                     }
-                    catch (Exception ex)
+                    catch
                     {
                         e.Accepted = false;
                     }
@@ -1177,16 +1177,9 @@ namespace Main
                             worksheet.Name = "Maestro_Data";
                         }
 
-                        //Headers
-                        foreach (var column in Entities.First().Keys)
-                        {
-                            countColumns++;
-                            worksheet.Cells[1, countColumns].Value2 = column;
-                        }
-
                         if (TableExist == false)
                         {
-                            worksheet.ListObjects.Add(Microsoft.Office.Interop.Excel.XlListObjectSourceType.xlSrcRange, worksheet.Range[worksheet.Cells[1, 1], worksheet.Cells[countRows + 1, countColumns]], Type.Missing, Microsoft.Office.Interop.Excel.XlYesNoGuess.xlYes, Type.Missing).Name = "Maestro_DataTable";
+                            worksheet.ListObjects.Add(Microsoft.Office.Interop.Excel.XlListObjectSourceType.xlSrcRange, worksheet.Range[worksheet.Cells[1, 1], worksheet.Cells[countRows + 1, Entities.First().Keys.Count]], Type.Missing, Microsoft.Office.Interop.Excel.XlYesNoGuess.xlYes, Type.Missing).Name = "Maestro_DataTable";
                         }
                         else
                         {
@@ -1203,6 +1196,33 @@ namespace Main
                                 currentColumn++;
                             }
                             currentRow++;
+                        }
+
+                        //Headers
+                        foreach (var column in Entities.First().Keys)
+                        {
+                            countColumns++;
+                            worksheet.Cells[1, countColumns].Value2 = column;
+                            if (Entities.First().FirstOrDefault(f => f.Key == column).Value is string)
+                            {
+                                ((Microsoft.Office.Interop.Excel.Range)worksheet.Range[worksheet.Cells[2, countColumns], worksheet.Cells[currentRow, countColumns]]).NumberFormat = "@";
+                            }
+                            else if (Entities.First().FirstOrDefault(f => f.Key == column).Value is long)
+                            {
+                                ((Microsoft.Office.Interop.Excel.Range)worksheet.Range[worksheet.Cells[2, countColumns], worksheet.Cells[currentRow, countColumns]]).NumberFormat = "# ##0";
+                            }
+                            else if (Entities.First().FirstOrDefault(f => f.Key == column).Value is int)
+                            {
+                                ((Microsoft.Office.Interop.Excel.Range)worksheet.Range[worksheet.Cells[2, countColumns], worksheet.Cells[currentRow, countColumns]]).NumberFormat = "0";
+                            }
+                            else if (Entities.First().FirstOrDefault(f => f.Key == column).Value is double)
+                            {
+                                ((Microsoft.Office.Interop.Excel.Range)worksheet.Range[worksheet.Cells[2, countColumns], worksheet.Cells[currentRow, countColumns]]).NumberFormat = "# ##0,00";
+                            }
+                            else if (Entities.First().FirstOrDefault(f => f.Key == column).Value is DateTime)
+                            {
+                                ((Microsoft.Office.Interop.Excel.Range)worksheet.Range[worksheet.Cells[2, countColumns], worksheet.Cells[currentRow, countColumns]]).NumberFormat = "hh:mm:ss dd.mm.yyyy";
+                            }
                         }
 
                         application.Calculation = Microsoft.Office.Interop.Excel.XlCalculation.xlCalculationAutomatic;

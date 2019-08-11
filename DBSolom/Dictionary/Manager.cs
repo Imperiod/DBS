@@ -10,26 +10,19 @@ namespace DBSolom
 {
     public class Manager
     {
-        public Manager()
-        {
-            Видалено = false;
-            Створино = DateTime.Now;
-            Змінено = DateTime.Now;
-        }
-
         [Key]
         [Editable(false)]
         public long Id { get; set; }
 
-        public bool Видалено { get; set; }
+        public bool Видалено { get; set; } = false;
 
         public User Створив { get; set; }
 
-        public DateTime Створино { get; set; }
+        public DateTime Створино { get; set; } = DateTime.Now;
 
         public User Змінив { get; set; }
 
-        public DateTime Змінено { get; set; }
+        public DateTime Змінено { get; set; } = DateTime.Now;
 
         public Main_manager Головний_розпорядник { get; set; }
 

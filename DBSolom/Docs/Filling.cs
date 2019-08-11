@@ -10,37 +10,28 @@ namespace DBSolom
 {
     public class Filling
     {
-        public Filling()
-        {
-            Видалено = false;
-            Створино = DateTime.Now;
-            Змінено = DateTime.Now;
-            Проведено = DateTime.Now;
-            Підписано = false;
-        }
-
         [Key]
         [Editable(false)]
         public long Id { get; set; }
 
-        public bool Видалено { get; set; }
+        public bool Видалено { get; set; } = false;
 
         [Required(AllowEmptyStrings = false)]
         public User Створив { get; set; }
 
         [Required(AllowEmptyStrings = false)]
-        public DateTime Створино { get; set; }
+        public DateTime Створино { get; set; } = DateTime.Now;
 
         [Required(AllowEmptyStrings = false)]
         public User Змінив { get; set; }
 
         [Required(AllowEmptyStrings = false)]
-        public DateTime Змінено { get; set; }
+        public DateTime Змінено { get; set; } = DateTime.Now;
 
         [Required(AllowEmptyStrings = false)]
-        public DateTime Проведено { get; set; }
+        public DateTime Проведено { get; set; } = DateTime.Now;
 
-        public bool Підписано { get; set; }
+        public bool Підписано { get; set; } = false;
 
         [Required(AllowEmptyStrings = false)]
         public Main_manager Головний_розпорядник { get; set; }

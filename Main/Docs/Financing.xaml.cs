@@ -45,6 +45,7 @@ namespace Main.Docs
 
         DBSolom.Db db = new Db(Func.GetConnectionString);
 
+        int ItemIndexInDGM = -1;
         #endregion
 
         public Financing()
@@ -146,6 +147,11 @@ namespace Main.Docs
 
         private void DGM_SelectedCellsChanged(object sender, SelectedCellsChangedEventArgs e)
         {
+            if (DGM.CurrentItem != null)
+            {
+                ItemIndexInDGM = DGM.Items.IndexOf(DGM.CurrentItem);
+            }
+
             try
             {
                 if (DGM.SelectedCells.Count > 0 && EXPCALC.IsExpanded)
@@ -473,16 +479,17 @@ namespace Main.Docs
 
         private void CopyEntityInTable()
         {
-            if (DGM.CurrentItem is null || DGM.SelectedCells?.Count > 1)
+            if (ItemIndexInDGM == -1 || DGM.SelectedCells?.Count > 1)
             {
-                MessageBox.Show("Встаньте на 1 ячейку необходимой строки!", "Maestro: [Коригування]", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                MessageBox.Show("Встаньте на 1 ячейку необходимой строки!", "Maestro: [Фінансування]", MessageBoxButton.OK, MessageBoxImage.Exclamation);
             }
             else
             {
-                DBSolom.Financing row = (DBSolom.Financing)DGM.CurrentItem;
+                DGM.Focus();
+                DBSolom.Financing row = (DBSolom.Financing)DGM.Items.GetItemAt(ItemIndexInDGM);
                 if (row.Головний_розпорядник is null || row.КЕКВ is null || row.КФК is null || row.Мікрофонд is null)
                 {
-                    MessageBox.Show("Заполните все данные в строке!", "Maestro: [Коригування]", MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    MessageBox.Show("Заполните все данные в строке!", "Maestro: [Фінансування]", MessageBoxButton.OK, MessageBoxImage.Exclamation);
                 }
                 else
                 {
@@ -497,10 +504,15 @@ namespace Main.Docs
                     };
                     db.Financings.Local.Add(financing);
 
-                    DGM.CommitEdit();
-                    DGM.CommitEdit();
+
+                    if (ItemIndexInDGM != -1)
+                    {
+                        DGM.CommitEdit();
+                        DGM.CommitEdit();
+                    }
 
                     CollectionViewSource.View.Refresh();
+
                     DGM.CurrentItem = financing;
                     DGM.CurrentCell = new DataGridCellInfo(financing, DGM.Columns.First(f => f.Header.ToString() == "Головний_розпорядник"));
                     DGM.BeginEdit();

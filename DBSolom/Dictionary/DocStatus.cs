@@ -9,30 +9,23 @@ namespace DBSolom
 {
     public class DocStatus
     {
-        public DocStatus()
-        {
-            Видалено = false;
-            Створино = DateTime.Now;
-            Змінено = DateTime.Now;
-        }
-
         [Key]
         [Editable(false)]
         public long Id { get; set; }
 
-        public bool Видалено { get; set; }
+        public bool Видалено { get; set; } = false;
 
         [Required(AllowEmptyStrings = false)]
         public User Створив { get; set; }
 
         [Required(AllowEmptyStrings = false)]
-        public DateTime Створино { get; set; }
+        public DateTime Створино { get; set; } = DateTime.Now;
 
         [Required(AllowEmptyStrings = false)]
         public User Змінив { get; set; }
 
         [Required(AllowEmptyStrings = false)]
-        public DateTime Змінено { get; set; }
+        public DateTime Змінено { get; set; } = DateTime.Now;
 
         [Required(AllowEmptyStrings = false)]
         public string Повністю { get; set; }

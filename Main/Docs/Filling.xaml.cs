@@ -339,6 +339,11 @@ namespace Main.Docs
                 CollectionViewSource.GetDefaultView(DGM.ItemsSource).Refresh();
             }
         }
+
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            Func.dbHaveNotSavedChanges(e, db.Fillings.Local, db);
+        }
     }
 
     #region "Converters"

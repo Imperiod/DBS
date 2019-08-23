@@ -616,5 +616,11 @@ namespace Main
                 }
             }
         }
+
+        private void MI_Summary_Click(object sender, RoutedEventArgs e)
+        {
+            Maestro.Functional.Summary summary = new Maestro.Functional.Summary();
+            summary.Show();
+        }
     }
 }

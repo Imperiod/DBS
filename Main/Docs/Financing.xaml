@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Main.Docs"
         mc:Ignorable="d"
-        Title="Maestro: [Фінансування]" Height="450" Width="800" KeyUp="Window_KeyUp">
+        Title="Maestro: [Фінансування]" Height="450" Width="800" KeyUp="Window_KeyUp" Closing="Window_Closing">
     <Window.Resources>
         <local:FinancingGroupTotalConverter  x:Key="TotalConverter" />
 
@@ -168,7 +168,14 @@
             </Grid>
         </Expander>
 
-        <DataGrid x:Name="DGM" Grid.Row="1" Margin="0, 5, 0, 0" ItemsSource="{Binding Mode=OneWay, Source={StaticResource cvs}}" Loaded="DGM_Loaded" SelectionUnit="Cell" SelectedCellsChanged="DGM_SelectedCellsChanged" Foreground="Black" Background="White" BorderBrush="#FF18106A" CellEditEnding="DGM_CellEditEnding" BeginningEdit="DGM_BeginningEdit" AutoGeneratingColumn="DGM_AutoGeneratingColumn" CanUserDeleteRows="False" AllowDrop="True" />
+        <DataGrid x:Name="DGM" Grid.Row="1" Margin="0, 5, 0, 0" ItemsSource="{Binding Mode=OneWay, Source={StaticResource cvs}}" Loaded="DGM_Loaded" SelectionUnit="Cell" SelectedCellsChanged="DGM_SelectedCellsChanged" Foreground="Black" Background="White" BorderBrush="#FF18106A" CellEditEnding="DGM_CellEditEnding" BeginningEdit="DGM_BeginningEdit" AutoGeneratingColumn="DGM_AutoGeneratingColumn" CanUserDeleteRows="False" AllowDrop="True" ContextMenuOpening="DGM_ContextMenuOpening">
+            <DataGrid.ContextMenu>
+                <ContextMenu>
+                    <Grid x:Name="CntxGrid">
+                    </Grid>
+                </ContextMenu>
+            </DataGrid.ContextMenu>
+        </DataGrid>
 
         <Expander x:Name="EXPCALC" Grid.Row="2" Margin="5" IsExpanded="False" Header="Розрахунки:" BorderBrush="LightBlue" BorderThickness="2">
             <Grid>

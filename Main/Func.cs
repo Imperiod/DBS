@@ -1,23 +1,20 @@
 ﻿using DBSolom;
-using Microsoft.CSharp;
+using ClosedXML.Excel;
 using Microsoft.Win32;
 using System;
-using System.CodeDom.Compiler;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data.Entity;
 using System.Globalization;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
 using System.Windows.Data;
-using System.Windows.Input;
-using System.Windows.Media;
+using System.Data;
+using System.Collections.ObjectModel;
 
 namespace Main
 {
@@ -71,6 +68,7 @@ namespace Main
             switch (headerString)
             {
                 case "Id":
+                case "SortIndex":
                     e.Column = new DataGridTextColumn()
                     {
                         Header = header,
@@ -105,7 +103,7 @@ namespace Main
                         SelectedValueBinding = new Binding(headerString) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
                         IsReadOnly = true,
                         DisplayIndex = counterForDGMColumns,
-                        SortMemberPath = headerString+".Логін"
+                        SortMemberPath = headerString + ".Логін"
                     };
                     break;
                 case "Створино":
@@ -132,11 +130,12 @@ namespace Main
                         SelectedValueBinding = new Binding(headerString) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
                         IsReadOnly = false,
                         DisplayIndex = counterForDGMColumns,
-                        SortMemberPath = headerString+".Логін"
+                        SortMemberPath = headerString + ".Логін"
                     };
                     break;
                 case "Контакти":
                 case "Логін":
+                case "Тип":
                     e.Column = new DataGridTextColumn()
                     {
                         Header = e.Column.Header,
@@ -212,7 +211,7 @@ namespace Main
                         DisplayMemberPath = "Повністю",
                         SelectedValueBinding = new Binding(headerString) { UpdateSourceTrigger = UpdateSourceTrigger.PropertyChanged },
                         DisplayIndex = counterForDGMColumns,
-                        SortMemberPath = headerString+".Повністю"
+                        SortMemberPath = headerString + ".Повністю"
                     };
                     break;
                 case "Розпорядник":
@@ -702,6 +701,134 @@ namespace Main
         }
 
         /// <summary>
+        /// Creat view for context menu and attach his to top grid of context menu
+        /// </summary>
+        /// <param name="topGrid">Top grid of context menu</param>
+        /// <param name="correctionCntxMenuList">List of correction context menu entity</param>
+        public static void GetContextMenuView(Grid topGrid, List<CorrectionCntxMenu> correctionCntxMenuList)
+        {
+            topGrid.Children.Clear();
+            foreach (var correctionCntxMenu in correctionCntxMenuList)
+            {
+                Grid grid = new Grid();
+                grid.ColumnDefinitions.Add(new ColumnDefinition() { Width = GridLength.Auto });
+                grid.ColumnDefinitions.Add(new ColumnDefinition() { Width = GridLength.Auto });
+                grid.ColumnDefinitions.Add(new ColumnDefinition() { Width = GridLength.Auto });
+                grid.ColumnDefinitions.Add(new ColumnDefinition() { Width = GridLength.Auto });
+                grid.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
+                grid.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
+                grid.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
+
+                Grid.SetRow(grid, correctionCntxMenuList.IndexOf(correctionCntxMenu));
+                Grid.SetColumn(grid, 0);
+
+                foreach (var lbl in correctionCntxMenu.cntx_dict_lbl)
+                {
+                    int indexColumn = correctionCntxMenu.cntx_dict_lbl.IndexOf(lbl);
+
+                    Grid.SetRow(lbl, 0);
+                    Grid.SetColumn(lbl, indexColumn);
+                    grid.Children.Add(lbl);
+                }
+                foreach (var cmb in correctionCntxMenu.cntx_dict_cmb)
+                {
+                    int indexColumn = correctionCntxMenu.cntx_dict_cmb.IndexOf(cmb);
+
+                    Grid.SetRow(cmb, 1);
+                    Grid.SetColumn(cmb, indexColumn);
+                    grid.Children.Add(cmb);
+                }
+                foreach (var txt in correctionCntxMenu.cntx_dict_txt)
+                {
+                    int indexColumn = correctionCntxMenu.cntx_dict_txt.IndexOf(txt);
+
+                    Grid.SetRow(txt, 2);
+                    Grid.SetColumn(txt, indexColumn);
+                    grid.Children.Add(txt);
+                }
+                if (grid.Children.Count > 0)
+                {
+                    topGrid.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
+                    topGrid.Children.Add(grid);
+                }
+            }
+
+            Button button = new Button() { Content = "Консолідувати" };
+            Grid.SetRow(button, topGrid.RowDefinitions.Count);
+            Grid.SetColumn(button, 0);
+            button.Click += Maestro_T_Btn_Click;
+
+            topGrid.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
+            topGrid.Children.Add(button);
+
+            void Maestro_T_Btn_Click(object sender, RoutedEventArgs e)
+            {
+                Maestro.Functional.Summary summary = new Maestro.Functional.Summary();
+                summary.Dispatcher.Invoke(new Action(() =>
+                {
+                    summary.FillDate(DateTime.Now);
+                }));
+
+                foreach (var correctionCntxMenu in correctionCntxMenuList)
+                {
+                    if (correctionCntxMenu.cntx_dict_cmb[0].SelectedValue != null)
+                    {
+                        summary.Dispatcher.Invoke(new Action(() =>
+                        {
+                            summary.dict_cmb["Фонд"].SelectedValue = correctionCntxMenu.cntx_dict_cmb[0].SelectedValue;
+                        }));
+                        summary.Dispatcher.Invoke(new Action(() =>
+                        {
+                            summary.dict_txt["Фонд"].Text = correctionCntxMenu.cntx_dict_txt[0].Text;
+                        }));
+                    }
+
+                    if (correctionCntxMenu.cntx_dict_cmb[1].SelectedValue != null)
+                    {
+                        summary.Dispatcher.Invoke(new Action(() =>
+                        {
+                            summary.dict_cmb["Головний_розпорядник"].SelectedValue = correctionCntxMenu.cntx_dict_cmb[1].SelectedValue;
+                        }));
+                        summary.Dispatcher.Invoke(new Action(() =>
+                        {
+                            summary.dict_txt["Головний_розпорядник"].Text = correctionCntxMenu.cntx_dict_txt[1].Text;
+                        }));
+                    }
+
+                    if (correctionCntxMenu.cntx_dict_cmb[2].SelectedValue != null)
+                    {
+                        summary.Dispatcher.Invoke(new Action(() =>
+                        {
+                            summary.dict_cmb["КФК"].SelectedValue = correctionCntxMenu.cntx_dict_cmb[2].SelectedValue;
+                        }));
+                        summary.Dispatcher.Invoke(new Action(() =>
+                        {
+                            summary.dict_txt["КФК"].Text = correctionCntxMenu.cntx_dict_txt[2].Text;
+                        }));
+                    }
+
+                    if (correctionCntxMenu.cntx_dict_cmb[3].SelectedValue != null)
+                    {
+                        summary.Dispatcher.Invoke(new Action(() =>
+                        {
+                            summary.dict_cmb["КЕКВ"].SelectedValue = correctionCntxMenu.cntx_dict_cmb[3].SelectedValue;
+                        }));
+                        summary.Dispatcher.Invoke(new Action(() =>
+                        {
+                            summary.dict_txt["КЕКВ"].Text = correctionCntxMenu.cntx_dict_txt[3].Text;
+                        }));
+                    }
+
+                    summary.Dispatcher.Invoke(new Action(() =>
+                    {
+                        summary.BTN_Accept_Click(null, null);
+                    }));
+                }
+                summary.Show();
+            }
+        }
+
+        /// <summary>
         /// Обработчик группировки
         /// </summary>
         /// <param name="sender">Стандартный аргумент события</param>
@@ -873,7 +1000,7 @@ namespace Main
             {
                 Content = item.Name,
                 IsThreeState = false,
-                IsChecked = new List<string>() { "Id", "Видалено", "Створив", "Створино", "Змінив", "Змінено" }.Contains(item.Name) ? false : true,
+                IsChecked = new List<string>() { "SortIndex", "Id", "Видалено", "Створив", "Створино", "Змінив", "Змінено" }.Contains(item.Name) ? false : true,
                 Style = st,
                 HorizontalContentAlignment = HorizontalAlignment.Stretch,
                 HorizontalAlignment = HorizontalAlignment.Stretch
@@ -937,7 +1064,7 @@ namespace Main
                     }
                 }
             }
-            
+
             bool CheckOneEntity(Filters filter)
             {
                 object OriginalValue = null;
@@ -949,8 +1076,14 @@ namespace Main
                 foreach (var micro_item in filter.GetFilters) //Перебор всех фильтров по типу И (если хоть один не проходит тогда False)
                 {
                     //Определение главных переменных - оригинальное значение, тип значения и сравниваемое значение
-                    if (e.Item.GetType().GetProperty(micro_item["prop"]).PropertyType.FullName.Contains("DBSolom"))
+                    if (e.Item.GetType().GetProperty(micro_item["prop"]).GetValue(e.Item) is null)
                     {
+                        typeValue = e.Item.GetType().GetProperty(micro_item["prop"]).GetValue(e.Item)?.GetType().Name;
+                        RealValue = e.Item.GetType().GetProperty(micro_item["prop"]).GetValue(e.Item);
+                    }
+                    else if (e.Item.GetType().GetProperty(micro_item["prop"]).PropertyType.FullName.Contains("DBSolom"))
+                    {
+
                         var ListPropertysOfEntity = ((PropertyInfo[])e.Item.GetType().GetProperty(micro_item["prop"]).GetValue(e.Item).GetType().GetProperties()).Select(k => k.Name).ToList();
                         OriginalValue = e.Item.GetType().GetProperty(micro_item["prop"]).GetValue(e.Item);
 
@@ -1014,18 +1147,16 @@ namespace Main
 
                         if (typeValue == "String")
                         {
-                            resultOfEquels.Add(
-                                                RemoveBadSymbols(RealValue.ToString()).Length >= RemoveBadSymbols(start).Length &&
-                                                RemoveBadSymbols(RealValue.ToString()).Length <= RemoveBadSymbols(end).Length
-                                              );
+                            resultOfEquels.Add(RemoveBadSymbols(RealValue.ToString()).Length >= RemoveBadSymbols(start).Length &&
+                                               RemoveBadSymbols(RealValue.ToString()).Length <= RemoveBadSymbols(end).Length);
                         }
                         else
                         {
-                            resultOfEquels.Add(Tech.CodeGeneration.CodeGenerator.ExecuteCode<bool>($"return {typeValue}.Parse(RealValue) >= {typeValue}.Parse(FirstFilterValue) && {typeValue}.Parse(RealValue) <= {typeValue}.Parse(SecondFilterValue);",
+                            resultOfEquels.Add(Tech.CodeGeneration.CodeGenerator.ExecuteCode<bool>(
+                                $"return {typeValue}.Parse(RealValue) >= {typeValue}.Parse(FirstFilterValue) && {typeValue}.Parse(RealValue) <= {typeValue}.Parse(SecondFilterValue);",
                                                 Tech.CodeGeneration.CodeParameter.Create("FirstFilterValue", RemoveBadSymbols(start)),
                                                 Tech.CodeGeneration.CodeParameter.Create("SecondFilterValue", RemoveBadSymbols(end)),
-                                                Tech.CodeGeneration.CodeParameter.Create("RealValue", RemoveBadSymbols(RealValue.ToString()))
-                                                ));
+                                                Tech.CodeGeneration.CodeParameter.Create("RealValue", RemoveBadSymbols(RealValue.ToString()))));
                         }
                     }
                     else if (micro_item["type"] == "[,]")
@@ -1055,36 +1186,28 @@ namespace Main
                     }
                     else if (micro_item["type"] == ">|<")
                     {
-                        resultOfEquels.Add(
-                                            RemoveBadSymbols(RealValue.ToString()).ToLower()
-                                            .Contains(RemoveBadSymbols(micro_item["value"].ToString()).ToLower())
-                                          );
+                        resultOfEquels.Add(RemoveBadSymbols(RealValue.ToString()).ToLower()
+                                          .Contains(RemoveBadSymbols(micro_item["value"].ToString()).ToLower()));
                     }
                     else
                     {
                         if (typeValue == "String")
                         {
-                            resultOfEquels.Add(
-                                Tech.CodeGeneration.CodeGenerator.ExecuteCode<bool>(
-                                    $"return RealValue {micro_item["type"]} FilterValue ;",
-                                    Tech.CodeGeneration.CodeParameter.Create(
-                                        "FilterValue", RemoveBadSymbols(micro_item["value"].ToString())),
-                                    Tech.CodeGeneration.CodeParameter.Create(
-                                        "RealValue", RemoveBadSymbols(RealValue.ToString()))
-                                                                                    )
-                                              );
+                            resultOfEquels.Add(Tech.CodeGeneration.CodeGenerator.ExecuteCode<bool>(
+                                $"return RealValue {micro_item["type"]} FilterValue ;",
+                                Tech.CodeGeneration.CodeParameter.Create("FilterValue", RemoveBadSymbols(micro_item["value"].ToString())),
+                                Tech.CodeGeneration.CodeParameter.Create("RealValue", RemoveBadSymbols(RealValue.ToString()))));
+                        }
+                        else if (typeValue is null && micro_item["value"] == "null")
+                        {
+                            resultOfEquels.Add(true);
                         }
                         else
                         {
-                            resultOfEquels.Add(
-                                Tech.CodeGeneration.CodeGenerator.ExecuteCode<bool>(
+                            resultOfEquels.Add(Tech.CodeGeneration.CodeGenerator.ExecuteCode<bool>(
                                     $"return {typeValue}.Parse(RealValue) {micro_item["type"]} {typeValue}.Parse(FilterValue);",
-                                    Tech.CodeGeneration.CodeParameter.Create(
-                                        "FilterValue", RemoveBadSymbols(micro_item["value"].ToString())),
-                                    Tech.CodeGeneration.CodeParameter.Create(
-                                        "RealValue", RemoveBadSymbols(RealValue.ToString()))
-                                                                                    )
-                                              );
+                                    Tech.CodeGeneration.CodeParameter.Create("FilterValue", RemoveBadSymbols(micro_item["value"].ToString())),
+                                    Tech.CodeGeneration.CodeParameter.Create("RealValue", RemoveBadSymbols(RealValue.ToString()))));
                         }
                     }
                 }
@@ -1114,127 +1237,190 @@ namespace Main
             Window active_window = (Window)((Grid)((Expander)((Grid)((Button)sender).Parent).Parent).Parent).Parent;
             DataGrid DGM = (DataGrid)active_window.GetType().GetRuntimeFields().First(f => f.Name == "DGM").GetValue(active_window);
             ProgressBar PB = (ProgressBar)active_window.GetType().GetRuntimeFields().First(f => f.Name == "PB").GetValue(active_window);
-
-            bool WorksheetExist = false;
-            bool TableExist = false;
             #endregion
 
             if (DGM.SelectedCells.Count > 0)
             {
-                List<Dictionary<string, dynamic>> Entities = new List<Dictionary<string, dynamic>>();
-                int countColumns = 0;
-                int countRows = CopyEntities(DGM, ref Entities, 0);
+                List<Dictionary<string, dynamic>> Entities = CopyEntities();
 
                 OpenFileDialog openFileDialog = new OpenFileDialog();
-                openFileDialog.Filter = "Excel files (*.xlsx;*.xlsm;*.xls)|*.xlsx;*.xlsm;*.xls";
+                openFileDialog.Filter = "Excel files (*.xlsx;*.xlsm)|*.xlsx;*.xlsm;";
                 if (openFileDialog.ShowDialog() == true)
                 {
                     PB.IsIndeterminate = true;
 
                     var Task = new Task(() =>
                     {
-                        #region "Variables"
-                        Microsoft.Office.Interop.Excel.Application application = new Microsoft.Office.Interop.Excel.Application
+                        try
                         {
-                            AskToUpdateLinks = false,
-                            DisplayAlerts = false,
-                            Visible = false
-                        };
-                        Microsoft.Office.Interop.Excel.Workbook workbook = application.Workbooks.Open(openFileDialog.FileName);
-                        application.Calculation = Microsoft.Office.Interop.Excel.XlCalculation.xlCalculationManual;
-                        int currentRow = 2;
-                        Microsoft.Office.Interop.Excel.Worksheet worksheet = null;
-                        #endregion
-
-                        //Check exist worksheet
-                        foreach (Microsoft.Office.Interop.Excel.Worksheet item in workbook.Worksheets)
-                        {
-                            if (item.Name == "Maestro_Data")
+                            using (XLWorkbook wb = new XLWorkbook(openFileDialog.FileName, XLEventTracking.Disabled))
                             {
-                                WorksheetExist = true;
-                                worksheet = item;
-                                break;
-                            }
-                        }
+                                IXLWorksheet ws = wb.Worksheets.FirstOrDefault(f => f.Name == "Maestro_Data");
+                                wb.CalculateMode = XLCalculateMode.Manual;
+                                int countHeadersOfEntities = Entities.First().Keys.Count;
+                                IXLTable table;
 
-                        if (WorksheetExist)
-                        {
-                            if (worksheet.ListObjects.Count != 0)
-                            {
-                                for (int i = 1; i <= worksheet.ListObjects.Count; i++)
+                                if (ws is null)
                                 {
-                                    if (worksheet.ListObjects[i].Name == "Maestro_DataTable")
+                                    ws = wb.AddWorksheet("Maestro_Data");
+                                    DataTable newTable = new DataTable("Maestro_Table");
+
+                            //Headers
+                            foreach (var item in Entities.First().Keys)
                                     {
-                                        TableExist = true;
-                                        break;
+                                        DataColumn column = new DataColumn(item);
+                                        newTable.Columns.Add(column);
+                                    }
+
+                            //Rows
+                            foreach (var columnValue in Entities)
+                                    {
+                                        DataRow newRow = newTable.NewRow();
+                                        newTable.Rows.Add(newRow);
+                                    }
+
+                                    ws.Cell(1, 1).InsertTable(newTable, "Maestro_Table", true); //Attach table
+                                    table = ws.Tables.FirstOrDefault(f => f.Name == "Maestro_Table");
+
+                                    SetStylesForValues();
+                                    FillData();
+                                }
+                                else //Worksheet is exist
+                                {
+
+
+                                    table = ws.Tables.FirstOrDefault(f => f.Name == "Maestro_Table");
+                                    if (table is null)
+                                    {
+                                        if (ws.Tables.Count() > 0)
+                                        {
+                                            PB.Dispatcher.Invoke(() => PB.IsIndeterminate = false);
+                                            MessageBox.Show("На листі Maestro_Data є сторонні таблиці, якщо потрібна таблиця все таки є і вона коректна, будь ласка змініть її ім\'я на \"Maestro_Table\" та спробуйте знову", "Maestro:[Експорт]", MessageBoxButton.OK, MessageBoxImage.Hand);
+                                            return;
+                                        }
+                                        DataTable newTable = new DataTable("Maestro_Table");
+
+                                //Headers
+                                foreach (var item in Entities.First().Keys)
+                                        {
+                                            DataColumn column = new DataColumn(item);
+                                            newTable.Columns.Add(column);
+                                        }
+
+                                //Rows
+                                foreach (var columnValue in Entities)
+                                        {
+                                            DataRow newRow = newTable.NewRow();
+                                            newTable.Rows.Add(newRow);
+                                        }
+
+                                        ws.Cell(1, 1).InsertTable(newTable, "Maestro_Table", true); //Attach table
+                                        table = ws.Tables.FirstOrDefault(f => f.Name == "Maestro_Table");
+
+                                        SetStylesForValues();
+                                        FillData();
+                                        ws.Range(ws.Cell(1, table.Fields.Count() + 1), ws.Cell(table.RowCount() + 90001, table.Fields.Count() + 251)).Clear(XLClearOptions.All);
+                                        ws.Range(ws.Cell(table.RowCount() + 1, 1), ws.Cell(90001 - table.RowCount(), table.Fields.Count())).Clear(XLClearOptions.All);
+                                    }
+                                    else //Table is exist
+                                    {
+                                        if (ws.Tables.Count() > 1)
+                                        {
+                                            PB.Dispatcher.Invoke(() => PB.IsIndeterminate = false);
+                                            MessageBox.Show("На листі Maestro_Data є сторонні таблиці, будь ласка видаліть всі зайві таблиці за виключенням \"Maestro_Table\" та спробуйте знову", "Maestro:[Експорт]", MessageBoxButton.OK, MessageBoxImage.Hand);
+                                            return;
+                                        }
+                                //Clear other values
+                                ws.Range(ws.Cell(1, table.Fields.Count() + 1), ws.Cell(table.RowCount() + 90001, table.Fields.Count() + 251)).Clear(XLClearOptions.All);
+                                        ws.Range(ws.Cell(table.RowCount() + 1, 1), ws.Cell(90001 - table.RowCount(), table.Fields.Count())).Clear(XLClearOptions.All);
+
+                                        table.Resize(ws.Cell(1, 1), ws.Cell(Entities.Count + 1, countHeadersOfEntities));
+
+                                //Headers
+                                PrepareHeaders();
+                                        for (int indexColumn = 0; indexColumn < countHeadersOfEntities; indexColumn++)
+                                        {
+                                            ws.Cell(1, indexColumn + 1).SetValue(Entities.First().Keys.ElementAt(indexColumn));
+                                        }
+
+                                        SetStylesForValues();
+                                        FillData();
+                                        ws.Range(ws.Cell(1, table.Fields.Count() + 1), ws.Cell(table.RowCount() + 90001, table.Fields.Count() + 251)).Clear(XLClearOptions.All);
+                                        ws.Range(ws.Cell(table.RowCount() + 1, 1), ws.Cell(90001 - table.RowCount(), table.Fields.Count())).Clear(XLClearOptions.All);
+                                    }
+                                }
+
+                                wb.CalculateMode = XLCalculateMode.Auto;
+                                wb.Save();
+                                MessageBox.Show("Виконано!", "Maestro", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                                void PrepareHeaders()
+                                {
+                                    List<string> l = table.Fields.Select(s => s.Name).ToList();
+                                    int i = 1;
+
+                                    while (i <= l.Count)
+                                    {
+                                        string s = "MSTR" + new Random().Next(1, 1000);
+                                        if (l.Contains(s) == false)
+                                        {
+                                            table.Column(i).SetValue(s);
+                                            l[i - 1] = s;
+                                            i++;
+                                        }
+                                    }
+                                }
+                                void SetStylesForValues()
+                                {
+                                    foreach (var item in Entities.First().Keys)
+                                    {
+                                        switch (Entities.First()[item])
+                                        {
+                                            case long val:
+                                                ws.Table("Maestro_Table").DataRange.Column(item).Style.NumberFormat.Format = "#";
+                                                break;
+                                            case int val:
+                                                ws.Table("Maestro_Table").DataRange.Column(item).Style.NumberFormat.Format = "#";
+                                                break;
+                                            case double val:
+                                                ws.Table("Maestro_Table").DataRange.Column(item).Style.NumberFormat.Format = "# ### ### ##0.00;[Red]-# ### ### ###.00";
+                                                break;
+                                            case DateTime val:
+                                                ws.Table("Maestro_Table").DataRange.Column(item).Style.NumberFormat.Format = "hh:mm:ss dd/mm/yyyy";
+                                                break;
+                                            case string val:
+                                                ws.Table("Maestro_Table").DataRange.Column(item).Style.NumberFormat.Format = "@";
+                                                break;
+                                            default:
+                                                break;
+                                        }
+
+                                    }
+                                }
+                                void FillData()
+                                {
+                                    for (int indexColumn = 0; indexColumn < countHeadersOfEntities; indexColumn++)
+                                    {
+                                        for (int indexRow = 0; indexRow < Entities.Count; indexRow++)
+                                        {
+                                            var v = Entities.ElementAt(indexRow).Values.ElementAt(indexColumn);
+                                            table.DataRange.Cell(indexRow + 1, indexColumn + 1).SetValue(v ?? "");
+                                        }
+                                        ws.Column(indexColumn + 1).AdjustToContents();
                                     }
                                 }
                             }
+                            openFileDialog = null;
                         }
-                        else
+                        catch (System.IO.IOException ex)
                         {
-                            worksheet = workbook.Worksheets.Add();
-                            worksheet.Name = "Maestro_Data";
+                            MessageBox.Show($"Файл відкритий в іншій програмі або зайнятий іншим процесом.\n\nСистемне повідомлення: [{ex}]", "Maestro:[Експорт]", MessageBoxButton.OK, MessageBoxImage.Error);
                         }
-
-                        if (TableExist == false)
+                        finally
                         {
-                            worksheet.ListObjects.Add(Microsoft.Office.Interop.Excel.XlListObjectSourceType.xlSrcRange, worksheet.Range[worksheet.Cells[1, 1], worksheet.Cells[countRows + 1, Entities.First().Keys.Count]], Type.Missing, Microsoft.Office.Interop.Excel.XlYesNoGuess.xlYes, Type.Missing).Name = "Maestro_DataTable";
+                            PB.Dispatcher.Invoke(() => PB.IsIndeterminate = false);
                         }
-                        else
-                        {
-                            worksheet.Range[worksheet.Cells[2, 1], worksheet.Cells[10000, 50]].Clear();
-                        }
-
-                        //Filling
-                        foreach (var item in Entities)
-                        {
-                            int currentColumn = 1;
-                            foreach (string ent in item.Keys)
-                            {
-                                worksheet.Cells[currentRow, currentColumn].Value2 = item.FirstOrDefault(dict => dict.Key == ent).Value;
-                                currentColumn++;
-                            }
-                            currentRow++;
-                        }
-
-                        //Headers
-                        foreach (var column in Entities.First().Keys)
-                        {
-                            countColumns++;
-                            worksheet.Cells[1, countColumns].Value2 = column;
-                            if (Entities.First().FirstOrDefault(f => f.Key == column).Value is string)
-                            {
-                                ((Microsoft.Office.Interop.Excel.Range)worksheet.Range[worksheet.Cells[2, countColumns], worksheet.Cells[currentRow, countColumns]]).NumberFormat = "@";
-                            }
-                            else if (Entities.First().FirstOrDefault(f => f.Key == column).Value is long)
-                            {
-                                ((Microsoft.Office.Interop.Excel.Range)worksheet.Range[worksheet.Cells[2, countColumns], worksheet.Cells[currentRow, countColumns]]).NumberFormat = "# ##0";
-                            }
-                            else if (Entities.First().FirstOrDefault(f => f.Key == column).Value is int)
-                            {
-                                ((Microsoft.Office.Interop.Excel.Range)worksheet.Range[worksheet.Cells[2, countColumns], worksheet.Cells[currentRow, countColumns]]).NumberFormat = "0";
-                            }
-                            else if (Entities.First().FirstOrDefault(f => f.Key == column).Value is double)
-                            {
-                                ((Microsoft.Office.Interop.Excel.Range)worksheet.Range[worksheet.Cells[2, countColumns], worksheet.Cells[currentRow, countColumns]]).NumberFormat = "# ##0,00";
-                            }
-                            else if (Entities.First().FirstOrDefault(f => f.Key == column).Value is DateTime)
-                            {
-                                ((Microsoft.Office.Interop.Excel.Range)worksheet.Range[worksheet.Cells[2, countColumns], worksheet.Cells[currentRow, countColumns]]).NumberFormat = "hh:mm:ss dd.mm.yyyy";
-                            }
-                        }
-
-                        application.Calculation = Microsoft.Office.Interop.Excel.XlCalculation.xlCalculationAutomatic;
-                        MessageBox.Show("Виконано!", "Maestro", MessageBoxButton.OK, MessageBoxImage.Information);
-                        application.Visible = true;
-                        openFileDialog = null;
-                        application = null;
-                        workbook = null;
-                        worksheet = null;
-                        PB.Dispatcher.Invoke(() => PB.IsIndeterminate = false);
                     });
-
                     Task.Start();
                 }
             }
@@ -1242,76 +1428,69 @@ namespace Main
             {
                 MessageBox.Show("Виділіть всі строки, які будуть експортовані!", "Maestro", MessageBoxButton.OK, MessageBoxImage.Hand);
             }
-        }
 
-        /// <summary>
-        /// Копирует сущности перед экспортом
-        /// </summary>
-        /// <param name="DGM"></param>
-        /// <param name="Entities"></param>
-        /// <param name="countRows"></param>
-        /// <returns></returns>
-        private static int CopyEntities(DataGrid DGM, ref List<Dictionary<string, dynamic>> Entities, int countRows)
-        {
-            foreach (DataGridCellInfo item in DGM.SelectedCells)
+            List<Dictionary<string, dynamic>> CopyEntities()
             {
-                if (item.Item.ToString() != "{NewItemPlaceholder}" && Entities.FirstOrDefault(dict => dict.FirstOrDefault(d => d.Key == "Id").Value?.ToString() == item.Item.GetType().GetProperty("Id").GetValue(item.Item).ToString()) is null)
+                List<Dictionary<string, dynamic>> Entities = new List<Dictionary<string, dynamic>>();
+
+                //Copy uniques values
+                IEnumerable<DataGridCellInfo> entitiesIntoCell = DGM.SelectedCells.Where(w => w.Item.ToString() != "{NewItemPlaceholder}").GroupBy((DataGridCellInfo g) => g.Item.GetType().GetProperty("Id").GetValue(g.Item)).Select(s => s.First());
+
+                //Define headers of column
+                List<string> headers = entitiesIntoCell.First().Item.GetType().GetProperties().Select(s => s.Name).ToList();
+
+                foreach (DataGridCellInfo entityIntoCell in entitiesIntoCell)
                 {
-                    foreach (var itemm in item.Item.GetType().GetProperties().Select(s => s.Name).ToList())
+                    Dictionary<string, dynamic> dict = new Dictionary<string, dynamic>();
+
+                    foreach (var header in headers)
                     {
-                        var q = Entities.FirstOrDefault(dict => dict.FirstOrDefault(d => d.Key == "Id").Value?.ToString() == item.Item.GetType().GetProperty("Id").GetValue(item.Item).ToString());
-                        if (q is null)
+                        dynamic correctValue;
+                        dynamic insideProp = entityIntoCell.Item.GetType().GetProperty(header).GetValue(entityIntoCell.Item);
+                        switch (header)
                         {
-                            Entities.Add(new Dictionary<string, dynamic>() { { itemm, item.Item.GetType().GetProperty(itemm).GetValue(item.Item) } });
-                        }
-                        else
-                        {
-                            dynamic q1, q2, q3;
-                            switch (itemm)
-                            {
-                                case "Створив":
-                                case "Змінив":
-                                case "Правовласник":
-                                    q1 = item.Item.GetType().GetProperty(itemm).GetValue(item.Item);
-                                    q.Add(itemm, q1.GetType().GetProperty("Логін").GetValue(q1));
-                                    break;
-                                case "Статус":
-                                    q1 = item.Item.GetType().GetProperty(itemm).GetValue(item.Item);
-                                    q.Add(itemm, q1.GetType().GetProperty("Повністю").GetValue(q1));
-                                    break;
-                                case "Головний_розпорядник":
-                                    q1 = item.Item.GetType().GetProperty(itemm).GetValue(item.Item);
-                                    q.Add(itemm, q1.GetType().GetProperty("Найменування").GetValue(q1));
-                                    break;
-                                case "Мікрофонд":
-                                    q1 = item.Item.GetType().GetProperty(itemm).GetValue(item.Item);
-                                    q.Add(itemm, q1.GetType().GetProperty("Повністю").GetValue(q1));
-                                    if (q.ContainsKey("Фонд") == false)
-                                    {
-                                        q2 = q1.GetType().GetProperty("Фонд").GetValue(q1);
-                                        q3 = q2.GetType().GetProperty("Код").GetValue(q2);
-                                        q.Add("Фонд", q3);
-                                    }
-                                    break;
-                                case "КФК":
-                                case "Фонд":
-                                case "КДБ":
-                                case "КФБ":
-                                case "КЕКВ":
-                                    q1 = item.Item.GetType().GetProperty(itemm).GetValue(item.Item);
-                                    q.Add(itemm, q1.GetType().GetProperty("Код").GetValue(q1));
-                                    break;
-                                default:
-                                    q.Add(itemm, item.Item.GetType().GetProperty(itemm).GetValue(item.Item));
-                                    break;
-                            }
+                            case "Створив":
+                            case "Змінив":
+                            case "Правовласник":
+                                correctValue = insideProp?.GetType().GetProperty("Логін").GetValue(insideProp);
+                                dict.Add(header, correctValue);
+                                break;
+                            case "Статус":
+                                correctValue = insideProp?.GetType().GetProperty("Повністю").GetValue(insideProp);
+                                dict.Add(header, correctValue);
+                                break;
+                            case "Головний_розпорядник":
+                                correctValue = insideProp.GetType().GetProperty("Найменування").GetValue(insideProp);
+                                dict.Add(header, correctValue);
+                                break;
+                            case "Мікрофонд":
+                                correctValue = insideProp.GetType().GetProperty("Повністю").GetValue(insideProp);
+                                dict.Add(header, correctValue);
+                                if (((object)insideProp).GetType().GetProperties().Select((PropertyInfo s) => s.Name).ToList().Contains("Фонд") == false)
+                                {
+                                    correctValue = insideProp.GetType().GetProperty("Фонд").GetValue(insideProp);
+                                    dynamic q3 = correctValue.GetType().GetProperty("Код").GetValue(correctValue);
+                                    dict.Add("Фонд", q3);
+                                }
+                                break;
+                            case "КФК":
+                            case "Фонд":
+                            case "КДБ":
+                            case "КФБ":
+                            case "КЕКВ":
+                                correctValue = insideProp?.GetType().GetProperty("Код").GetValue(insideProp);
+                                dict.Add(header, correctValue);
+                                break;
+                            default:
+                                dict.Add(header, insideProp);
+                                break;
                         }
                     }
-                    countRows++;
+                    Entities.Add(dict);
                 }
-            }
 
-            return countRows;
+                return Entities;
+            }
         }
 
         /// <summary>
@@ -1572,6 +1751,51 @@ namespace Main
 
             return errors;
         }
+
+        /// <summary>
+        /// Finalaser
+        /// </summary>
+        /// <param name="e">Standart argument of event window.closing</param>
+        /// <param name="db">Datebase context</param>
+        public static void dbHaveNotSavedChanges<T>(CancelEventArgs e, ObservableCollection<T> C, DBSolom.Db db)
+        {
+            foreach (var item in C)
+            {
+                if (db.Entry(item).State != EntityState.Unchanged)
+                {
+                    var resultMsg = MessageBox.Show("У вас є незафіксовані зміни. Зафіксувати?", "Maestro:[Довідки]", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
+                    switch (resultMsg)
+                    {
+                        case MessageBoxResult.Cancel:
+                            e.Cancel = true;
+                            break;
+                        case MessageBoxResult.Yes:
+                            try
+                            {
+                                db.SaveChanges();
+                                MessageBox.Show("Зміни збережено!");
+                                e.Cancel = false;
+                            }
+                            catch (Exception ex)
+                            {
+                                MessageBox.Show(ex.Message);
+                            }
+                            break;
+                        case MessageBoxResult.No:
+                            e.Cancel = false;
+                            break;
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    public class CorrectionCntxMenu
+    {
+        public List<Label> cntx_dict_lbl { get; set; } = new List<Label>();
+        public List<ComboBox> cntx_dict_cmb { get; set; } = new List<ComboBox>();
+        public List<TextBox> cntx_dict_txt { get; set; } = new List<TextBox>();
     }
 
     public class Filters

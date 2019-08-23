@@ -7,6 +7,13 @@
         mc:Ignorable="d"
         Title="Maestro:[Залишки]" Height="450" Width="800">
     <Window.Resources>
+
+        <local:RemainderConverterForNameOfGroup x:Key="RemainderConverterForNameOfGroup" />
+        <local:RemainderDigitConverter x:Key="RemainderDigitConverter" />
+        <local:RemainderWidthConverterForColumnHeaderOfGroupFirst x:Key="RemainderWidthConverterForColumnHeaderOfGroupFirst" />
+        <local:RemainderWidthConverterForColumnHeaderOfGroupSecond x:Key="RemainderWidthConverterForColumnHeaderOfGroupSecond" />
+        <local:RemainderWidthConverterForColumnHeaderOfGroupMonths x:Key="RemainderWidthConverterForColumnHeaderOfGroupMonths" />
+
         <local:MonthCurrBalanceGroupTotalConverter  x:Key="MonthBalanceTotalConverter" />
         <local:MonthCurrBalanceGroupCurrentConverter  x:Key="MonthBalanceCurrentConverter" />
         <local:MonthCurrBalanceGroupOneConverter  x:Key="MonthBalanceOneConverter" />
@@ -71,13 +78,13 @@
         <GroupStyle x:Key="one">
             <GroupStyle.ContainerStyle>
                 <Style TargetType="{x:Type GroupItem}">
-                    <Setter Property="Margin" Value="0,0,0,0"/>
+                    <Setter Property="Margin" Value="1,2,1,2"/>
                     <Setter Property="Template">
                         <Setter.Value>
                             <ControlTemplate TargetType="{x:Type GroupItem}">
-                                <Expander IsExpanded="False" Background="Black" BorderThickness="1" BorderBrush="Yellow" Margin="3">
+                                <Expander IsExpanded="False" BorderBrush="#FF48BEE4" Background="Black" BorderThickness="2" Width="auto">
                                     <Expander.Header>
-                                        <Grid Width="auto">
+                                        <Grid>
                                             <Grid.RowDefinitions>
                                                 <RowDefinition Height="50"/>
                                                 <RowDefinition Height="1" />
@@ -90,23 +97,23 @@
                                                 <RowDefinition Height="20"/>
                                             </Grid.RowDefinitions>
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="700" />
-                                                <ColumnDefinition Width="150" />
-                                                <ColumnDefinition Width="150" />
-                                                <ColumnDefinition Width="150" />
-                                                <ColumnDefinition Width="150" />
-                                                <ColumnDefinition Width="150" />
-                                                <ColumnDefinition Width="150" />
-                                                <ColumnDefinition Width="150" />
-                                                <ColumnDefinition Width="150" />
-                                                <ColumnDefinition Width="150" />
-                                                <ColumnDefinition Width="150" />
-                                                <ColumnDefinition Width="150" />
-                                                <ColumnDefinition Width="150" />
-                                                <ColumnDefinition Width="150" />
-                                                <ColumnDefinition Width="150" />
+                                                <ColumnDefinition Width="{Binding GetWidth.Width, Converter={StaticResource RemainderWidthConverterForColumnHeaderOfGroupFirst}, ElementName=window, Mode=OneWay, NotifyOnSourceUpdated=True}" />
+                                                <ColumnDefinition Width="{Binding GetWidth.Width, Converter={StaticResource RemainderWidthConverterForColumnHeaderOfGroupSecond}, ElementName=window, Mode=OneWay, NotifyOnSourceUpdated=True}"  />
+                                                <ColumnDefinition Width="{Binding GetWidth.Width, Converter={StaticResource RemainderWidthConverterForColumnHeaderOfGroupSecond}, ElementName=window, Mode=OneWay, NotifyOnSourceUpdated=True}"  />
+                                                <ColumnDefinition Width="{Binding GetWidth.Width, Converter={StaticResource RemainderWidthConverterForColumnHeaderOfGroupMonths}, ElementName=window, Mode=OneWay, NotifyOnSourceUpdated=True}" />
+                                                <ColumnDefinition Width="{Binding GetWidth.Width, Converter={StaticResource RemainderWidthConverterForColumnHeaderOfGroupMonths}, ElementName=window, Mode=OneWay, NotifyOnSourceUpdated=True}" />
+                                                <ColumnDefinition Width="{Binding GetWidth.Width, Converter={StaticResource RemainderWidthConverterForColumnHeaderOfGroupMonths}, ElementName=window, Mode=OneWay, NotifyOnSourceUpdated=True}" />
+                                                <ColumnDefinition Width="{Binding GetWidth.Width, Converter={StaticResource RemainderWidthConverterForColumnHeaderOfGroupMonths}, ElementName=window, Mode=OneWay, NotifyOnSourceUpdated=True}" />
+                                                <ColumnDefinition Width="{Binding GetWidth.Width, Converter={StaticResource RemainderWidthConverterForColumnHeaderOfGroupMonths}, ElementName=window, Mode=OneWay, NotifyOnSourceUpdated=True}" />
+                                                <ColumnDefinition Width="{Binding GetWidth.Width, Converter={StaticResource RemainderWidthConverterForColumnHeaderOfGroupMonths}, ElementName=window, Mode=OneWay, NotifyOnSourceUpdated=True}" />
+                                                <ColumnDefinition Width="{Binding GetWidth.Width, Converter={StaticResource RemainderWidthConverterForColumnHeaderOfGroupMonths}, ElementName=window, Mode=OneWay, NotifyOnSourceUpdated=True}" />
+                                                <ColumnDefinition Width="{Binding GetWidth.Width, Converter={StaticResource RemainderWidthConverterForColumnHeaderOfGroupMonths}, ElementName=window, Mode=OneWay, NotifyOnSourceUpdated=True}" />
+                                                <ColumnDefinition Width="{Binding GetWidth.Width, Converter={StaticResource RemainderWidthConverterForColumnHeaderOfGroupMonths}, ElementName=window, Mode=OneWay, NotifyOnSourceUpdated=True}" />
+                                                <ColumnDefinition Width="{Binding GetWidth.Width, Converter={StaticResource RemainderWidthConverterForColumnHeaderOfGroupMonths}, ElementName=window, Mode=OneWay, NotifyOnSourceUpdated=True}" />
+                                                <ColumnDefinition Width="{Binding GetWidth.Width, Converter={StaticResource RemainderWidthConverterForColumnHeaderOfGroupMonths}, ElementName=window, Mode=OneWay, NotifyOnSourceUpdated=True}" />
+                                                <ColumnDefinition Width="{Binding GetWidth.Width, Converter={StaticResource RemainderWidthConverterForColumnHeaderOfGroupMonths}, ElementName=window, Mode=OneWay, NotifyOnSourceUpdated=True}" />
                                             </Grid.ColumnDefinitions>
-                                            <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="15" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Background="Black" Foreground="Red" Content="{Binding Name}" FontSize="24" FontWeight="Bold" />
+                                            <Label Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="15" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" Background="Black" Foreground="Red" Content="{Binding Converter={StaticResource RemainderConverterForNameOfGroup}}" FontSize="24" FontWeight="Bold" />
                                             <Label Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="15" Background="White" />
                                             <TextBlock Grid.Row="2" Grid.Column="0" Foreground="Green" TextAlignment="Right" VerticalAlignment="Center">План:</TextBlock>
                                             <TextBlock Grid.Row="2" Grid.Column="1" Foreground="Red" TextAlignment="Right" FontWeight="Bold" Text="{Binding Items, Converter={StaticResource CurrPlanTotalConverter}}"/>
@@ -355,7 +362,31 @@
             </Grid>
         </Expander>
 
-        <DataGrid x:Name="DGM" Grid.Row="1" Margin="0, 5, 0, 0" SelectionUnit="Cell" AutoGeneratingColumn="DGM_AutoGeneratingColumn" IsReadOnly="True" SelectedCellsChanged="DGM_SelectedCellsChanged"/>
+        <DataGrid x:Name="DGM" Grid.Row="1" Margin="0, 5, 0, 0" SelectionUnit="Cell" AutoGenerateColumns="False" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.IsVirtualizingWhenGrouping="True" IsReadOnly="True" SelectedCellsChanged="DGM_SelectedCellsChanged">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Id" Binding="{Binding Mode=OneTime, Path=Id}" Visibility="Hidden" />
+                <DataGridTextColumn Header="Фонд" Binding="{Binding Mode=OneTime, Path=Фонд.Код}" />
+                <DataGridTextColumn Header="Мікрофонд" Binding="{Binding Mode=OneTime, Path=Мікрофонд.Повністю}" />
+                <DataGridTextColumn Header="КФК" Binding="{Binding Mode=OneTime, Path=КФК.Код}" />
+                <DataGridTextColumn Header="Головний_розпорядник" Binding="{Binding Mode=OneTime, Path=Головний_розпорядник.Найменування}" />
+                <DataGridTextColumn Header="КЕКВ" Binding="{Binding Mode=OneTime, Path=КЕКВ.Код}" />
+                <DataGridTextColumn Header="Дані" Binding="{Binding Mode=OneTime, Path=Дані}" />
+                <DataGridTextColumn Header="Рік" Binding="{Binding Mode=OneTime, Path=Рік, Converter={StaticResource RemainderDigitConverter}}" />
+                <DataGridTextColumn Header="Період" Binding="{Binding Mode=OneTime, Path=Період, Converter={StaticResource RemainderDigitConverter}}" />
+                <DataGridTextColumn Header="Січень" Binding="{Binding Mode=OneTime, Path=Січень, Converter={StaticResource RemainderDigitConverter}}" />
+                <DataGridTextColumn Header="Лютий" Binding="{Binding Mode=OneTime, Path=Лютий, Converter={StaticResource RemainderDigitConverter}}" />
+                <DataGridTextColumn Header="Березень" Binding="{Binding Mode=OneTime, Path=Березень, Converter={StaticResource RemainderDigitConverter}}" />
+                <DataGridTextColumn Header="Квітень" Binding="{Binding Mode=OneTime, Path=Квітень, Converter={StaticResource RemainderDigitConverter}}" />
+                <DataGridTextColumn Header="Травень" Binding="{Binding Mode=OneTime, Path=Травень, Converter={StaticResource RemainderDigitConverter}}" />
+                <DataGridTextColumn Header="Червень" Binding="{Binding Mode=OneTime, Path=Червень, Converter={StaticResource RemainderDigitConverter}}" />
+                <DataGridTextColumn Header="Липень" Binding="{Binding Mode=OneTime, Path=Липень, Converter={StaticResource RemainderDigitConverter}}" />
+                <DataGridTextColumn Header="Серпень" Binding="{Binding Mode=OneTime, Path=Серпень, Converter={StaticResource RemainderDigitConverter}}" />
+                <DataGridTextColumn Header="Вересень" Binding="{Binding Mode=OneTime, Path=Вересень, Converter={StaticResource RemainderDigitConverter}}" />
+                <DataGridTextColumn Header="Жовтень" Binding="{Binding Mode=OneTime, Path=Жовтень, Converter={StaticResource RemainderDigitConverter}}" />
+                <DataGridTextColumn Header="Листопад" Binding="{Binding Mode=OneTime, Path=Листопад, Converter={StaticResource RemainderDigitConverter}}" />
+                <DataGridTextColumn Header="Грудень" Binding="{Binding Mode=OneTime, Path=Грудень, Converter={StaticResource RemainderDigitConverter}}" />
+            </DataGrid.Columns>
+        </DataGrid>
 
         <Expander x:Name="EVAL" Grid.Row="2" Margin="5" IsExpanded="False" Header="Розрахунки:" BorderBrush="LightBlue" BorderThickness="2">
             <Grid Height="auto">

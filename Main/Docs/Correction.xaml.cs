@@ -48,6 +48,8 @@ namespace Main.Docs
         List<ListMonths> RemList = new List<ListMonths>();
 
         int ItemIndexInDGM = -1;
+
+        List<CorrectionCntxMenu> correctionCntxMenu = new List<CorrectionCntxMenu>();
         #endregion
 
         public Correction()
@@ -488,7 +490,7 @@ namespace Main.Docs
 
                     DGM.CurrentItem = correction;
                     DGM.CurrentCell = new DataGridCellInfo(correction, DGM.Columns.First(f => f.Header.ToString() == "Внутрішній_номер"));
-                    
+
                     DGM.BeginEdit();
                 }
             }
@@ -498,7 +500,71 @@ namespace Main.Docs
         {
             CopyEntityInTable();
         }
+
+        private void Window_Closing(object sender, CancelEventArgs e)
+        {
+            Func.dbHaveNotSavedChanges(e, db.Corrections.Local, db);
+        }
+
+        private void DGM_ContextMenuOpening(object sender, ContextMenuEventArgs e)
+        {
+            if (DGM.SelectedCells.Count != 0)
+            {
+                List<CorrectionCntxMenu> ListCorrectionMenu = new List<CorrectionCntxMenu>();
+                var ListUniqItems = DGM.SelectedCells.Where(w => w.Item.ToString() != "{NewItemPlaceholder}")
+                                                     .Select(s => (DBSolom.Correction)s.Item)
+                                                     .GroupBy(g => g.Id)
+                                                     .ToList();
+
+                foreach (var item in ListUniqItems)
+                {
+                    DBSolom.Correction correction = item.First();
+                    CorrectionCntxMenu correctionCntxMenu = new CorrectionCntxMenu();
+
+                    int? fond = correction.Мікрофонд?.Фонд?.Код;
+
+                    if (fond != null)
+                    {
+                        correctionCntxMenu.cntx_dict_lbl.Add(new Label() { Content = "Фонд" });
+                        correctionCntxMenu.cntx_dict_cmb.Add(new ComboBox() { ItemsSource = db.list });
+                        correctionCntxMenu.cntx_dict_txt.Add(new TextBox() { Text = fond.ToString() });
+                    }
+
+                    string mainManager = correction.Головний_розпорядник?.Найменування;
+
+                    if (mainManager != null)
+                    {
+                        correctionCntxMenu.cntx_dict_lbl.Add(new Label() { Content = "Головний_розпорядник" });
+                        correctionCntxMenu.cntx_dict_cmb.Add(new ComboBox() { ItemsSource = db.list });
+                        correctionCntxMenu.cntx_dict_txt.Add(new TextBox() { Text = mainManager.ToString() });
+                    }
+
+                    int? kfk = correction.КФК?.Код;
+
+                    if (kfk != null)
+                    {
+                        correctionCntxMenu.cntx_dict_lbl.Add(new Label() { Content = "КФК" });
+                        correctionCntxMenu.cntx_dict_cmb.Add(new ComboBox() { ItemsSource = db.list });
+                        correctionCntxMenu.cntx_dict_txt.Add(new TextBox() { Text = kfk.ToString() });
+                    }
+
+                    int? kekb = correction.КЕКВ?.Код;
+
+                    if (kekb != null)
+                    {
+                        correctionCntxMenu.cntx_dict_lbl.Add(new Label() { Content = "КЕКВ" });
+                        correctionCntxMenu.cntx_dict_cmb.Add(new ComboBox() { ItemsSource = db.list });
+                        correctionCntxMenu.cntx_dict_txt.Add(new TextBox() { Text = kekb.ToString() });
+                    }
+
+                    ListCorrectionMenu.Add(correctionCntxMenu);
+                }
+                Func.GetContextMenuView(CntxGrid, ListCorrectionMenu);
+            }
+        }
     }
+
+
 
     #region "Converters"
 

@@ -5,22 +5,57 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Main"
         mc:Ignorable="d"
-        Title="Maestro" Height="auto" Width="auto" ResizeMode="CanMinimize" SizeToContent="WidthAndHeight" WindowStartupLocation="CenterScreen" Topmost="True">
+        Title="Maestro" Height="auto" Width="auto" SizeToContent="WidthAndHeight" ResizeMode="CanMinimize" WindowStartupLocation="CenterScreen" Topmost="True">
+    <Window.Background>
+        <ImageBrush ImageSource="login.jpg" Stretch="UniformToFill" TileMode="FlipXY"/>
+    </Window.Background>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="auto"></RowDefinition>
+            <RowDefinition Height="auto"></RowDefinition>
         </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="auto"></ColumnDefinition>
-            <ColumnDefinition Width="auto"></ColumnDefinition>
-            <ColumnDefinition Width="auto"></ColumnDefinition>
-        </Grid.ColumnDefinitions>
-        <Menu Grid.Row="0" Grid.Column="0">
-            <MenuItem  Header="Поточка">
-                <MenuItem Header="Річні плани">
-                    <MenuItem Header="За фондом">
-                        <MenuItem x:Name="MI_Filling" Header="Редагування" Click="MI_Filling_Click"></MenuItem>
-                        <MenuItem x:Name="MI_Filling_FromExcel" Header="Excel імпорт" Click="MI_Filling_FromExcel_Click">
+        <Grid Grid.Row="0" HorizontalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition />
+                <ColumnDefinition Width="150" />
+                <ColumnDefinition />
+                <ColumnDefinition Width="150"/>
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <Menu Grid.Column="0" Background="#807e3737" Foreground="White" FontWeight="Bold" BorderThickness="2" BorderBrush="Black" Margin="0,5,0,0">
+                <MenuItem  Header="Поточка" Height="30" Width="90" Padding="20,0,0,0">
+                    <MenuItem Header="Річні плани" Foreground="Black">
+                        <MenuItem Header="За фондом">
+                            <MenuItem x:Name="MI_Filling" Header="Редагування" Click="MI_Filling_Click"></MenuItem>
+                            <MenuItem x:Name="MI_Filling_FromExcel" Header="Excel імпорт" Click="MI_Filling_FromExcel_Click">
+                                <MenuItem.Background>
+                                    <RadialGradientBrush>
+                                        <GradientStop Color="Black" Offset="1"/>
+                                        <GradientStop Color="Red" Offset="0.564"/>
+                                    </RadialGradientBrush>
+                                </MenuItem.Background>
+                            </MenuItem>
+                        </MenuItem>
+                        <MenuItem Header="За мікрофондом">
+                            <MenuItem x:Name="MI_MicroFilling" Header="Редагування" Click="MI_MicroFilling_Click"></MenuItem>
+                            <MenuItem x:Name="MI_MicroFilling_FromExcel" Header="Excel імпорт" Click="MI_MicroFilling_FromExcel_Click">
+                                <MenuItem.Background>
+                                    <RadialGradientBrush>
+                                        <GradientStop Color="Black" Offset="1"/>
+                                        <GradientStop Color="Red" Offset="0.564"/>
+                                    </RadialGradientBrush>
+                                </MenuItem.Background>
+                            </MenuItem>
+                        </MenuItem>
+                        <MenuItem Header="Уточнені плани" Click="MI_CurrPlan_Click" Foreground="Black">
+                        </MenuItem>
+                    </MenuItem>
+                    <MenuItem Header="Залишки коштів" Click="MI_Remainders_Click" Foreground="Black">
+                    </MenuItem>
+                    <MenuItem x:Name="MI_Correct" Header="Довідки" Click="MI_Correct_Click" Foreground="Black" />
+                    <MenuItem Header="Фінансування" Foreground="Black">
+                        <MenuItem x:Name="MI_Financing" Header="Редагування" Click="MI_Financing_Click"></MenuItem>
+                        <MenuItem x:Name="MI_Financing_FromExcel" Header="Excel імпорт" Click="MI_Financing_FromExcel_Click">
                             <MenuItem.Background>
                                 <RadialGradientBrush>
                                     <GradientStop Color="Black" Offset="1"/>
@@ -29,55 +64,52 @@
                             </MenuItem.Background>
                         </MenuItem>
                     </MenuItem>
-                    <MenuItem Header="За мікрофондом">
-                        <MenuItem x:Name="MI_MicroFilling" Header="Редагування" Click="MI_MicroFilling_Click"></MenuItem>
-                        <MenuItem x:Name="MI_MicroFilling_FromExcel" Header="Excel імпорт" Click="MI_MicroFilling_FromExcel_Click">
-                            <MenuItem.Background>
-                                <RadialGradientBrush>
-                                    <GradientStop Color="Black" Offset="1"/>
-                                    <GradientStop Color="Red" Offset="0.564"/>
-                                </RadialGradientBrush>
-                            </MenuItem.Background>
-                        </MenuItem>
-                    </MenuItem>
-                    <MenuItem Header="Уточнені плани" Click="MI_CurrPlan_Click" Foreground="Black">
-                    </MenuItem>
+                    <Separator />
+                    <MenuItem x:Name="MI_Summary" Header="Консолідація" Foreground="Black" ToolTip="Експериментальна форма, що консолідує всю інформацію у розрізі дат, та відображає зміни на цю саму дату" Click="MI_Summary_Click" />
                 </MenuItem>
-                <MenuItem Header="Залишки коштів" Click="MI_Remainders_Click" Foreground="Black">                   
+            </Menu>
+            <Menu Grid.Column="2" Background="#807e3737" Foreground="White" FontWeight="Bold" BorderThickness="2" BorderBrush="Black" Margin="0,5,0,0">
+                <MenuItem  Header="Довідники" Height="30" Width="100" Padding="17,0,0,0">
+                    <MenuItem x:Name="MI_Macrofoundations" Header="Макрофонди" Click="MI_Macrofoundations_Click" Foreground="Black"/>
+                    <MenuItem x:Name="MI_Foundations" Header="Фонди" Click="MI_Foundations_Click" Foreground="Black"/>
+                    <MenuItem x:Name="MI_Microfoundations" Header="Мікрофонди" Click="MI_Microfoundations_Click" Foreground="Black" />
+                    <MenuItem x:Name="MI_KFB" Header="КФБ" Click="MI_KFB_Click" Foreground="Black"/>
+                    <MenuItem x:Name="MI_KDB" Header="КДБ" Click="MI_KDB_Click" Foreground="Black"/>
+                    <MenuItem x:Name="MI_KEKB" Header="КЕКВ" Click="MI_KEKB_Click" Foreground="Black"/>
+                    <MenuItem x:Name="MI_KFK" Header="КФК" Click="MI_KFK_Click" Foreground="Black"/>
+                    <MenuItem x:Name="MI_Main_managers" Header="Головні розпорядники" Click="MI_Main_managers_Click" Foreground="Black"/>
+                    <MenuItem x:Name="MI_Managers" Header="Розпорядники" Click="MI_Managers_Click" Foreground="Black"/>
+                    <MenuItem x:Name="MI_DocStatus" Header="Статуси документа" Click="MI_DocStatus_Click" Foreground="Black"/>
                 </MenuItem>
-                <MenuItem x:Name="MI_Correct" Header="Довідки" Click="MI_Correct_Click" Foreground="Black"></MenuItem>
-                <MenuItem Header="Фінансування" Foreground="Black">
-                    <MenuItem x:Name="MI_Financing" Header="Редагування" Click="MI_Financing_Click"></MenuItem>
-                    <MenuItem x:Name="MI_Financing_FromExcel" Header="Excel імпорт" Click="MI_Financing_FromExcel_Click">
-                        <MenuItem.Background>
-                            <RadialGradientBrush>
-                                <GradientStop Color="Black" Offset="1"/>
-                                <GradientStop Color="Red" Offset="0.564"/>
-                            </RadialGradientBrush>
-                        </MenuItem.Background>
-                    </MenuItem>
+            </Menu>
+            <Menu Grid.Column="4" Background="#807e3737" Foreground="White" FontWeight="Bold" BorderThickness="2" BorderBrush="Black" Margin="0,5,0,0">
+                <MenuItem Header="Системні" Height="30" Width="90" Padding="16,0,0,0">
+                    <MenuItem x:Name="MI_Users" Header="Користувачі" Click="MI_Users_Click" Foreground="Black"></MenuItem>
+                    <MenuItem x:Name="MI_Lows" Header="Права доступу" Click="MI_Lows_Click" Foreground="Black"></MenuItem>
                 </MenuItem>
-            </MenuItem>
-        </Menu>
-        <Menu Grid.Row="0" Grid.Column="1">
-            <MenuItem  Header="Довідники">
-                <MenuItem x:Name="MI_Macrofoundations" Header="Макрофонди" Click="MI_Macrofoundations_Click" Foreground="Black"/>
-                <MenuItem x:Name="MI_Foundations" Header="Фонди" Click="MI_Foundations_Click" Foreground="Black"/>
-                <MenuItem x:Name="MI_Microfoundations" Header="Мікрофонди" Click="MI_Microfoundations_Click" Foreground="Black" />
-                <MenuItem x:Name="MI_KFB" Header="КФБ" Click="MI_KFB_Click" Foreground="Black"/>
-                <MenuItem x:Name="MI_KDB" Header="КДБ" Click="MI_KDB_Click" Foreground="Black"/>
-                <MenuItem x:Name="MI_KEKB" Header="КЕКВ" Click="MI_KEKB_Click" Foreground="Black"/>
-                <MenuItem x:Name="MI_KFK" Header="КФК" Click="MI_KFK_Click" Foreground="Black"/>
-                <MenuItem x:Name="MI_Main_managers" Header="Головні розпорядники" Click="MI_Main_managers_Click" Foreground="Black"/>
-                <MenuItem x:Name="MI_Managers" Header="Розпорядники" Click="MI_Managers_Click" Foreground="Black"/>
-                <MenuItem x:Name="MI_DocStatus" Header="Статуси документа" Click="MI_DocStatus_Click" Foreground="Black"/>
-            </MenuItem>
-        </Menu>
-        <Menu Grid.Row="0" Grid.Column="2">
-            <MenuItem Header="Системні">
-                <MenuItem x:Name="MI_Users" Header="Користувачі" Click="MI_Users_Click" Foreground="Black"></MenuItem>
-                <MenuItem x:Name="MI_Lows" Header="Права доступу" Click="MI_Lows_Click" Foreground="Black"></MenuItem>
-            </MenuItem>
-        </Menu>
+            </Menu>
+        </Grid>
+        
+
+        <Label BorderThickness="2" BorderBrush="Red" Margin="20" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Width="auto" Background="Transparent" Foreground="White" FontWeight="Bold">
+            <TextBlock LineHeight="20" TextWrapping="Wrap" TextAlignment="Center" FontFamily="Colibri" FontSize="12">
+                        Зміни:<LineBreak />
+                1) Додано нову форму "Консолідація", при наведенні курсору на пункт меню ви отримаєте підсказку<LineBreak />
+                Ця форма дозволяє відобразити усі Плани, Зміни та Фінансування на поточну дату.<LineBreak />
+                Окрім того, на кожну Зміну створюється Уточнення, а на кожне Фінансування Залишок.<LineBreak />
+                Це дозволяє переглянути абсолютно всі зміни та їх наслідки на обрану дату у максимальному розрізі всеохоплюючих даних.<LineBreak />
+                Панель інструментів працює у звичному режимі.<LineBreak />
+                <LineBreak />
+                2) Впроваджено контекстне меню, як функція префільтрації форми консолідації для форм "Довідки" та "Фінансування". <LineBreak />
+                Це меню відображається у разі натискання правої кнопки миші на виділеному або одному з виділених елементів.<LineBreak />
+                Воно дозволяє швидко відобразити форму консолідації з префільтрацією.<LineBreak />
+                Меню мість 4 колонки: Фонд, Головний розпорядник, КФК, КЕКВ<LineBreak />
+                Кожна з колонок містить назву, тип порівняння, та значення порівняння.<LineBreak />
+                Для кожної строки таблиці в якій виділено щонайменше 1 комірку, створюється відповідний запис у контекстному меню.<LineBreak />
+                Декілька записів, дозволяють робити префільтрацію консолідації за типом "АБО" в той час, як колонки одного запису діють за типом "І",<LineBreak />
+                що дозволяє більш гнучко виконувати префільтрацію.<LineBreak />
+                Однак у будь-якому випадку ви можете використовувати повну форму консолідації, так як це є лише її префільтрація.
+            </TextBlock>
+        </Label>
     </Grid>
 </Window>
